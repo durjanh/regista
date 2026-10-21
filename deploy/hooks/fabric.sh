@@ -23,8 +23,8 @@ set -- --workspace "$FABRIC_WORKSPACE_NAME" --resource-group "$AZURE_RESOURCE_GR
        --eventhub-namespace "$namespace"
 [ -n "${FABRIC_CAPACITY_NAME:-}" ] && set -- "$@" --capacity-name "$FABRIC_CAPACITY_NAME"
 [ -n "${FABRIC_EVENTHUB_CONNECTION_ID:-}" ] && set -- "$@" --eventhub-connection-id "$FABRIC_EVENTHUB_CONNECTION_ID"
-# The enterprise Event Hubs namespace is private: an Eventstream would need a streaming vNet data gateway.
-[ "${DEPLOYMENT_PROFILE:-}" = "aks-enterprise" ] && set -- "$@" --skip-eventstream
+# The enterprise Event Hubs namespace is private: Fabric reaches it through a workspace managed private endpoint.
+[ "${DEPLOYMENT_PROFILE:-}" = "aks-enterprise" ] && set -- "$@" --eventhub-private
 
 echo "▶ Microsoft Fabric: workspace '$FABRIC_WORKSPACE_NAME'"
 # Fabric is optional: a Fabric problem (no trial yet, tenant setting off) must not fail the Azure deployment.

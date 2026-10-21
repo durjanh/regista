@@ -188,9 +188,14 @@ def platform(d, parent, x0, y0, w, private):
 
 def users_group(d, x, y, w, enterprise=False):
     g = d.group("Internet" if enterprise else "Users and clients", x, y, w, 270, stroke=GREY, fill="#FFFFFF", icon="users")
-    fans = d.box("Fans · producers · managers", "Matchday · Studio · Dugout", 12, 42, w - 24, 62, GREY, parent=g, icon="users")
-    ovl = d.box("Broadcast overlay", "OBS / vMix browser source", 12, 114, w - 24, 62, GREY, parent=g, icon="browser")
-    cop = d.box("Partners · MCP clients" if enterprise else "Copilot · MCP clients", "/api · /mcp" if enterprise else "/mcp (14 tools)", 12, 186, w - 24, 62, GREY, parent=g, icon="devices")
+    fans = d.box("Fans · producers · managers", "Matchday · Studio · Dugout", 12, 38, w - 24, 52, GREY, parent=g, icon="users")
+    ovl = d.box("Broadcast overlay", "OBS / vMix browser source", 12, 96, w - 24, 52, GREY, parent=g, icon="browser")
+    cop = d.box("Partners · MCP clients" if enterprise else "Copilot · MCP clients", "/api · /mcp" if enterprise else "/mcp (14 tools)", 12, 154, w - 24, 52, GREY, parent=g, icon="devices")
+    # The SPA on Static Web Apps calls the API from the browser: Static Web Apps doesn't proxy /api
+    # (a linked backend caps requests at 45 s, which would cut the SSE streams, and can't carry WebSockets).
+    api = "API Management" if enterprise else "the API"
+    d.text(f"<b>①</b> users open the app on Static Web Apps<br><b>②</b> the app calls {api}: /api, SSE (from the browser, CORS)"
+           "<br><b>③</b> Web PubSub pushes live updates to the app", 12, 210, w - 24, 52, parent=g, size=9)
     return fans, ovl, cop
 
 
@@ -205,11 +210,13 @@ def container_apps():
           "Functions · Cosmos DB · Microsoft Fabric · GitHub", 1900)
 
     users = d.group("Users and clients", 20, 90, 270, 400, stroke=GREY, fill="#FFFFFF", icon="users")
-    fans = d.box("Fans", "Matchday · Ask · Recap · Scouting<br>12 languages · audio described", 12, 42, 246, 66, GREY, parent=users, icon="users")
-    prod = d.box("Studio producer · Manager", "control room: approve / edit / kill<br>truth panel · Dugout", 12, 118, 246, 66, GREY, parent=users, icon="users")
-    ovl = d.box("Broadcast overlay", "/overlay/:id in OBS / vMix<br>1920×1080, transparent", 12, 194, 246, 66, GREY, parent=users, icon="browser")
-    cop = d.box("GitHub Copilot agent mode", ".vscode/mcp.json + Azure MCP Server", 12, 270, 246, 56, GREY, parent=users, icon="devices")
-    mcp = d.box("Any MCP client", "Foundry agents · broadcaster assistants", 12, 336, 246, 52, GREY, parent=users, icon="devices")
+    fans = d.box("Fans", "Matchday · Ask · Recap · Scouting<br>12 languages · audio described", 12, 38, 246, 58, GREY, parent=users, icon="users")
+    prod = d.box("Studio producer · Manager", "control room: approve / edit / kill<br>truth panel · Dugout", 12, 102, 246, 58, GREY, parent=users, icon="users")
+    ovl = d.box("Broadcast overlay", "/overlay/:id in OBS / vMix<br>1920×1080, transparent", 12, 166, 246, 58, GREY, parent=users, icon="browser")
+    cop = d.box("GitHub Copilot agent mode", ".vscode/mcp.json + Azure MCP Server", 12, 230, 246, 50, GREY, parent=users, icon="devices")
+    mcp = d.box("Any MCP client", "Foundry agents · broadcaster assistants", 12, 286, 246, 48, GREY, parent=users, icon="devices")
+    d.text("<b>①</b> users open the app on Static Web Apps<br><b>②</b> the app calls the API: /api, SSE (from the browser, CORS)"
+           "<br><b>③</b> Web PubSub pushes live updates to the app", 12, 340, 246, 52, parent=users, size=9)
 
     gh = d.group("GitHub", 20, 510, 270, 400, stroke=GITHUB, fill="#FFFFFF")
     d.box("Repository", "services/api · apps/web · infra (Bicep) · deploy (azd)", 12, 40, 246, 60, GITHUB, parent=gh)
@@ -224,7 +231,7 @@ def container_apps():
     az = d.group("Azure subscription (UK South) · keyless: one user-assigned managed identity, Entra ID everywhere", 320, 90, 1760, 1040, icon="subscription")
 
     swa = d.box("Azure Static Web Apps (Free)", "React 19 SPA · 9 surfaces + /overlay · global, HTTPS (metadata: East US 2) · "
-                "calls the API directly: fetch + SSE, CORS limited to this origin", 20, 48, 520, 60, AZURE, parent=az, icon="static", size=10)
+                "the SPA calls the API from the browser: fetch + SSE, CORS to this origin", 20, 48, 520, 60, AZURE, parent=az, icon="static", size=10)
     wps = d.box("Azure Web PubSub (Standard S1)", "shared live broadcast: the API publishes once per tick · groups match.{id} / .{lang} / overlay.{id}<br>"
                 "1,000 viewers per unit, 100 units = 100,000 · keyless (Entra tokens)", 20, 118, 520, 72, AZURE, parent=az, icon="webpubsub", size=10)
 
@@ -290,12 +297,12 @@ def container_apps():
     # Edges: browser -> SPA and browser -> API, then the runtime flows through the free channel between columns.
     gap_x = d.geo[cae][0] + 520 + 15            # channel between the Container Apps column and the Foundry/Data column
     # One lane per edge in the gap between the users column and the subscription, so vertical legs never overlap.
-    d.edge(fans, swa, "SPA (HTTPS)", exit=(1, 0.25), entry=(0, 0.35), via_x=296)
-    d.edge(prod, swa, "", exit=(1, 0.3), entry=(0, 0.7), via_x=302)
-    d.edge(fans, wps, "WebSocket", exit=(1, 0.5), entry=(0, 0.35), via_x=308)
-    d.edge(ovl, wps, "", exit=(1, 0.3), entry=(0, 0.7), via_x=314)
-    d.edge(fans, api, "/api · SSE (CORS)", exit=(1, 0.75), entry=(0, 0.2), via_x=320)
-    d.edge(ovl, api, "", exit=(1, 0.6), entry=(0, 0.45), via_x=326)
+    d.edge(fans, swa, "①", exit=(1, 0.25), entry=(0, 0.2), via_x=296)
+    d.edge(prod, swa, "", exit=(1, 0.3), entry=(0, 0.4), via_x=302)
+    d.edge(ovl, swa, "", exit=(1, 0.3), entry=(0, 0.6), via_x=308)
+    # The SPA served by Static Web Apps (running in the browser) calls the API; Web PubSub pushes the broadcast to it.
+    d.edge(wps, swa, "③", color=AZURE, exit=(0, 0.4), entry=(0, 0.78), via_x=316)
+    d.edge(swa, api, "②", color=AZURE, exit=(0, 0.93), entry=(0, 0.2), via_x=324)
     d.edge(cop, api, "/mcp", exit=(1, 0.5), entry=(0, 0.7), via_x=332)
     d.edge(mcp, api, "", exit=(1, 0.5), entry=(0, 0.9), via_x=337)
     # API -> Web PubSub: straight up at the right edge of the column, clear of the environment's title.
@@ -329,7 +336,7 @@ def aks_standard():
     az = d.group("Azure subscription (UK South) · one resource group · keyless: Entra ID + managed identities everywhere",
                  300, 90, 1450, 925, icon="subscription")
 
-    swa = d.box("Azure Static Web Apps (Free)", "React SPA + /overlay · global, HTTPS (metadata: East US 2) · the browser calls the API directly: fetch + SSE, CORS limited to this origin",
+    swa = d.box("Azure Static Web Apps (Free)", "React SPA + /overlay · global, HTTPS (metadata: East US 2) · the SPA calls the API from the browser: fetch + SSE, CORS limited to this origin",
                 20, 48, 900, 56, AZURE, parent=az, icon="static", size=10)
     wps = d.box("Azure Web PubSub (Standard S1)", "shared live broadcast: the API publishes once per tick · groups match.{id} / .{lang} / overlay.{id} · "
                 "1,000 viewers per unit, 100 units = 100,000 · keyless (Entra tokens)", 20, 114, 900, 60, AZURE, parent=az, icon="webpubsub", size=10)
@@ -362,11 +369,10 @@ def aks_standard():
     p = platform(d, az, 945, 48, 485, private=False)
 
     gap_x = d.geo[aks][0] + 900 + 12          # channel between the AKS column and the platform column
-    d.edge(fans, swa, "SPA (HTTPS)", exit=(1, 0.25), entry=(0, 0.5), via_x=276)
-    d.edge(fans, wps, "WebSocket", exit=(1, 0.45), entry=(0, 0.35), via_x=283)
-    d.edge(ovl, wps, "", exit=(1, 0.3), entry=(0, 0.7), via_x=290)
-    d.edge(fans, ing, "/api · SSE (CORS)", exit=(1, 0.75), entry=(0, 0.4), via_x=297)
-    d.edge(ovl, ing, "", exit=(1, 0.6), entry=(0, 0.6), via_x=304)
+    d.edge(fans, swa, "①", exit=(1, 0.25), entry=(0, 0.2), via_x=276)
+    d.edge(ovl, swa, "", exit=(1, 0.3), entry=(0, 0.45), via_x=283)
+    d.edge(wps, swa, "③", color=AZURE, exit=(0, 0.4), entry=(0, 0.72), via_x=292)
+    d.edge(swa, ing, "②", color=AZURE, exit=(0, 0.92), entry=(0, 0.4), via_x=301)
     d.edge(cop, ing, "/mcp", exit=(1, 0.5), entry=(0, 0.8), via_x=311)
     d.edge(ing, api, "HTTPS → :8000", exit=(0.5, 1), entry=(0.5, 0))
     d.edge(api, p["models"], "Entra token", color=PURPLE, exit=(1, 0.25), entry=(0, 0.5), via_x=gap_x - 4)
@@ -400,7 +406,7 @@ def aks_enterprise():
     d.text("Hooks grant AKS RBAC and AcrPush by role name and smoke-test the gateway.", 12, 386, 226, 50, parent=ado)
 
     az = d.group("Azure subscription (UK South) · keyless: Entra ID + managed identities", 300, 90, 1760, 1181, icon="subscription")
-    swa = d.box("Azure Static Web Apps (Free)", "React SPA + /overlay · global, HTTPS (metadata: East US 2) · the browser calls the API Management gateway directly: fetch + SSE, CORS limited to this origin",
+    swa = d.box("Azure Static Web Apps (Free)", "React SPA + /overlay · global, HTTPS (metadata: East US 2) · the SPA calls API Management from the browser: fetch + SSE, CORS limited to this origin",
                 20, 48, 1110, 56, AZURE, parent=az, icon="static", size=10)
     wps = d.box("Azure Web PubSub (Standard S1)", "shared live broadcast: the API publishes once per tick · groups match.{id} / .{lang} / overlay.{id} · 1,000 viewers per unit, "
                 "100 units = 100,000<br>keyless (Entra tokens) · public: client connections only · the API publishes via its private endpoint",
@@ -448,14 +454,13 @@ def aks_enterprise():
            "No WAF in this profile; Front Door Premium + WAF is the documented next step (docs/ARCHITECTURE.md).", 20, 910, 1070, 45, parent=vnet)
 
     p = platform(d, az, 1155, 48, 585, private=True)
-    d.text("<b>Fabric</b> (no icon in the Azure set): Eventstream needs a Fabric managed private endpoint (F SKU) to read the private "
-           "Event Hubs namespace; the Lakehouse season export runs from the pipeline.", 1155, 860, 585, 60, parent=az)
+    d.text("<b>Fabric</b> (no icon in the Azure set): the Eventstream reads the private Event Hubs namespace through a workspace "
+           "managed private endpoint (trial or F capacity), created and approved by the postprovision hook.", 1155, 860, 585, 60, parent=az)
 
-    d.edge(fans, swa, "SPA (HTTPS)", exit=(1, 0.25), entry=(0, 0.5), via_x=278)
-    d.edge(fans, wps, "WebSocket", exit=(1, 0.45), entry=(0, 0.35), via_x=285)
-    d.edge(ovl, wps, "", exit=(1, 0.3), entry=(0, 0.7), via_x=292)
-    d.edge(fans, apim, "/api · SSE (CORS)", exit=(1, 0.75), entry=(0, 0.3), via_x=299)
-    d.edge(ovl, apim, "", exit=(1, 0.6), entry=(0, 0.55), via_x=306)
+    d.edge(fans, swa, "①", exit=(1, 0.25), entry=(0, 0.2), via_x=278)
+    d.edge(ovl, swa, "", exit=(1, 0.3), entry=(0, 0.45), via_x=285)
+    d.edge(wps, swa, "③", color=AZURE, exit=(0, 0.4), entry=(0, 0.72), via_x=294)
+    d.edge(swa, apim, "②", color=AZURE, exit=(0, 0.92), entry=(0, 0.3), via_x=303)
     d.edge(cop, apim, "/api · /mcp", exit=(1, 0.5), entry=(0, 0.8), via_x=313)
     d.edge(apim, ilb, "VNet integration", color=ORANGE, width=2, exit=(1, 0.4), entry=(0, 0.5))
     d.edge(ilb, api, "", exit=(0.5, 1), entry=(0.55, 0))

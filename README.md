@@ -178,7 +178,9 @@ If azd says it can't access a subscription you just created, it is using a stale
 azd env new regista --location uksouth          # 12 characters max: the name goes into every resource name
 azd env set AZURE_RESOURCE_GROUP rg-regista
 azd env set BUDGET_EMAIL you@example.com               # optional budget alert
-azd provision --preview                                # what-if
+azd provision --preview                                # what-if (azd's summary lists only the types it has names for)
+scripts/preview-all.sh                                 # every resource, incl. Web PubSub + hub, plus a Fabric dry run; read-only
+                                                       #   (--profile aks | aks-enterprise for the other azd projects)
 azd up                                                 # provision + build + deploy + smoke test
 # Pay-for-use: the API scales to zero, so the first request after idle takes ~20-40 s. While judging or recording:
 #   azd env set API_MIN_REPLICAS 1 && azd provision
@@ -206,6 +208,7 @@ azd env set AZURE_RESOURCE_GROUP rg-regista-aks
 azd env set LETSENCRYPT_EMAIL you@example.com                               # for the API's HTTPS certificate
 azd env set AKS_AUTHORIZED_IP_RANGES "$(curl -s https://api.ipify.org)/32"   # optional: API server only from your IP
 azd provision --preview
+(cd ../.. && scripts/preview-all.sh --profile aks)                          # full what-if + Fabric dry run
 azd up
 ```
 
@@ -221,6 +224,7 @@ azd env set APIM_PUBLISHER_EMAIL you@example.com
 azd env set AZURE_DEVOPS_ORG_URL https://dev.azure.com/<org>        # for the in-VNet Managed DevOps Pool
 azd env set DEVOPS_INFRASTRUCTURE_PRINCIPAL_ID "$(az ad sp list --display-name DevOpsInfrastructure --query '[0].id' -o tsv)"
 azd provision --preview
+(cd ../.. && scripts/preview-all.sh --profile aks-enterprise)       # full what-if + Fabric dry run (managed private endpoint)
 azd provision                                                       # API_URL = API Management gateway, WEB_URL = Static Web App
 ```
 
@@ -236,6 +240,18 @@ azd env set WEBPUBSUB_UNITS 100 && azd provision      # 100,000 concurrent viewe
 ```
 
 ### 4. Azure DevOps pipelines (optional)
+
+**Your Azure DevOps organisation.** `dev.azure.com` sends you to the Azure marketing/portal page when the browser's
+signed-in account has no organisation. Open https://aex.dev.azure.com/me signed in as the account of the subscription's
+tenant (the same one as `az account show --query user.name`): it lists your organisations, or *Create new organization*.
+Organisations created there are backed by that Microsoft Entra tenant, which the keyless service connection needs.
+Then create a project (private) in it.
+
+**Parallel jobs.** A new organisation has no Microsoft-hosted parallel job, and pipelines fail with *No hosted
+parallelism has been purchased or granted*. Either request the free grant (https://aka.ms/azpipelines-parallelism-request,
+2–3 business days) or buy one Microsoft-hosted parallel job: *Organization settings → Billing*, link the subscription,
+set *MS Hosted CI/CD* to 1 (about $40/month; set it back to 0 afterwards). The enterprise Deploy stage runs on the
+Managed DevOps Pool, which uses the organisation's free self-hosted parallel job; its VMs bill to your subscription.
 
 `.azuredevops/pipelines/ci.yml` mirrors GitHub CI. `.azuredevops/pipelines/azure-dev.yml` runs what-if → provision → deploy for the profile you pick, with approvals on the `regista-<profile>` environment. One-time setup (keyless service connection, variable group, both pipelines):
 

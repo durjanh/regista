@@ -11,6 +11,8 @@ Creates (or reuses):
     Lakehouse ``Files/reference/`` folder, so real results sit next to the synthetic events in Fabric
   * the workspace identity, granted *Azure Event Hubs Data Receiver* on the namespace (keyless: Event Hubs has
     local auth disabled, and workspace identity is the keyless option Fabric documents for this source)
+  * with --eventhub-private (enterprise profile: the namespace has no public access), a workspace **managed private
+    endpoint** to the namespace, approved on the Azure side, so the Eventstream reaches it over Private Link
   * the Eventstream ``regista_live`` (Event Hubs ``match-events`` / consumer group ``fabric`` -> ``match_events``),
     once a Fabric connection to the namespace exists (--eventhub-connection-id). The Connections API doesn't
     document Event Hubs + workspace identity, so that connection is the one portal step (docs/DEPLOYMENT.md).
@@ -52,6 +54,7 @@ LAKEHOUSE_NAME = "regista_lakehouse"
 EVENTHOUSE_NAME = "regista_eventhouse"
 KQL_DATABASE_NAME = "regista_live"
 EVENTSTREAM_NAME = "regista_live_stream"
+MANAGED_PRIVATE_ENDPOINT_NAME = "mpe-regista-eventhubs"
 EVENT_HUBS_RECEIVER_ROLE = "Azure Event Hubs Data Receiver"
 
 # Table + mapping for the contract `Event` JSON (plus match_id and the feeder's emitted_at timestamp).
@@ -161,6 +164,48 @@ def az_tsv(*args: str) -> str:
     return subprocess.run(["az", *args, "-o", "tsv"], check=True, capture_output=True, text=True).stdout.strip()
 
 
+def approve_private_endpoint(namespace_id: str, message: str) -> bool:
+    """Approve the Fabric managed private endpoint's pending connection on the Event Hubs namespace. True once approved."""
+    conns = json.loads(subprocess.run(["az", "network", "private-endpoint-connection", "list", "--id", namespace_id, "-o", "json"],
+                                      check=True, capture_output=True, text=True).stdout or "[]")
+    ours = [c for c in conns if (c.get("properties", {}).get("privateLinkServiceConnectionState") or {}).get("description") == message]
+    for c in ours:
+        if c["properties"]["privateLinkServiceConnectionState"].get("status") == "Pending":
+            subprocess.run(["az", "network", "private-endpoint-connection", "approve", "--id", c["id"],
+                            "--description", message, "-o", "none"], check=True, capture_output=True, text=True)
+    return bool(ours)
+
+
+def ensure_managed_private_endpoint(fabric: Fabric, ws: str, namespace_id: str, workspace_name: str) -> None:
+    """Find-or-create the workspace managed private endpoint to the private Event Hubs namespace, then approve it."""
+    message = f"Fabric workspace {workspace_name}: Eventstream to Event Hubs"[:140]
+    _, _, payload = fabric.request("GET", f"/workspaces/{ws}/managedPrivateEndpoints")
+    mpe = next((m for m in payload.get("value", []) if m.get("name") == MANAGED_PRIVATE_ENDPOINT_NAME), None)
+    if not mpe:
+        created = fabric.try_request("POST", f"/workspaces/{ws}/managedPrivateEndpoints", {
+            "name": MANAGED_PRIVATE_ENDPOINT_NAME, "targetPrivateLinkResourceId": namespace_id,
+            "targetSubresourceType": "namespace", "requestMessage": message})
+        if not created:
+            print("⚠ Managed private endpoint not created (the workspace must be on a trial or F capacity, and you a workspace admin).")
+            return
+        print(f"Created managed private endpoint {MANAGED_PRIVATE_ENDPOINT_NAME} (Fabric provisions it in a few minutes)")
+    status = ((mpe or {}).get("connectionState") or {}).get("status")
+    if status == "Approved":
+        print(f"Managed private endpoint {MANAGED_PRIVATE_ENDPOINT_NAME}: Approved")
+        return
+    # The request reaches the namespace only once Fabric has provisioned the endpoint: wait up to ~10 minutes.
+    for _ in range(40):
+        try:
+            if approve_private_endpoint(namespace_id, message):
+                print(f"Approved the managed private endpoint on the Event Hubs namespace ({MANAGED_PRIVATE_ENDPOINT_NAME})")
+                return
+        except subprocess.CalledProcessError as err:
+            print(f"⚠ Could not approve the private endpoint connection: {err.stderr or err}")
+            return
+        time.sleep(15)
+    print("⚠ The managed private endpoint is still provisioning. Re-run to approve it: azd hooks run postprovision")
+
+
 def eventstream_definition(connection_id: str, workspace_id: str, database: dict) -> dict:
     """Event Hubs (consumer group fabric) -> default stream -> Eventhouse table match_events (processed ingestion:
     JSON fields map to columns by name). Shapes from Microsoft Learn: Eventstream item definition + REST API."""
@@ -185,6 +230,44 @@ def eventstream_definition(connection_id: str, workspace_id: str, database: dict
     return {"parts": [{"path": "eventstream.json", "payload": b64(json.dumps(spec)), "payloadType": "InlineBase64"}]}
 
 
+def dry_run(fabric: Fabric, args: argparse.Namespace, capacity_id: str) -> int:
+    """Read-only: which Fabric items already exist in the workspace and which the setup would create."""
+    workspace = fabric.find("/workspaces", args.workspace)
+    if not workspace:
+        print(f"  would create workspace '{args.workspace}' on capacity {capacity_id}, then every item below")
+        items = [(kind, name, None) for kind, name in (("Lakehouse", LAKEHOUSE_NAME), ("Eventhouse", EVENTHOUSE_NAME),
+                                                        ("KQL database", KQL_DATABASE_NAME), ("Eventstream", EVENTSTREAM_NAME))]
+    else:
+        ws = workspace["id"]
+        on_capacity = workspace.get("capacityId") == capacity_id
+        print(f"  workspace '{args.workspace}' exists ({ws}){'' if on_capacity else f'; would assign it to capacity {capacity_id}'}")
+        items = [(kind, name, fabric.find(f"/workspaces/{ws}/{path}", name)) for kind, path, name in (
+            ("Lakehouse", "lakehouses", LAKEHOUSE_NAME), ("Eventhouse", "eventhouses", EVENTHOUSE_NAME),
+            ("KQL database", "kqlDatabases", KQL_DATABASE_NAME), ("Eventstream", "eventstreams", EVENTSTREAM_NAME))]
+        _, _, details = fabric.request("GET", f"/workspaces/{ws}")
+        print(f"  workspace identity: {'exists' if details.get('workspaceIdentity') else 'would be provisioned'}"
+              " (then granted Azure Event Hubs Data Receiver on the namespace)")
+    if args.eventhub_private and workspace:
+        _, _, mpes = fabric.request("GET", f"/workspaces/{workspace['id']}/managedPrivateEndpoints")
+        mpe = next((m for m in mpes.get("value", []) if m.get("name") == MANAGED_PRIVATE_ENDPOINT_NAME), None)
+        state = ((mpe or {}).get("connectionState") or {}).get("status")
+        print(f"  managed private endpoint {MANAGED_PRIVATE_ENDPOINT_NAME} -> Event Hubs: "
+              + (f"exists ({state})" if mpe else "would be created and approved"))
+    elif args.eventhub_private:
+        print(f"  managed private endpoint {MANAGED_PRIVATE_ENDPOINT_NAME} -> Event Hubs: would be created and approved")
+    for kind, name, found in items:
+        if found:
+            print(f"  {kind} {name}: exists")
+        elif kind == "Eventstream" and not args.eventhub_connection_id:
+            print(f"  {kind} {name}: waits for the Event Hubs connection (FABRIC_EVENTHUB_CONNECTION_ID; docs/DEPLOYMENT.md step 5.3)")
+        else:
+            print(f"  {kind} {name}: would be created" + ("  (+ table match_events, mapping match_events_json)" if kind == "KQL database" else ""))
+    if not args.skip_reference_upload:
+        print("  Lakehouse Files/reference/: the CC0 results CSVs would be (re)uploaded")
+    print("  API identity: Contributor on the workspace, after `azd provision` creates it (OneLake exports)")
+    return 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--workspace", default="Regista", help="Fabric workspace display name")
@@ -197,6 +280,9 @@ def main() -> int:
     parser.add_argument("--eventhub-namespace", help="Event Hubs namespace name (grants the workspace identity Data Receiver)")
     parser.add_argument("--eventhub-connection-id", help="Fabric connection id for the Event Hubs namespace (creates the Eventstream)")
     parser.add_argument("--skip-eventstream", action="store_true", help="No workspace identity or Eventstream (e.g. private Event Hubs)")
+    parser.add_argument("--eventhub-private", action="store_true",
+                        help="The namespace is private: create a workspace managed private endpoint to it and approve it")
+    parser.add_argument("--dry-run", action="store_true", help="Report what exists and what would be created; change nothing")
     args = parser.parse_args()
 
     fabric = Fabric()
@@ -213,11 +299,18 @@ def main() -> int:
     if not capacity_id:
         _, _, caps = fabric.request("GET", "/capacities")
         trial = next((c for c in caps.get("value", []) if str(c.get("sku", "")).upper().startswith("FT") and c.get("state") == "Active"), None)
+        existing = fabric.find("/workspaces", args.workspace)
+        if not trial and existing and existing.get("capacityId"):
+            # A pipeline service principal can't see your trial capacity, but can use the workspace already on it.
+            trial = {"id": existing["capacityId"], "displayName": "the workspace's current capacity", "region": "unchanged"}
         if not trial:
             raise SystemExit("No capacity given and no active Fabric trial found. Start the free trial at https://app.fabric.microsoft.com "
                              "(signed in as the deploying account) or pass --capacity-name.")
         capacity_id = trial["id"]
         print(f"Using the Fabric trial capacity '{trial.get('displayName')}' ({trial.get('region')})")
+
+    if args.dry_run:
+        return dry_run(fabric, args, capacity_id)
 
     # Workspace -----------------------------------------------------------------------------------
     workspace = fabric.find("/workspaces", args.workspace)
@@ -307,6 +400,12 @@ def main() -> int:
                 print(f"Workspace identity {sp_id} has '{EVENT_HUBS_RECEIVER_ROLE}' on {args.eventhub_namespace}")
             except subprocess.CalledProcessError as err:
                 print(f"⚠ Could not grant '{EVENT_HUBS_RECEIVER_ROLE}' to the workspace identity: {err.stderr or err}")
+        if args.eventhub_private:
+            try:
+                namespace_id = az_tsv("eventhubs", "namespace", "list", "--query", f"[?name=='{args.eventhub_namespace}'].id | [0]")
+                ensure_managed_private_endpoint(fabric, ws, namespace_id, args.workspace)
+            except subprocess.CalledProcessError as err:
+                print(f"⚠ Could not look up the Event Hubs namespace: {err.stderr or err}")
 
     # Eventstream ----------------------------------------------------------------------------------
     if args.skip_eventstream:
@@ -325,6 +424,8 @@ def main() -> int:
         print("\nEventstream: one portal step, then re-run.\n"
               f"  1. Fabric portal > workspace '{args.workspace}' > Settings > Manage connections > New: Azure Event Hubs,\n"
               f"     namespace {args.eventhub_namespace or '<namespace>'}, hub match-events, authentication: Workspace identity.\n"
+              + ("     The namespace is private: untick *Test connection* (it is reached through the managed private endpoint).\n"
+                 if args.eventhub_private else "") +
               "  2. Copy the connection id, then: azd env set FABRIC_EVENTHUB_CONNECTION_ID <id> && azd provision")
 
     print(f"\nOneLake for the API: ONELAKE_WORKSPACE={args.workspace}  ONELAKE_LAKEHOUSE={LAKEHOUSE_NAME}")

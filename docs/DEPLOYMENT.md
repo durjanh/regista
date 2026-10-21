@@ -29,6 +29,12 @@ azd provision --preview     # what-if
 azd up
 ```
 
+`azd provision --preview` prints only the resource types azd has display names for, so Web PubSub and its hub, the
+managed identity, the consumer groups, the Cosmos containers and the role assignments are planned but not listed.
+`scripts/preview-all.sh` runs the same what-if through `az` and lists all 48 changes, then a read-only dry run of the
+Fabric setup: which items already exist in `FABRIC_WORKSPACE_NAME` and which `postprovision` would create (Fabric
+items are not Azure resources, so no Azure preview can show them).
+
 `scripts/deploy.sh` and the GitHub Actions workflows below remain as an alternative path for the same template.
 
 ### AKS standard (azd)
@@ -56,7 +62,7 @@ azd provision      # one pass; API_URL is the API Management gateway, WEB_URL th
 
 Then deploy from the Azure DevOps pipeline (below): its Deploy stage runs on the Managed DevOps Pool inside `snet-agents`, the only place that can reach the private API server and the private registry. API Management is the only public endpoint: its gateway (HTTPS on `*.azure-api.net`, rate-limited per client IP) reaches the internal NGINX ingress on 10.40.4.10 through VNet integration. There is no WAF in this profile; for production, put Front Door Premium or Application Gateway WAF in front of the gateway. The Front Door design, with its pitfalls, is in [ARCHITECTURE.md: Future: Azure Front Door](ARCHITECTURE.md#future-azure-front-door-in-front-of-api-management). For development only, `azd env set AKS_PRIVATE_CLUSTER false` plus `AKS_AUTHORIZED_IP_RANGES` makes the API server public but IP-restricted; the registry and data services stay private, so `azd deploy` from a laptop still needs the in-VNet agent.
 
-Known limits: the AKS application routing add-on's NGINX is supported by Microsoft through November 2026 (Gateway API is the migration path); Fabric Eventstream needs a Fabric managed private endpoint (F SKU) to read the private Event Hubs namespace.
+Known limits: the AKS application routing add-on's NGINX is supported by Microsoft through November 2026 (Gateway API is the migration path); Fabric Eventstream reads the private Event Hubs namespace through a workspace managed private endpoint (step 5).
 
 ### Azure DevOps pipelines
 
@@ -218,18 +224,33 @@ Fabric items (workspace, Lakehouse, Eventhouse, Eventstream) are not Azure Resou
 
    The Eventstream reads consumer group `fabric` and writes to `match_events` with processed ingestion (JSON fields map to columns by name). If the API refuses the definition, the hook prints the error and you can create it in the portal instead: new Eventstream → source Azure Event Hubs (Extended features, the connection above, consumer group `fabric`, JSON) → destination Eventhouse, *Event processing before ingestion*, database `regista_live`, table `match_events` → *Publish*.
 
-   Enterprise profile: the Event Hubs namespace is private, so the hook skips the Eventstream. It would need a Fabric managed private endpoint or a streaming virtual network data gateway.
+   Enterprise profile: the Event Hubs namespace has no public access, so the hook also creates a workspace **managed
+   private endpoint** `mpe-regista-eventhubs` to it (Fabric REST API, subresource `namespace`) and approves the request
+   on the namespace (`az network private-endpoint-connection approve`); Fabric supports this on trial and F capacities,
+   UK South included. Fabric takes a few minutes to provision it; if it is still pending, `azd hooks run postprovision`
+   approves it. When you create the connection in step 3, untick *Test connection*: the portal tests from the public
+   internet, which the namespace refuses. Data preview in the Eventstream editor may also be unavailable.
+
+   Inbound private access to the Eventhouse (a workspace-level private link, `Microsoft.Fabric/privateLinkServicesForFabric`)
+   is a separate feature and is not set up: it needs a paid F capacity (not the trial), and Fabric documents that a
+   private-link Eventhouse can't consume events from an Eventstream, which would break this live path.
 
 4. **Feed it.** Run the feeder so events flow (`az containerapp job start -n regista-feeder -g rg-regista`, or `kubectl -n regista create job feeder-$(date +%s) --from=cronjob/regista-feeder` on AKS).
 
 5. **Untested here.** The workspace-identity provisioning, the role grant and the Eventstream definition follow Microsoft Learn but have not run against a live Fabric tenant yet. A Fabric failure never fails `azd provision`: the hook reports it and you re-run it with `azd hooks run postprovision`.
 
-6. **Query.** Open the KQL queryset on `regista_live` and paste the queries from `docs/kql/`:
+6. **From Azure Pipelines.** The hook runs as the pipeline's service principal. Add `FABRIC_WORKSPACE_NAME` (and, once
+   created, `FABRIC_EVENTHUB_CONNECTION_ID`) to the variable group, enable the Fabric tenant setting *Service principals
+   can call Fabric public APIs*, and add the service principal `regista-pipeline-<profile>` as **Admin** of the workspace
+   (Workspace → Manage access). It can't see your personal trial capacity, so it reuses the capacity the workspace is
+   already on.
+
+7. **Query.** Open the KQL queryset on `regista_live` and paste the queries from `docs/kql/`:
    - `live-momentum.kql`: xT added per minute per team
    - `shots-by-team.kql`: shots, xG and finishing delta
    - `ingest-latency.kql`: p50/p95/p99 from feeder to Eventhouse (needs the feeder to stamp `emitted_at`)
 
-7. **Real results next to the reconstructions.** In a Lakehouse notebook, or the SQL analytics endpoint after loading the CSVs as tables:
+8. **Real results next to the reconstructions.** In a Lakehouse notebook, or the SQL analytics endpoint after loading the CSVs as tables:
 
    ```sql
    -- Spark SQL in a Fabric notebook attached to regista_lakehouse
