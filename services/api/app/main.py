@@ -26,6 +26,7 @@ from .forge.calibration import run_calibration
 from .forge.matches import MatchBuildError, build_what_if
 from .forge.reference import reference
 from .integrations import persistence, telemetry
+from .live import broadcast
 from .live.replay import latency_stats, live_stream, overlay_stream
 from .mcp_server import mcp
 from .store import store
@@ -50,6 +51,7 @@ async def lifespan(app: FastAPI):
         yield
     warm.cancel()
     scout_warm.cancel()
+    await broadcast.shutdown()
     if consumer:
         consumer.cancel()
 
@@ -77,7 +79,8 @@ async def health():
     return {"status": "ok", "mode": settings.mode, "version": VERSION, "agents_runtime": agents.mode(), "scouting_ready": scouting.ready,
             "video_safe": video_safe,
             "services": {"llm": settings.llm, "agents": settings.agents, "speech": settings.speech, "translator": settings.translator,
-                         "safety": settings.safety, "cosmos": p["cosmos"], "eventhub": bool(settings.eventhub_fqdn), "onelake": p["onelake"]},
+                         "safety": settings.safety, "cosmos": p["cosmos"], "eventhub": bool(settings.eventhub_fqdn), "onelake": p["onelake"],
+                         "webpubsub": broadcast.enabled()},
             "live": {"source": settings.live_source, "narrative_latency": latency_stats()}}
 
 
@@ -169,6 +172,38 @@ async def live(match_id: str, speed: float = 30, start_t: float = 0, persona: st
     return EventSourceResponse(live_stream(match_id, speed, start_t, persona, language, drill), ping=15,
                                headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
 
+
+# ---------------------------------------------------------------- realtime broadcast (Azure Web PubSub)
+
+@app.get("/api/realtime/negotiate")
+async def realtime_negotiate(match_id: str, language: str = "en"):
+    """A short-lived Web PubSub client URL for one match (Entra-issued; join-only roles). enabled=false -> use SSE."""
+    _match(match_id)
+    return await broadcast.negotiate(match_id, language)
+
+
+class BroadcastStart(BaseModel):
+    speed: float = Field(1, ge=1, le=600)
+    start_t: float = Field(0, ge=0)
+    languages: list[str] = Field(default_factory=lambda: ["en"], max_length=6)
+
+
+@app.post("/api/broadcast/{match_id}/start")
+async def broadcast_start(match_id: str, req: BroadcastStart):
+    """Start the shared live timeline for everyone watching this match (idempotent while live)."""
+    _match(match_id)
+    return broadcast.start(match_id, req.speed, req.start_t, req.languages)
+
+
+@app.post("/api/broadcast/{match_id}/stop")
+async def broadcast_stop(match_id: str):
+    _match(match_id)
+    return broadcast.stop(match_id)
+
+
+@app.get("/api/broadcast/status")
+async def broadcast_status():
+    return broadcast.status()
 
 # ---------------------------------------------------------------- AI: narratives, recaps, Q&A, speech, translation
 

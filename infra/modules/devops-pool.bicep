@@ -19,7 +19,7 @@ param devOpsInfrastructurePrincipalId string
 param vnetName string
 param subnetId string
 
-param vmSize string = 'Standard_D2ads_v5'
+param vmSize string = 'Standard_D2ds_v6'
 
 @description('Predefined Azure Pipelines image alias (Microsoft Learn, "Configure images").')
 param image string = 'ubuntu-24.04'

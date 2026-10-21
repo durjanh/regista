@@ -8,13 +8,15 @@ The app and the platform (Foundry, Event Hubs, Cosmos DB, Storage, Functions, Fa
 
 | Profile | azd project | Infrastructure | What it adds | Rough monthly cost* |
 |---|---|---|---|---|
-| **containerapps** (default, live judge demo) | `azure.yaml` (repo root) | `infra/main.bicep` | Container Apps (API, feeder job); React SPA on Static Web Apps (Free) | ~$90–180 |
-| **aks** | `deploy/aks/azure.yaml` | `infra/aks/main.bicep` | AKS (Entra RBAC, workload identity, CNI overlay + Cilium, Container Insights); the API on app-routing NGINX with a static IP, DNS label and Let's Encrypt HTTPS; SPA on Static Web Apps (Free); manifests in `deploy/k8s/aks` | ~$250–400 |
-| **aks-enterprise** | `deploy/aks-enterprise/azure.yaml` | `infra/aks-enterprise/main.bicep` | VNet + NSGs, private endpoints and private DNS for ACR (Premium), Storage, Cosmos DB, Event Hubs and Foundry; private AKS (Standard tier, Azure Policy); internal NGINX on 10.40.4.10; API Management Standard v2 as the only public API endpoint (VNet integration out to the ingress); SPA on Static Web Apps (Standard); VNet-integrated Functions; Managed DevOps Pool | ~$1,000–1,400 |
+| **containerapps** (default, live judge demo) | `azure.yaml` (repo root) | `infra/main.bicep` | Container Apps (API scales to zero, feeder job); React SPA on Static Web Apps (Free); serverless Cosmos DB, Flex Consumption Functions; Web PubSub Standard (1 unit) for the live broadcast | ~$80 idle; ~$90–150 with demo traffic |
+| **aks** | `deploy/aks/azure.yaml` | `infra/aks/main.bicep` | AKS (Entra RBAC, workload identity, CNI overlay + Cilium, Container Insights); the API on app-routing NGINX with a static IP, DNS label and Let's Encrypt HTTPS; SPA on Static Web Apps (Free); manifests in `deploy/k8s/aks`; Web PubSub | ~$300–450 |
+| **aks-enterprise** | `deploy/aks-enterprise/azure.yaml` | `infra/aks-enterprise/main.bicep` | VNet + NSGs, private endpoints and private DNS for ACR (Premium), Storage, Cosmos DB, Event Hubs, Foundry and Web PubSub (public side: client connections only); private AKS (Standard tier, Azure Policy); internal NGINX on 10.40.4.10; API Management Standard v2 as the only public API endpoint (VNet integration out to the ingress); SPA on Static Web Apps (Free); VNet-integrated Functions; Managed DevOps Pool | ~$1,050–1,450 |
 
-**Front end in every profile: Azure Static Web Apps.** The SPA calls the API directly at the URL baked in at build time (`VITE_API_BASE_URL`), and the API's `CORS_ORIGINS` allows only the Static Web App. Static Web Apps isn't offered in UK South, so its resource lives in West Europe (metadata only; the files are served from the global edge).
+**Front end in every profile: Azure Static Web Apps.** The SPA calls the API directly at the URL baked in at build time (`VITE_API_BASE_URL`), and the API's `CORS_ORIGINS` allows only the Static Web App. Static Web Apps isn't offered in UK South, so its resource lives in East US 2 (`STATIC_WEB_APP_LOCATION`; metadata only, the files are served from the global edge). Every profile uses the **Free** plan (`STATIC_WEB_APP_SKU=Standard` to change).
 
 \*Estimates only, from list prices at the time of writing, before model tokens and Fabric. Check the [pricing calculator](https://azure.microsoft.com/pricing/calculator/) for your region. The biggest enterprise items are API Management Standard v2 and the AKS nodes; tear the enterprise profile down when you are not using it.
+
+**Live broadcast scale.** Every profile includes Azure Web PubSub for the shared live broadcast: `WEBPUBSUB_UNITS` (default 1 = 1,000 concurrent viewers; 100 = 100,000) and `WEBPUBSUB_SKU` (`Standard_S1` default, `Free_F1` for 20-connection development, `Premium_P1`). Measure delivery latency with `scripts/loadtest-realtime.py` (README §3e).
 
 **Prerequisites for azd**: [azd](https://learn.microsoft.com/azure/developer/azure-developer-cli/install-azd), Azure CLI, Docker, and for AKS `kubectl` + `kubelogin` (`az aks install-cli`), because local cluster accounts are disabled. Sign in to the subscription you mean to use (a personal one for the hackathon): `az account show`.
 
@@ -73,6 +75,19 @@ scripts/setup-azure-devops.sh --org https://dev.azure.com/<org> --project <proje
 ```
 
 Then add an approval check on the `regista-<profile>` environment and run *regista-azure-dev*. For the enterprise profile, pass the pool name (the `AZURE_DEVOPS_POOL_NAME` output) as `managedPool`.
+
+## Idempotency: run it again, nothing changes
+
+Every provision can be re-run safely; a second run changes nothing and fails on nothing.
+
+- **Deterministic names.** Every resource name comes from `infra/modules/naming.bicep` (subscription + resource group + environment); no `newGuid()` or `utcNow()` in a name or a persisted property (the budget start date is a fixed `2026-10-01`).
+- **Deterministic role assignments.** Every Bicep role assignment is named `guid(scope, principal, role)`. Roles that Bicep grants are never also granted by a script under another name (that would fail the next run with `RoleAssignmentExists`); `scripts/grant-dev-access.sh` therefore just re-runs provisioning. Roles only scripts grant (AKS RBAC, AcrPush, the Fabric workspace identity, the pipeline principal) are checked first and created only if missing (`deploy/hooks/role-assign.sh`).
+- **Images survive re-provisioning.** azd passes `SERVICE_API_IMAGE_NAME`; `scripts/deploy.sh` and `infra.yml` read the running image and pass it back, so a re-run never reverts to the placeholder.
+- **Incremental mode only**, and settings that Azure can't change in place (Cosmos serverless, AI account sub-domain, private cluster, DNS labels) are fixed per environment.
+- **Hooks are find-or-create**: Fabric items, cert-manager (`kubectl apply`), azd environment values.
+- **Proof.** Right after a provision, `scripts/check-idempotency.sh` runs the preview again and fails if anything would be created, modified or deleted; the Azure DevOps pipeline runs it after every provision.
+
+Two deliberate changes are not re-runs and need a step first: switching the model of an existing deployment (`CHAT_MODEL_NAME`) means deleting that model deployment first; and after `azd down` always use `--purge`, or the soft-deleted Foundry account blocks the next provision with the same name.
 
 ## 0. Prerequisites
 
@@ -171,44 +186,43 @@ When the feeder publishes `full_time`, the Function generates the broadcaster re
 
 ## 5. Microsoft Fabric (Lakehouse + Real-Time Intelligence)
 
-1. **Capacity.** Start a Fabric trial (Fabric portal → Account manager → *Start trial*). Alternatively, set `deployFabricCapacity = true` and `FABRIC_ADMIN_EMAIL`, then re-run the infra workflow. Pause a paid capacity when you're not using it.
+Fabric items (workspace, Lakehouse, Eventhouse, Eventstream) are not Azure Resource Manager resources, so Bicep can't create them; `deploy/hooks/fabric.sh` creates them through the Fabric REST API after `azd provision` (`scripts/fabric-setup.py`, find-or-create, safe to re-run).
 
-2. **Workspace, Lakehouse, Eventhouse and reference data:**
+1. **Capacity.** Start the free **Fabric trial** once: sign in at https://app.fabric.microsoft.com as the account that runs azd → Account manager → *Start trial*. The script finds the active trial capacity on its own. (Paid alternative: `deployFabricCapacity = true` creates an F2, about $260/month if left running; set `FABRIC_CAPACITY_NAME` to its name.)
+
+2. **Turn the setup on and provision:**
 
    ```bash
-   pip install azure-identity
-   python scripts/fabric-setup.py --workspace "Regista" \
-     --capacity-name "<trial or F2 capacity name>" \
-     --resource-group rg-regista \
-     --identity-name "$(az deployment group show -g rg-regista -n main --query properties.outputs.IDENTITY_NAME.value -o tsv)"
+   azd env set FABRIC_WORKSPACE_NAME Regista
+   azd provision        # the postprovision hook runs the Fabric setup
    ```
 
-   The script creates or reuses the following, and prints the `ONELAKE_*` values to use:
-   - the workspace
+   It creates or reuses:
+   - the workspace on your trial capacity
    - Lakehouse `regista_lakehouse`, with the CC0 reference CSVs uploaded to `Files/reference/`
-   - Eventhouse `regista_eventhouse`
-   - KQL database `regista_live`, with table `match_events` and JSON mapping `match_events_json`
-   - Contributor access to the workspace for the API's managed identity, so Data Forge can export to OneLake
+   - Eventhouse `regista_eventhouse`, KQL database `regista_live`, table `match_events` with JSON mapping `match_events_json`
+   - Contributor on the workspace for the API's managed identity, so Data Forge can export to OneLake
+   - the **workspace identity**, granted *Azure Event Hubs Data Receiver* on the namespace. The Event Hubs namespace has local (SAS) auth disabled; workspace identity is the keyless option Fabric documents for this source.
 
-3. **Point Data Forge at OneLake.** Set `oneLakeWorkspace = 'Regista'` and `oneLakeLakehouse = 'regista_lakehouse'` in `infra/main.bicepparam`, then re-run the infra workflow.
+   It then stores `ONELAKE_WORKSPACE` and `ONELAKE_LAKEHOUSE` in the azd environment; run `azd provision` (Container Apps) or `azd deploy` (AKS) once more to give them to the API.
 
-4. **Workspace identity for the Eventstream (keyless).** Our Event Hubs namespace has local (SAS) auth disabled, so the Eventstream uses the **workspace identity**:
-   1. Fabric portal → workspace *Regista* → Workspace settings → **Workspace identity** → *+ Workspace identity*. Copy its **ID**.
-   2. Grant it read access to the event hub:
+3. **The one portal step: the Event Hubs connection.** Fabric's Connections API doesn't document creating an Event Hubs connection with workspace identity, so create it once by hand:
+   1. Fabric portal → *Settings* (gear) → **Manage connections and gateways** → *+ New* → **Cloud**.
+   2. Connection type **Azure Event Hubs**; namespace `<evh-…>` (the `EVENTHUB_FQDN` output without `.servicebus.windows.net`), event hub `match-events`; authentication **Workspace identity**.
+   3. Copy the connection's **ID**, then:
 
       ```bash
-      az role assignment create --assignee "<workspace identity ID>" \
-        --role "Azure Event Hubs Data Receiver" \
-        --scope "$(az eventhubs namespace list -g rg-regista --query '[0].id' -o tsv)"
+      azd env set FABRIC_EVENTHUB_CONNECTION_ID <connection-id>
+      azd provision        # the hook now creates the Eventstream regista_live_stream
       ```
 
-5. **Eventstream** (portal):
-   1. In the workspace, create a new **Eventstream** named `regista-live`.
-   2. Choose *Connect data sources* → **Azure Event Hubs** → feature level **Extended features**.
-   3. Enter the namespace `<evh-…>` (output `EVENTHUB_FQDN` without `.servicebus.windows.net`) and the event hub `match-events`.
-   4. Set **Authentication kind** to **Workspace identity**, the **Consumer group** to `fabric`, and the data format to **JSON**.
-   5. Add a destination: **Eventhouse** → *Event processing before ingestion* → database `regista_live`, table `match_events`, input format JSON.
-   6. Select **Publish**.
+   The Eventstream reads consumer group `fabric` and writes to `match_events` with processed ingestion (JSON fields map to columns by name). If the API refuses the definition, the hook prints the error and you can create it in the portal instead: new Eventstream → source Azure Event Hubs (Extended features, the connection above, consumer group `fabric`, JSON) → destination Eventhouse, *Event processing before ingestion*, database `regista_live`, table `match_events` → *Publish*.
+
+   Enterprise profile: the Event Hubs namespace is private, so the hook skips the Eventstream. It would need a Fabric managed private endpoint or a streaming virtual network data gateway.
+
+4. **Feed it.** Run the feeder so events flow (`az containerapp job start -n regista-feeder -g rg-regista`, or `kubectl -n regista create job feeder-$(date +%s) --from=cronjob/regista-feeder` on AKS).
+
+5. **Untested here.** The workspace-identity provisioning, the role grant and the Eventstream definition follow Microsoft Learn but have not run against a live Fabric tenant yet. A Fabric failure never fails `azd provision`: the hook reports it and you re-run it with `azd hooks run postprovision`.
 
 6. **Query.** Open the KQL queryset on `regista_live` and paste the queries from `docs/kql/`:
    - `live-momentum.kql`: xT added per minute per team

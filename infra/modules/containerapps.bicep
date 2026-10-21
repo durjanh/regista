@@ -21,9 +21,14 @@ param apiEnv array
 @description('Origins allowed to call the API from a browser (the Static Web App URL), comma-separated.')
 param corsOrigins string
 
+@description('0 = scale to zero: no compute charge while nobody uses it; the first request after idle waits for a cold start.')
 @minValue(0)
-param apiMinReplicas int = 1
-param apiMaxReplicas int = 5
+param apiMinReplicas int = 0
+
+@description('1: live sessions, the studio queue and caches are in memory, so a second replica would split them.')
+@minValue(1)
+@maxValue(1)
+param apiMaxReplicas int = 1
 
 resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2025-02-01' existing = {
   name: logAnalyticsName

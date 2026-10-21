@@ -1,8 +1,8 @@
 #!/usr/bin/env sh
 # azd postprovision hook for the AKS profiles. Runs with the azd environment exported (Bicep outputs included).
 #   1. Grant whoever ran azd (a user, or the pipeline's service principal) Kubernetes access through Azure RBAC.
-#      Roles are assigned by *name* here, so no role-definition GUID is hard-coded; `az role assignment create`
-#      is idempotent.
+#      Roles are assigned by *name* (no hard-coded GUID) and only if missing (deploy/hooks/role-assign.sh), so a
+#      re-run never fails. Bicep never assigns these roles, so there is no duplicate under another name.
 #   2. Standard profile: install cert-manager for the API's HTTPS certificate.
 set -eu
 
@@ -22,11 +22,9 @@ fi
 if [ -n "$principal_id" ]; then
   echo "▶ Kubernetes and registry access for $principal_type $principal_id"
   for role in "Azure Kubernetes Service RBAC Cluster Admin" "Azure Kubernetes Service Cluster User Role"; do
-    az role assignment create --assignee-object-id "$principal_id" --assignee-principal-type "$principal_type" \
-      --role "$role" --scope "$cluster_id" -o none
+    sh "$(dirname "$0")/role-assign.sh" "$principal_id" "$principal_type" "$role" "$cluster_id"
   done
-  az role assignment create --assignee-object-id "$principal_id" --assignee-principal-type "$principal_type" \
-    --role "AcrPush" --scope "$registry_id" -o none
+  sh "$(dirname "$0")/role-assign.sh" "$principal_id" "$principal_type" "AcrPush" "$registry_id"
 else
   echo "⚠ Could not resolve the deploying principal; grant 'Azure Kubernetes Service RBAC Cluster Admin' by hand."
 fi
@@ -45,3 +43,6 @@ if [ "${DEPLOYMENT_PROFILE:-}" = "aks" ]; then
 fi
 
 echo "▶ Web: ${WEB_URL:-}   API: ${API_URL:-}"
+
+# Optional Microsoft Fabric setup (only when FABRIC_WORKSPACE_NAME is set).
+sh "$(dirname "$0")/fabric.sh"

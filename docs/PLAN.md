@@ -21,7 +21,7 @@ This plan follows *Inside the Game Hackathon — Entry Plan* (20 Oct). Section 1
 | `azd` | **azd** for all three profiles (`azure.yaml`, `deploy/aks`, `deploy/aks-enterprise`), plus `scripts/deploy.sh`, GitHub Actions and Azure Pipelines | What-if, provision, build, roll out, smoke test |
 | Key Vault | Not deployed | There are no secrets: every call uses Entra ID and one managed identity, with key auth disabled. Add Key Vault only if a secret ever appears |
 | Live features from Eventhouse KQL | Live features computed in the API from the event stream; Eventhouse for investigations | This is the plan's own fallback for slow Fabric ingestion. Each insight carries its KQL query as a receipt, and the Fabric RTI MCP server is wired up in `.vscode/mcp.json` |
-| Web PubSub | Server-sent events | Enough for the demo. Web PubSub is the documented scale path (`docs/ARCHITECTURE.md`) |
+| Web PubSub | **Azure Web PubSub** for the shared live broadcast; SSE kept for personal replays | Built for a broadcaster's audience: publish once, fan out to 1,000 viewers per unit, 100,000 at 100 units. Load-tested with `scripts/loadtest-realtime.py` |
 | Front Door in front of everything | **API Management Standard v2 is the enterprise edge**; Front Door Premium + WAF is documented as the next step (`docs/ARCHITECTURE.md`) | Simpler (no Private Link approval or two-pass provision) and about $330 a month cheaper; the trade-off is no WAF for the demo |
 | Grader agent | **Deterministic Grader** | The plan's own rule: grading compares structured fields, not opinions |
 | A2A broadcaster agent, auto-eventing from tracking | Not built | Stretch items, and the first things the plan says to cut |
@@ -106,7 +106,7 @@ Record from replay with the deployed URL visible, `REGISTA_VIDEO_SAFE=1`, captio
 | Azure AI services | Speech, Translator, Content Safety and Prompt Shields (`ai/services.py`), all Entra-authenticated |
 | Microsoft Fabric | Lakehouse (season dataset, realism report, reference CSVs), Eventstream → Eventhouse/KQL (`scripts/fabric-setup.py`, `docs/kql/`) |
 | Azure data | Cosmos DB for NoSQL (narratives, studio decisions, audit log, profiles), Blob Storage |
-| Cloud native | **Static Web Apps** for the React SPA; Container Apps (API, feeder job) or **AKS** (standard, or private behind **API Management Standard v2** with private endpoints), Event Hubs, Functions (Flex), ACR, App Insights, budget alert |
+| Cloud native | **Static Web Apps** for the React SPA; Container Apps (API, feeder job) or **AKS** (standard, or private behind **API Management Standard v2** with private endpoints), **Web PubSub** (live broadcast fan-out), Event Hubs, Functions (Flex), ACR, App Insights, budget alert |
 
 ## 9. Azure: what we need from you
 

@@ -20,6 +20,8 @@ import { EmptyState, Skeleton } from "../components/States";
 import { HeadToHead, MatchFacts } from "../components/RealFacts";
 import { PersonaSelect } from "../components/TopBar";
 import { useLiveMatch } from "../hooks/useLiveMatch";
+import { useBroadcast } from "../hooks/useBroadcast";
+import { LiveBadge, SourceSwitch, useBroadcastStatus, type LiveSource } from "../components/Broadcast";
 import { clock, describeEvent } from "../lib/format";
 import { currentChain, goalsFromEvents, playerMaps, teamColors } from "../lib/match";
 import { usePrefs } from "../lib/prefs";
@@ -31,7 +33,28 @@ export function Matchday() {
   const match = useMatch();
   const { persona, language, t, accessible, setAccessible, autoplayAudio, setAutoplayAudio } = usePrefs();
   const live = useLiveMatch(id, { persona, language, initialSpeed: accessible ? 10 : 30 });
-  const { state } = live;
+  // Live broadcast: one shared timeline over Azure Web PubSub, chosen by default when the match is on air. Replay:
+  // the viewer's own SSE stream with speed and seek. Every view renders either source (same LiveState shape).
+  const { status: onAir } = useBroadcastStatus(id);
+  const [source, setSource] = useState<LiveSource | null>(null);
+  const wantBroadcast = Boolean(onAir?.live) && (source ?? "broadcast") === "broadcast";
+  const bc = useBroadcast(id, { language, active: wantBroadcast, homeId: match.home.team_id, awayId: match.away.team_id });
+  const usingBroadcast = wantBroadcast && bc.available !== false;
+  const { pause: pauseReplay, play: playReplay } = live;
+  useEffect(() => {
+    if (usingBroadcast) pauseReplay();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [usingBroadcast]);
+  const chooseSource = (s: LiveSource) => {
+    setSource(s);
+    if (s === "replay") playReplay();
+  };
+  // No Web PubSub in this deployment: carry on with the viewer's replay.
+  useEffect(() => {
+    if (wantBroadcast && bc.available === false) playReplay();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [wantBroadcast, bc.available]);
+  const state = usingBroadcast ? bc.state : live.state;
   // Fan views differ in layout and pace, not just wording: analyst, casual, player focus, club focus, single metric.
   const { view, setView, params, setParam } = useMatchdayView();
   const colors = teamColors(match);
@@ -157,7 +180,15 @@ export function Matchday() {
       />
 
       <div className="card" style={{ padding: 12 }}>
-        <LiveControls {...live} />
+        {onAir?.live ? (
+          <div className="row" style={{ marginBottom: 10, gap: 12 }}>
+            <SourceSwitch source={usingBroadcast ? "broadcast" : "replay"} onChange={chooseSource} />
+            {usingBroadcast ? <LiveBadge connection={bc.connection} latencyMs={bc.latencyMs} /> : null}
+            <span className="xs muted">{usingBroadcast ? t("bc.liveHint") : t("bc.replayHint")}</span>
+            {wantBroadcast && bc.available === false ? <span className="xs muted">{t("bc.unavailable")}</span> : null}
+          </div>
+        ) : null}
+        {usingBroadcast ? null : <LiveControls {...live} />}
         <div className="row" style={{ marginTop: 10 }}>
           <ViewSwitch view={view} onChange={setView} />
         </div>

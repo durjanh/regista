@@ -56,7 +56,7 @@ steps:
         azd env set AZURE_PRINCIPAL_ID "$oid"
         azd env set AZURE_PRINCIPAL_TYPE ServicePrincipal
 
-        for v in APIM_PUBLISHER_EMAIL BUDGET_EMAIL BUDGET_AMOUNT AZURE_DEVOPS_ORG_URL DEVOPS_INFRASTRUCTURE_PRINCIPAL_ID AKS_AUTHORIZED_IP_RANGES LETSENCRYPT_EMAIL; do
+        for v in APIM_PUBLISHER_EMAIL BUDGET_EMAIL BUDGET_AMOUNT AZURE_DEVOPS_ORG_URL DEVOPS_INFRASTRUCTURE_PRINCIPAL_ID AKS_AUTHORIZED_IP_RANGES LETSENCRYPT_EMAIL WEBPUBSUB_SKU WEBPUBSUB_UNITS API_MIN_REPLICAS; do
           val="${!v:-}"
           if [ -n "$val" ]; then azd env set "$v" "$val"; fi
         done
@@ -67,9 +67,17 @@ steps:
             ;;
           provision)
             azd provision --no-prompt
+            # Idempotency: a second preview right after provisioning must show no creates, modifies or deletes.
+            "$(Build.SourcesDirectory)/scripts/check-idempotency.sh" \
+              || echo "##vso[task.logissue type=warning]Re-running the provision would still change resources (see the log)."
             ;;
           deploy)
             azd env refresh --no-prompt
             azd deploy --no-prompt
+            # Deployed integration tests: health, CORS, SSE, MCP, the Web PubSub broadcast and the Static Web App.
+            api=$(azd env get-value API_URL); web=$(azd env get-value WEB_URL)
+            cd "$(Build.SourcesDirectory)/services/api"
+            python3 -m venv .it && .it/bin/pip install --quiet -r requirements-dev.txt
+            REGISTA_IT_API_URL="$api" REGISTA_IT_WEB_URL="$web" .it/bin/pytest -m deployed --no-cov
             ;;
         esac

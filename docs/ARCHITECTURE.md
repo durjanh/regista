@@ -32,6 +32,7 @@ flowchart LR
 
   GRADER{{"Grader<br/>truth score"}}
   EH[["Event Hubs<br/>match-events"]]
+  WPS{{"Azure Web PubSub<br/>shared live broadcast<br/>groups per match / language / overlay"}}
   COSMOS[("Cosmos DB<br/>narratives · studio · recaps")]
   BLOB[("Blob Storage<br/>datasets · audio · recaps")]
   FUNC["Azure Functions (Flex)<br/>full-time recap automation"]
@@ -61,7 +62,9 @@ flowchart LR
   FUNC --> COSMOS
   FUNC --> BLOB
   USERS(("Fans · producers · broadcast overlay")) -->|loads the SPA| WEB
-  USERS -->|/api · SSE · /mcp, CORS| API
+  USERS -->|/api · SSE replay · /mcp, CORS| API
+  API -->|publish once per tick| WPS
+  WPS -->|WebSocket fan-out: 1 unit = 1,000 viewers| USERS
   COPILOT(("GitHub Copilot Agent Mode<br/>+ Azure MCP Server")) -->|MCP| API
   EVALS -. CI gate .- API
   GRADER -. CI gate .- EVALS
@@ -72,8 +75,20 @@ flowchart LR
 1. **Source.** `regista-feeder` (a Container Apps job) or the API's in-process replay emits contract `Event`s at match speed. In Event Hubs mode they are published to `match-events`, with `match_id` and `type` as application properties.
 2. **Interpret.** The API consumes the `api` consumer group. It updates incremental state (score, xT momentum, Poisson win probability, xG, PPDA) and runs the moment detectors (goal, big chance, momentum swing, tactical shift, win-probability swing).
 3. **Explain.** For each moment, the Agent Framework workflow runs **Narrator → Fact-checker → Producer** on the fast `chat` deployment. The narrative is written in the viewer's persona and language. Every number must cite a `fact_id`, or the fact-checker rejects the sentence.
-4. **Render.** The result is pushed to browsers over SSE. The studio console receives proposed graphics, a producer approves them, and they go on air in the overlay (`/overlay/:matchId`, an OBS/vMix browser source).
+4. **Render.** The result is published **once** to Azure Web PubSub (the shared live broadcast; every viewer of the match sees the same moment) and also served over SSE for personal replays (own speed, seek, persona). The studio console receives proposed graphics, a producer approves them, and they go on air in the overlay (`/overlay/:matchId`, an OBS/vMix browser source).
 5. **Persist and analyse.** Narratives and studio items go to Cosmos DB. Fabric Eventstream lands the raw events in the Eventhouse for KQL analytics. On `full_time`, the Function generates the broadcaster recap and stores it in Cosmos DB and Blob Storage.
+
+### Realtime at broadcast scale (Azure Web PubSub)
+
+A broadcaster's audience is one shared live timeline, so the work must not grow with viewers:
+
+- **One publisher.** The live timeline comes from the feeder through Event Hubs (`LIVE_SOURCE=eventhub`), or from a shared server-side replay started in the Studio. The API publishes one batched `tick` per second to the group `match.{id}`, each narrative once per language to `match.{id}.{lang}`, and on-air cues to `overlay.{id}` (`docs/API_CONTRACT.md`, "Realtime broadcast").
+- **Web PubSub does the fan-out.** 1,000 concurrent connections per unit, up to 100 units (100,000 viewers) per resource on Standard_S1 / Premium_P1; Premium_P2 goes to 1,000,000; the subscription default is 150 units per region (soft limit). Scaling is a unit change: `azd env set WEBPUBSUB_UNITS 100 && azd provision`.
+- **Flat costs where they matter.** AI narration, fact-checking and detection run once per event, not per viewer. Web PubSub bills per unit-day plus outbound messages, where every delivery to every viewer counts in 2 KB chunks (1M messages per unit per day included). That is why the tick is batched once a second and stripped of freeze frames.
+- **Keyless.** Local auth is disabled; the API issues short-lived client tokens with Microsoft Entra ID (`Web PubSub Service Owner`) scoped to `joinLeaveGroup` roles for the match's groups. In the enterprise profile the public endpoint accepts only client connections and the API publishes through a private endpoint.
+- **Measured, not asserted.** `scripts/loadtest-realtime.py` opens N concurrent viewers and reports delivery latency p50/p95/p99 from each tick's `sent_at`.
+
+Order of magnitude for a real match (estimates; confirm in the pricing calculator): 100,000 viewers × one ~1–2 KB tick per second × 2 hours ≈ 720M deliveries. With 100 units (100M messages a day included) the day costs roughly the units plus the overage, in the high hundreds of dollars: proportionate for a rights holder, and paid only on match days. For the hackathon one Standard unit (1,000 concurrent viewers) costs about $49 a month.
 
 ### Truth loop
 
@@ -121,7 +136,7 @@ One platform, three ways to run the compute. In every profile the React front en
 |---|---|---|---|
 | Diagram | [architecture.drawio](architecture.drawio) | [architecture-aks.drawio](architecture-aks.drawio) | [architecture-aks-enterprise.drawio](architecture-aks-enterprise.drawio) |
 | Entry point | `infra/main.bicep` | `infra/aks/main.bicep` | `infra/aks-enterprise/main.bicep` |
-| Front end | Azure Static Web Apps (Free) | Azure Static Web Apps (Free) | Azure Static Web Apps (Standard) |
+| Front end | Azure Static Web Apps (Free) | Azure Static Web Apps (Free) | Azure Static Web Apps (Free; Standard optional for the SLA) |
 | API edge | Container Apps ingress (HTTPS) | App routing NGINX on a static public IP with a DNS label, HTTPS from cert-manager + Let's Encrypt | API Management Standard v2 (public gateway, rate limits) → VNet integration → internal NGINX (10.40.4.10) |
 | Cluster access | n/a | Public API server, Entra-only, optional authorized IPs | Private API server; deploys from a Managed DevOps Pool in `snet-agents` |
 | PaaS network | Public endpoints, Entra-only | Public endpoints, Entra-only | Public access disabled; private endpoints + 9 private DNS zones |
@@ -158,7 +173,8 @@ Alternatives: Application Gateway WAF v2 in the VNet in front of API Management 
 | Model deployment `reasoning` | gpt-5.5 `2026-04-24`, GlobalStandard, 50K TPM | Recaps, analyst, Scenario Director |
 | Container Apps environment | Consumption workload profile | Hosts the API and the feeder job |
 | Container App `regista-api` | 1 vCPU / 2 GiB, 1–5 replicas (HTTP-concurrency scaling) | API, live engine, agents, MCP |
-| Azure Static Web Apps | Free (Standard in the enterprise profile); region West Europe for metadata, files served from the global edge | The React SPA and the broadcast overlay page; calls the API directly, and the API's CORS allows only this origin |
+| Azure Static Web Apps | Free in every profile (`STATIC_WEB_APP_SKU=Standard` adds the SLA); region East US 2 for metadata, files served from the global edge | The React SPA and the broadcast overlay page; calls the API directly, and the API's CORS allows only this origin |
+| Azure Web PubSub | Standard_S1, 1 unit (`WEBPUBSUB_UNITS`, up to 100), local auth disabled, hub `regista` (anonymous connect denied) | Shared live broadcast fan-out: ticks, narratives per language, overlay cues |
 | Container Apps job `regista-feeder` | Manual trigger | Streams a match into Event Hubs |
 | Azure Container Registry | Basic, admin disabled | Images, built by ACR Tasks; pulled with managed identity |
 | Event Hubs namespace | Standard, 1 TU, local auth disabled | `match-events`, 4 partitions, consumer groups `api` / `functions` / `fabric` |
@@ -208,17 +224,18 @@ Region: **UK South**. Both model versions are listed as Global Standard in `ukso
 
 | Item | Rough monthly cost |
 |---|---|
-| Container Apps (API always-on at 1 replica) | ~$45–80 |
+| Container Apps API (Consumption, **scales to zero**; billed per vCPU/GiB-second while serving, monthly free grant first) | ~$0 idle; a few dollars for demo use |
 | Static Web Apps (Free plan) | $0 |
-| Event Hubs Standard, 1 TU | ~$22 |
-| Cosmos DB serverless, Storage, ACR Basic | ~$10 |
-| Log Analytics / Application Insights | ~$5–15 |
+| Azure Web PubSub Standard_S1, 1 unit (1,000 concurrent viewers; fixed per unit-day; Free_F1 has only 20 connections) | ~$49 |
+| Event Hubs Standard, 1 TU (fixed: no consumption or free tier; Basic allows only one consumer group and we need three) | ~$22 |
+| Cosmos DB serverless, Storage (pay per use) + ACR Basic (fixed ~$5: no consumption or free tier) | ~$6–10 |
+| Log Analytics / Application Insights (pay per GB, capped at 1 GB/day) | ~$0–15 |
 | Azure Functions Flex Consumption | ~$0–5 (free grant) |
 | Foundry tokens + Speech + Translator (demo volume) | ~$10–50 |
-| **Total without Fabric** | **~$90–180** |
+| **Total without Fabric** | **~$80 idle; ~$90–150 with demo traffic** |
 | Fabric F2 if left running 24/7 (optional) | ~$260 — use the free Fabric trial, or pause between demos |
 
-A monthly **budget alert** (`infra/modules/budget.bicep`, actual and forecast thresholds) emails `BUDGET_EMAIL`. To save money between demos: set the API's `minReplicas` to 0, and pause the Fabric capacity. The rules require the demo to stay available to judges until **10 November 2026**, so keep it running until then.
+A monthly **budget alert** (`infra/modules/budget.bicep`, actual and forecast thresholds) emails `BUDGET_EMAIL`. Pay for use by default: the API scales to zero (the first request after idle waits ~20–40 s for a cold start; `azd env set API_MIN_REPLICAS 1` and `azd provision` keep one replica warm for judging and recording), Cosmos DB is serverless, Functions are Flex Consumption, the Static Web App is Free, and Log Analytics stops ingesting at 1 GB/day (`LOG_DAILY_CAP_GB`). Only Web PubSub (~$49, one Standard unit), Event Hubs (~$22) and ACR Basic (~$5) bill while idle. AKS profiles bill for their nodes whenever the cluster runs: `az aks stop -g <rg> -n <cluster>` between demos stops that. In the enterprise profile API Management stays Standard v2: its Consumption tier can't do the VNet integration that reaches the private ingress. Pause a paid Fabric capacity when you're not using it.
 
 ## Scale path
 
@@ -226,7 +243,7 @@ A monthly **budget alert** (`infra/modules/budget.bicep`, actual and forecast th
 |---|---|
 | More API traffic | KEDA HTTP scaling is already on (`concurrentRequests: 50`). Raise `maxReplicas`. |
 | More live matches | Add Event Hubs partitions or throughput units (auto-inflate). Run one feeder job execution per match. |
-| More than ~10k concurrent live viewers | Move SSE fan-out to **Azure Web PubSub**. The API publishes once per event and Web PubSub handles the connections. |
+| 1,000 → 100,000 concurrent live viewers | Already on **Azure Web PubSub**: raise `WEBPUBSUB_UNITS` (1 unit = 1,000 connections, 100 per resource). Beyond 100,000: Premium_P2 (up to 1,000,000) or several resources behind a negotiate router. |
 | Global audience | The SPA is already on Static Web Apps' global edge; put Azure Front Door in front of the API. Data Zone deployments for regional processing. |
 | Predictable model latency | Provisioned throughput (PTU) for the `chat` deployment. Model router for cost/quality balance. |
 | Heavier analytics | Fabric capacity scale-up. Spark notebooks over the Lakehouse datasets (`python -m app.forge.season --upload` writes a full synthetic season with planted changes and a realism report to OneLake). Power BI on the Eventhouse. |

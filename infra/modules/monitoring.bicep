@@ -8,6 +8,9 @@ param appInsightsName string
 @description('Principal that publishes telemetry with Entra ID (the workload identity).')
 param publisherPrincipalId string
 
+@description('Daily ingestion cap in GB (cost guardrail). -1 = no cap.')
+param dailyQuotaGb int = 1
+
 var monitoringMetricsPublisherRoleId = '3913510d-42f4-4e42-8a64-420c390055eb'
 
 resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2025-02-01' = {
@@ -19,6 +22,9 @@ resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2025-02-01' = {
       name: 'PerGB2018'
     }
     retentionInDays: 30
+    workspaceCapping: {
+      dailyQuotaGb: dailyQuotaGb
+    }
   }
 }
 

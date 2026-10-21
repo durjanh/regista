@@ -2,7 +2,7 @@
 
 **One wrong stat on air costs a broadcaster trust, and AI commentary usually cannot be checked.** Regista is a live match-intelligence studio that proves every claim. Our synthetic match engine *secretly plants* tactical changes; Microsoft Agent Framework agents on Microsoft Foundry detect and explain them from the live event stream; a Verifier re-checks every number; a human producer approves what airs as timed overlays; and a **Grader scores every explanation against the planted truth**, live and in CI.
 
-Built for the Microsoft + Premier League *Inside the Game* Developer Hackathon with Microsoft Foundry, Microsoft Agent Framework, MCP, Azure AI Services, Microsoft Fabric, Cosmos DB, Event Hubs, Azure Functions, Azure Container Apps, Azure Static Web Apps and GitHub Copilot. Category: **Best Enterprise Solution**.
+Built for the Microsoft + Premier League *Inside the Game* Developer Hackathon with Microsoft Foundry, Microsoft Agent Framework, MCP, Azure AI Services, Microsoft Fabric, Cosmos DB, Event Hubs, Azure Functions, Azure Container Apps, Azure Static Web Apps, Azure Web PubSub and GitHub Copilot. Category: **Best Enterprise Solution**.
 
 ![Control room at 68': Argentina's planted press switch detected, the Verifier drill catching an overstated number (1.76 struck through, evidence says 0.82), and the truth panel scoring the detection in 286 seconds](docs/screenshots/studio-hero.png)
 
@@ -35,7 +35,7 @@ Built for the Microsoft + Premier League *Inside the Game* Developer Hackathon w
 |---|---|
 | **Control room** (`/studio/:id`) | Ranked insight cards with approve / edit / kill; auto-approve above a producer-set confidence; editorial rules (no betting or loaded language); Content Safety; a full audit log; broadcaster profiles (languages, tone, brand, threshold); versioned JSON cues with translated strings; truth panel and Verifier drill; a half-time pack (talking points plus graphics that go into the approval queue) |
 | **Air-ready overlays** (`/overlay/:id`) | Transparent 1920×1080 browser source for OBS / vMix driven by the cue contract (timecode, duration, priority, template, data, strings); data-only graphics fire even if AI text is slow |
-| **Matchday** (`/match/:id`) | Five views that differ in layout and pace, not just wording: **Analyst** (dense: pitch, pulse, insight cards, event feed with pass difficulty / ball and shot speed / sprint tags, key battle), **Casual** (big moments only, unhurried), **Player focus** (one player's touches, distance, sprints, top speed), **Club focus** (one side's story) and **Single metric** (one huge live number for a second screen). Plus control vs chaos, freeze frames, seven personas, 12 languages, neural voice and audio description |
+| **Matchday** (`/match/:id`) | **Live broadcast** (one shared timeline for every viewer, fanned out by Azure Web PubSub) or a personal **replay** (own speed and seek). Five views that differ in layout and pace, not just wording: **Analyst** (dense: pitch, pulse, insight cards, event feed with pass difficulty / ball and shot speed / sprint tags, key battle), **Casual** (big moments only, unhurried), **Player focus** (one player's touches, distance, sprints, top speed), **Club focus** (one side's story) and **Single metric** (one huge live number for a second screen). Plus control vs chaos, freeze frames, seven personas, 12 languages, neural voice and audio description |
 | **Dugout** (`/match/:id/dugout`) | For the manager: form vs a player's own baseline, fatigue vs team-mates (altitude-aware), "replace X with Y" with predicted win-probability impact, chase/protect changes, danger men, opponent patterns, spoken assistant-coach briefing |
 | **Scouting** (`/scouting`) | Player DNA (REAL record + MODEL tendencies: favourite side, foot, penalty placement, keeper dives, distance, sprints), strengths and weaknesses vs peers, "how to stop him"; team reports with real home/away records and "how to play against them" |
 | **Tactics, Ask, Recap** | Pass networks and profiles, shape changes, xG waterfalls; "Ask the match" via an agent using MCP tools; multi-agent recaps with run-sheets and social packs in every persona and language |
@@ -65,7 +65,7 @@ Every push runs `python -m app.evals.run --mode offline` as a gate:
 | Real-result fidelity (score, scorers, minutes) | **100%** |
 | Calibration vs real fixtures and event benchmarks | **16/16** |
 | Win-probability Brier score on real outcomes | **0.469** (coin flip: 0.667) |
-| Test coverage | API **96%** of statements (127 tests; CI floor 90%). Web: 107 Vitest tests; insight cards, truth panel, fan views, half-time pack and live controls 95–100% of lines, Studio 94%; about 60% of all of `src` (CI floor 58%) |
+| Tests | **API:** 144 unit tests, 96% statement coverage (CI floor 90%); 9 live-server integration tests over real HTTP, SSE and MCP (30 concurrent viewers, first event p95 320 ms); 6 deployed-environment tests incl. a Web PubSub round trip. **Web:** 131 Vitest tests (CI coverage floor); **16 Playwright end-to-end tests** in a real browser against the real API, incl. the hero moment, the overlay, axe accessibility scans and RTL Arabic |
 | Shape changes vs ground truth | 67% precision |
 | Scouting rediscovers player tendencies | foot 100%, penalty side 82%, keeper dive 100% |
 
@@ -75,6 +75,7 @@ Every push runs `python -m app.evals.run --mode offline` as a gate:
 - **Every claim checked:** deterministic Verifier on every number and citation (proven by the Verifier drill), fair-commentary lint, Azure AI Content Safety on output, Prompt Shields on user questions, editorial rules on graphics. Known limit: the Verifier checks that a number is in the evidence, not yet that it is attached to the right claim.
 - **Keyless:** one user-assigned managed identity and Entra ID everywhere; local and key auth disabled on Foundry, Cosmos DB, Event Hubs and Storage.
 - **Quality gates in CI:** truth score, Verifier drill, grounding, fidelity, calibration and scouting recovery block regressions; Foundry evaluations nightly.
+- **Built for a broadcast audience:** the API publishes each live update once; Azure Web PubSub fans it out (1,000 concurrent viewers per unit, 100 units = 100,000; Premium P2 to 1,000,000). Narration and detection cost don't grow with viewers. `scripts/loadtest-realtime.py` measures delivery latency at N concurrent viewers.
 - **Observability and cost:** OpenTelemetry to Application Insights with Agent Framework spans (prompt text excluded), SLO and cost-per-match dashboard, a monthly budget alert in Bicep.
 - **Brand safety:** `REGISTA_VIDEO_SAFE=1` replaces trademarked competition names with generic labels for recorded demos.
 
@@ -84,7 +85,7 @@ Diagrams (open in diagrams.net or the Draw.io VS Code extension): [Container App
 
 - **API** (`services/api`, Python/FastAPI): match engine with planted scenarios, detectors and Grader, analytics (xG, xT, win probability, PPDA, shapes), live engine (SSE), Agent Framework agents, MCP server at `/mcp`, guardrails, ops.
 - **Web** (`apps/web`, React + TypeScript, hosted on **Azure Static Web Apps**): control room, overlay, matchday, dugout, scouting, tactics, ask, recap, forge, ops. It calls the API directly; the API's CORS allows only the Static Web App.
-- **Infra** (`infra`, Bicep), three profiles on one shared platform (Foundry models, project, Speech, Translator, Content Safety; Event Hubs, Functions, Cosmos DB, Storage, ACR, App Insights, budget alert, optional Fabric capacity):
+- **Infra** (`infra`, Bicep), three profiles on one shared platform (Foundry models, project, Speech, Translator, Content Safety; Web PubSub for the live broadcast; Event Hubs, Functions, Cosmos DB, Storage, ACR, App Insights, budget alert, optional Fabric capacity):
   - **Container Apps** (`infra/main.bicep`): API and feeder job. The cheapest; runs the live demo.
   - **AKS standard** (`infra/aks`): Entra-only AKS with workload identity, Cilium, app routing and Kubernetes manifests in `deploy/k8s`.
   - **AKS enterprise** (`infra/aks-enterprise`): API Management Standard v2 (the only public endpoint) → VNet integration → internal NGINX → private AKS; every PaaS service behind a private endpoint; deploys from a Managed DevOps Pool inside the VNet.
@@ -120,7 +121,7 @@ Three profiles share one platform (Foundry, Event Hubs, Cosmos DB, Storage, Func
 
 | Profile | azd project | What you get | Est. cost |
 |---|---|---|---|
-| Container Apps | `azure.yaml` (repo root) | Cheapest; runs the live judge demo | ~$90–180 |
+| Container Apps | `azure.yaml` (repo root) | Pay for use where Azure offers it (the API scales to zero); Web PubSub Standard for the live broadcast | ~$80 idle; ~$90–150 with demo traffic |
 | AKS standard | `deploy/aks` | Entra-only AKS, workload identity, Cilium; the API on a stable hostname with Let's Encrypt HTTPS | ~$250–400 |
 | AKS enterprise | `deploy/aks-enterprise` | API Management Standard v2 as the only public endpoint → private ingress → private AKS; private endpoints for every PaaS service | ~$1,000–1,400 |
 
@@ -146,17 +147,55 @@ az account show --query "{name:name, user:user.name}"   # check before going any
 azd auth login                                          # azd signs in separately; use the same account
 ```
 
+### 2b. Prepare a new subscription (once; free)
+
+New subscriptions start with no resource providers registered, and often with **zero quota** for the newest models and some VM families. Check before the first deploy:
+
+```bash
+for ns in Microsoft.CognitiveServices Microsoft.App Microsoft.ContainerRegistry Microsoft.DocumentDB Microsoft.EventHub \
+          Microsoft.Storage Microsoft.Web Microsoft.OperationalInsights Microsoft.Insights Microsoft.ManagedIdentity \
+          Microsoft.Compute Microsoft.ContainerService Microsoft.Network Microsoft.ApiManagement; do
+  az provider register --namespace "$ns" --wait
+done
+az cognitiveservices usage list -l uksouth --query "[?contains(name.value,'GlobalStandard.gpt-5')]" -o table   # model quota
+az vm list-usage -l uksouth -o table | grep -i -E "Total Regional|DDSv6|DDSv5"                              # vCPU quota (AKS)
+```
+
+If the default models (`gpt-5.4-mini`, `gpt-5.5`) show a limit of 0, use a model you do have quota for and request an increase in the Foundry portal (Quotas):
+
+```bash
+azd env set CHAT_MODEL_NAME gpt-5-mini && azd env set CHAT_MODEL_VERSION 2025-08-07
+azd env set REASONING_MODEL_NAME gpt-5-mini && azd env set REASONING_MODEL_VERSION 2025-08-07
+```
+
+Other settings you can override the same way: `STATIC_WEB_APP_LOCATION` (default `eastus2`; Static Web Apps isn't in UK South and West Europe refuses some new subscriptions), and for AKS `AKS_NODE_VM_SIZE` (default `Standard_D4ds_v6`; v5 families often have 0 quota on new subscriptions), `AKS_NODE_MIN_COUNT` and `AKS_NODE_MAX_COUNT` (defaults fit the usual 10 vCPU limit).
+
+If azd says it can't access a subscription you just created, it is using a stale cache: run `azd auth login` again.
+
 ### 3a. Container Apps (default)
 
 ```bash
-azd env new regista
+azd env new regista --location uksouth          # 12 characters max: the name goes into every resource name
 azd env set AZURE_RESOURCE_GROUP rg-regista
 azd env set BUDGET_EMAIL you@example.com               # optional budget alert
 azd provision --preview                                # what-if
 azd up                                                 # provision + build + deploy + smoke test
+# Pay-for-use: the API scales to zero, so the first request after idle takes ~20-40 s. While judging or recording:
+#   azd env set API_MIN_REPLICAS 1 && azd provision
 ```
 
 Without azd: `scripts/deploy.sh --rg rg-regista --location uksouth --env regista --budget-email you@example.com`.
+
+### 3d. Microsoft Fabric (optional, any profile)
+
+Fabric items aren't Azure resources, so the postprovision hook creates them through the Fabric API. Start the free Fabric trial once at https://app.fabric.microsoft.com (same account), then:
+
+```bash
+azd env set FABRIC_WORKSPACE_NAME Regista
+azd provision          # workspace, Lakehouse + real CC0 data, Eventhouse/KQL table, keyless workspace identity
+```
+
+The Eventstream (Event Hubs → Eventhouse) needs one portal step first, creating the Event Hubs connection with *Workspace identity*; then `azd env set FABRIC_EVENTHUB_CONNECTION_ID <id>` and `azd provision` again. Exact steps: [docs/DEPLOYMENT.md §5](docs/DEPLOYMENT.md#5-microsoft-fabric-lakehouse--real-time-intelligence).
 
 ### 3b. AKS standard
 
@@ -186,6 +225,15 @@ azd provision                                                       # API_URL = 
 ```
 
 The AKS API server and the registry are private, so **deploy from the Azure DevOps pipeline**: its Deploy stage runs on the Managed DevOps Pool inside the VNet. Development only: `azd env set AKS_PRIVATE_CLUSTER false` and `azd env set AKS_AUTHORIZED_IP_RANGES <your-ip>/32` make the API server public but IP-restricted. There is no WAF in this profile; for production, add Front Door Premium in front of API Management ([design and steps](docs/ARCHITECTURE.md#future-azure-front-door-in-front-of-api-management)).
+
+### 3e. Live broadcast at scale (Web PubSub)
+
+Every profile deploys Azure Web PubSub (Standard, 1 unit = 1,000 concurrent viewers). Start a shared live broadcast from the Studio (*Go live to all viewers*), then measure it:
+
+```bash
+python scripts/loadtest-realtime.py --api "$(azd env get-value API_URL)" --match-id 2026-07-15-england-argentina --clients 500 --seconds 60
+azd env set WEBPUBSUB_UNITS 100 && azd provision      # 100,000 concurrent viewers (billed per unit-day: scale up for match days)
+```
 
 ### 4. Azure DevOps pipelines (optional)
 

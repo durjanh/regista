@@ -16,7 +16,14 @@ ignore = ["E501", "B008", "B905"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]
-addopts = "-q"
+# Default `pytest` = the unit suite (with the coverage floor when run with --cov). The other layers run explicitly:
+#   pytest -m integration --no-cov        real uvicorn server over real sockets (offline, no Azure)
+#   pytest -m deployed --no-cov           a deployed environment (REGISTA_IT_API_URL, optional REGISTA_IT_WEB_URL)
+addopts = "-q -m 'not integration and not deployed'"
+markers = [
+    "integration: live uvicorn server, real HTTP/SSE/MCP over sockets (no Azure)",
+    "deployed: runs against a deployed environment; skipped unless REGISTA_IT_API_URL is set",
+]
 
 [tool.coverage.run]
 source = ["app"]

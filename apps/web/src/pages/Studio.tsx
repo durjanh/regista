@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { api, type StudioAction } from "../api/client";
 import type { AuditEntry, BroadcasterProfile, Cue, MatchMeta, StudioItem, StudioSettings, StudioStatus } from "../api/types";
+import { GoLivePanel } from "../components/Broadcast";
 import { HalftimePack } from "../components/HalftimePack";
 import { InsightCard } from "../components/InsightCard";
 import { TruthPanel } from "../components/TruthPanel";
@@ -331,7 +332,8 @@ function StudioConsole({ match }: { match: MatchMeta }) {
     let alive = true;
     const load = () =>
       api
-        .studioQueue(id, tRef.current || undefined)
+        // Always bound by the clock: before kick-off t is 0, and an unbounded queue would show the full-time graphics.
+        .studioQueue(id, tRef.current)
         .then((q) => alive && merge(q))
         .catch(() => undefined);
     load();
@@ -435,6 +437,8 @@ function StudioConsole({ match }: { match: MatchMeta }) {
       <div className="card" style={{ padding: 12 }}>
         <GovernanceBar matchId={id} />
       </div>
+
+      <GoLivePanel matchId={id} currentT={state.t} homeId={match.home.team_id} awayId={match.away.team_id} />
 
       {insights.length || truthMode ? (
         <div className={truthMode ? "truth-row" : "truth-row single"}>

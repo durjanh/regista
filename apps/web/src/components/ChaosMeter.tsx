@@ -58,7 +58,7 @@ export function ChaosBand({ series, maxMinute = 90 }: { series: { minute: number
         aria-label={`${t("chaos.title")} by minute`}>
         {series.map((p, i) => {
           const next = series[i + 1]?.minute ?? p.minute + 1;
-          return <rect key={p.minute} x={p.minute} y={0} width={Math.max(0.5, next - p.minute)} height={6} fill={color(p.value)} opacity={0.25 + 0.75 * p.value} />;
+          return <rect key={i} x={p.minute} y={0} width={Math.max(0.5, next - p.minute)} height={6} fill={color(p.value)} opacity={0.25 + 0.75 * p.value} />;
         })}
       </svg>
     </div>

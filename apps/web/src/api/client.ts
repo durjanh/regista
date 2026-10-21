@@ -2,7 +2,7 @@ import type {
   Analysis, AskResponse, AuditEntry, BroadcasterProfile, Calibration, ChatTurn, Counterfactual, ForgeConfig, Health,
   Insight, MatchEvent, MatchMeta, MatchSummary, Dugout, H2H, MomentDetail, Narrative, Ops, Physical, PlayerDNA, PlayerStat,
   Recap, ReferenceSummary, ReferenceTeam, ScoutingPlayer, StudioItem, StudioSettings, Team, TeamDNA, TeamReport, TruthReport,
-  TruthScore,
+  TruthScore, BroadcastStatus, RealtimeNegotiate,
 } from "./types";
 
 export class ApiError extends Error {
@@ -101,6 +101,13 @@ export const api = {
     post<Narrative>(`/matches/${encodeURIComponent(id)}/insights/${encodeURIComponent(insightId)}/narrate`, body),
   truthScore: () => request<TruthScore>("/truth/score"),
   ops: () => request<Ops>("/ops"),
+  // Realtime broadcast (Azure Web PubSub): a Web PubSub client URL for one match, or enabled:false (use SSE).
+  realtimeNegotiate: (matchId: string, language: string) =>
+    request<RealtimeNegotiate>(`/realtime/negotiate${qs({ match_id: matchId, language })}`),
+  broadcastStart: (matchId: string, body: { speed?: number; start_t?: number; languages?: string[] } = {}) =>
+    post<BroadcastStatus>(`/broadcast/${encodeURIComponent(matchId)}/start`, body),
+  broadcastStop: (matchId: string) => post<BroadcastStatus>(`/broadcast/${encodeURIComponent(matchId)}/stop`, {}),
+  broadcastStatus: () => request<BroadcastStatus[]>("/broadcast/status"),
 };
 
 export type StudioAction = "approve" | "reject" | "on_air" | "edit" | "kill";

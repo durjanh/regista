@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
-import { overlayUrl } from "../api/client";
-import type { StudioItem } from "../api/types";
+import { api, overlayUrl } from "../api/client";
+import type { BroadcastCue, StudioItem } from "../api/types";
+import { connectRealtime } from "../lib/webpubsub";
 
 type Live = StudioItem & { leaving?: boolean };
 
@@ -77,6 +78,38 @@ export function Overlay() {
       const iv = window.setInterval(next, 4000);
       return () => window.clearInterval(iv);
     }
+    // Prefer the Web PubSub group overlay.{id} (scales to every broadcaster's overlay); fall back to SSE when this
+    // deployment has no Web PubSub or the negotiation fails.
+    let es: EventSource | null = null;
+    let fellBack = false;
+    const rt = connectRealtime({
+      negotiate: () => api.realtimeNegotiate(id, "en"),
+      groups: (g) => g === `overlay.${id}`,
+      onStatus: (st) => {
+        if ((st === "disabled" || st === "error") && !fellBack) {
+          fellBack = true;
+          rt?.close();
+          es = sse();
+        }
+      },
+      onMessage: (_group, data) => {
+        const cue = data as BroadcastCue;
+        if (!cue || cue.type !== "cue" || cue.match_id !== id) return;
+        if (cue.action === "on_air" && "kind" in cue.item) show(cue.item as StudioItem);
+        else if (cue.action === "kill") {
+          clearTimers(cue.item.id);
+          setActive((prev) => prev.filter((x) => x.id !== cue.item.id));
+        }
+      },
+    });
+    return () => {
+      rt.close();
+      es?.close();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, demo]);
+
+  function sse(): EventSource {
     const es = new EventSource(overlayUrl(id));
     es.addEventListener("on_air", (e) => {
       try {
@@ -104,9 +137,8 @@ export function Overlay() {
         /* ignore */
       }
     });
-    return () => es.close();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id, demo]);
+    return es;
+  }
 
   useEffect(
     () => () => {

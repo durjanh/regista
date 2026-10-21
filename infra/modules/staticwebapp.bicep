@@ -15,7 +15,7 @@ param name string
   'westus2'
   'eastasia'
 ])
-param location string = 'westeurope'
+param location string = 'eastus2'
 
 @allowed([
   'Free'

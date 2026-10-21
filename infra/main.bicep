@@ -83,6 +83,25 @@ param fabricAdminEmail string = ''
 
 param tags object = {}
 
+@description('API minimum replicas. 0 = scale to zero (pay nothing while idle; ~20-40 s cold start on the first request). Set 1 while judging or recording.')
+@minValue(0)
+@maxValue(1)
+param apiMinReplicas int = 0
+
+@description('Log Analytics daily ingestion cap in GB (cost guardrail; ingestion pauses for the rest of the day when reached). -1 = no cap.')
+param logDailyCapGb int = 1
+
+@allowed([
+  'Free_F1'
+  'Standard_S1'
+  'Premium_P1'
+])
+@description('Web PubSub tier for the shared live broadcast. Standard_S1: 1,000 concurrent viewers per unit.')
+param webPubSubSku string = 'Standard_S1'
+
+@description('Web PubSub units: 1 = 1,000 concurrent viewers, 100 = 100,000 (billed per unit-day).')
+param webPubSubUnits int = 1
+
 @allowed([
   'Free'
   'Standard'
@@ -90,8 +109,8 @@ param tags object = {}
 @description('Static Web Apps plan for the React front end. Free has no SLA; Standard adds it.')
 param staticWebAppSku string = 'Free'
 
-@description('Static Web Apps region (metadata only; files are served from the global edge). Not offered in UK South.')
-param staticWebAppLocation string = 'westeurope'
+@description('Static Web Apps region (metadata only; files are served from the global edge). Not offered in UK South; West Europe refuses some new subscriptions.')
+param staticWebAppLocation string = 'eastus2'
 
 @description('E-mail for the monthly cost budget alerts (50%, 90% actual; 100% forecast). Leave empty to skip the budget.')
 param budgetContactEmail string = ''
@@ -126,6 +145,7 @@ var names = {
   containerEnv: dashed('cae', environmentName, tok)
   apiApp: '${environmentName}-api'
   staticWebApp: dashed('swa', environmentName, tok)
+  webPubSub: dashed('wps', environmentName, tok)
   feederJob: '${environmentName}-feeder'
   functionsPlan: dashed('plan', environmentName, tok)
   functionsApp: dashed('func', environmentName, tok)
@@ -152,6 +172,7 @@ module monitoring 'modules/monitoring.bicep' = {
     logAnalyticsName: names.logAnalytics
     appInsightsName: names.appInsights
     publisherPrincipalId: identity.properties.principalId
+    dailyQuotaGb: logDailyCapGb
   }
 }
 
@@ -251,7 +272,22 @@ var apiEnv = [
   { name: 'ONELAKE_LAKEHOUSE', value: oneLakeLakehouse }
   { name: 'APPLICATIONINSIGHTS_CONNECTION_STRING', value: monitoring.outputs.appInsightsConnectionString }
   { name: 'OTEL_SERVICE_NAME', value: 'regista-api' }
+  { name: 'WEBPUBSUB_ENDPOINT', value: webPubSub.outputs.endpoint }
+  { name: 'WEBPUBSUB_HUB', value: webPubSub.outputs.hubName }
 ]
+
+module webPubSub 'modules/webpubsub.bicep' = {
+  name: 'webpubsub'
+  params: {
+    location: location
+    tags: allTags
+    name: names.webPubSub
+    sku: webPubSubSku
+    units: webPubSubUnits
+    publisherPrincipalId: identity.properties.principalId
+    logAnalyticsId: resourceId('Microsoft.OperationalInsights/workspaces', monitoring.outputs.logAnalyticsName)
+  }
+}
 
 module staticWebApp 'modules/staticwebapp.bicep' = {
   name: 'staticwebapp'
@@ -278,6 +314,7 @@ module containerApps 'modules/containerapps.bicep' = {
     placeholderImage: placeholderImage
     apiEnv: apiEnv
     corsOrigins: staticWebApp.outputs.url
+    apiMinReplicas: apiMinReplicas
   }
 }
 
@@ -345,6 +382,8 @@ output ACR_LOGIN_SERVER string = registry.outputs.loginServer
 output CONTAINER_ENV_NAME string = containerApps.outputs.environmentName
 output API_APP_NAME string = containerApps.outputs.apiAppName
 output STATIC_WEB_APP_NAME string = staticWebApp.outputs.name
+output WEBPUBSUB_ENDPOINT string = webPubSub.outputs.endpoint
+output WEBPUBSUB_HUB string = webPubSub.outputs.hubName
 output FEEDER_JOB_NAME string = containerApps.outputs.feederJobName
 output API_URL string = containerApps.outputs.apiUrl
 output WEB_URL string = staticWebApp.outputs.url

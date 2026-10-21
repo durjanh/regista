@@ -44,8 +44,12 @@ if [[ "$YES" != true ]]; then
   [[ "$ok" =~ ^[Yy]$ ]] || { echo "Cancelled."; exit 0; }
 fi
 
-echo "▶ Provision (placeholder images on the first run)"
-az deployment group create -g "$RG" -n "$DEPLOYMENT" --template-file infra/main.bicep --parameters infra/main.bicepparam -o none
+# Re-runs must not revert the running API to the placeholder image: pass the current image when there is one.
+current=$(az containerapp show -g "$RG" -n "${ENV_NAME}-api" --query "properties.template.containers[0].image" -o tsv 2>/dev/null || true)
+keep=()
+[[ -n "$current" ]] && keep=(--parameters "apiImage=$current")
+echo "▶ Provision (${current:-placeholder image on the first run})"
+az deployment group create -g "$RG" -n "$DEPLOYMENT" --template-file infra/main.bicep --parameters infra/main.bicepparam ${keep[@]+"${keep[@]}"} -o none
 out() { az deployment group show -g "$RG" -n "$DEPLOYMENT" --query "properties.outputs.$1.value" -o tsv; }
 ACR="$(out ACR_NAME)"; LOGIN="$(out ACR_LOGIN_SERVER)"
 TAG="$(git rev-parse --short HEAD 2>/dev/null || date +%s)"

@@ -178,6 +178,21 @@ jobs:
           echo "Access-Control-Allow-Origin: $allowed"
           [ "$allowed" = "$web" ]
 
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Deployed integration tests (health, CORS, SSE, MCP, Web PubSub broadcast, Static Web App)
+        working-directory: services/api
+        env:
+          REGISTA_IT_API_URL: ${{ needs.containers.outputs.api_url }}
+          REGISTA_IT_WEB_URL: ${{ needs.containers.outputs.web_url }}
+        run: |
+          pip install -r requirements-dev.txt
+          pytest -m deployed --no-cov
+
       - name: Summary
         run: |
           {

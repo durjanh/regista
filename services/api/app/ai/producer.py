@@ -7,6 +7,7 @@ a CG system) can draw them in sync with the feed. Nothing goes on air without a 
 from __future__ import annotations
 
 import asyncio
+from collections.abc import Callable
 from datetime import UTC, datetime
 from uuid import uuid4
 
@@ -14,6 +15,8 @@ from ..store import store
 
 _items: dict[str, dict[str, dict]] = {}          # match_id -> item_id -> item
 _overlay_subscribers: dict[str, set[asyncio.Queue]] = {}
+# Called with (match_id, kind, payload) on every on_air / kill: the Web PubSub broadcast registers one (app/live/broadcast.py).
+cue_listeners: list[Callable[[str, str, dict], None]] = []
 
 
 def _now() -> str:
@@ -256,16 +259,25 @@ def act(match_id: str, item_id: str, action: str, title: str | None = None, body
         if not item.get("editorial", {"passed": True})["passed"]:
             raise ValueError("Editorial rules block this item from going on air")
         item["status"] = "on_air"
-        for q in list(_overlay_subscribers.get(match_id, ())):
-            q.put_nowait(("on_air", item))
+        _overlay_cue(match_id, "on_air", item)
     elif action == "kill":
         item["status"] = "killed"
-        for q in list(_overlay_subscribers.get(match_id, ())):
-            q.put_nowait(("kill", {"id": item_id}))
+        _overlay_cue(match_id, "kill", {"id": item_id})
     else:
         raise ValueError(action)
     audit(match_id, item_id, action, "producer", item["title"])
     return item
+
+
+def _overlay_cue(match_id: str, kind: str, payload: dict) -> None:
+    """Fan a cue out to the SSE overlay streams and to any registered listener (the Web PubSub broadcast)."""
+    for q in list(_overlay_subscribers.get(match_id, ())):
+        q.put_nowait((kind, payload))
+    for listener in list(cue_listeners):
+        try:
+            listener(match_id, kind, payload)
+        except Exception:  # a broadcast problem must never block the producer console
+            pass
 
 
 def subscribe(match_id: str) -> asyncio.Queue:

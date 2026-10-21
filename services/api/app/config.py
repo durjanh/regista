@@ -26,6 +26,8 @@ class Settings:
     eventhub_name: str = field(default_factory=lambda: _env("EVENTHUB_NAME", "match-events"))
     eventhub_consumer_group: str = field(default_factory=lambda: _env("EVENTHUB_CONSUMER_GROUP", "api"))
     live_source: str = field(default_factory=lambda: _env("LIVE_SOURCE", "replay"))
+    webpubsub_endpoint: str = field(default_factory=lambda: _env("WEBPUBSUB_ENDPOINT"))
+    webpubsub_hub: str = field(default_factory=lambda: _env("WEBPUBSUB_HUB", "regista"))
     onelake_workspace: str = field(default_factory=lambda: _env("ONELAKE_WORKSPACE"))
     onelake_lakehouse: str = field(default_factory=lambda: _env("ONELAKE_LAKEHOUSE"))
     appinsights: str = field(default_factory=lambda: _env("APPLICATIONINSIGHTS_CONNECTION_STRING"))
@@ -53,6 +55,10 @@ class Settings:
     @property
     def safety(self) -> bool:
         return bool(self.ai_services_endpoint) and not self.force_offline
+
+    @property
+    def webpubsub(self) -> bool:
+        return bool(self.webpubsub_endpoint) and not self.force_offline
 
     @property
     def mode(self) -> str:

@@ -16,4 +16,6 @@ azure-cosmos~=4.17
 azure-storage-blob~=12.31
 azure-storage-file-datalake~=12.26
 azure-eventhub~=5.15
+# Realtime fan-out to every viewer (keyless, Entra-issued client tokens)
+azure-messaging-webpubsubservice~=1.3
 azure-monitor-opentelemetry~=1.8

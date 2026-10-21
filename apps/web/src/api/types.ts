@@ -317,7 +317,7 @@ export type Engine = "azure" | "offline";
 export type Narrative = {
   id: string;
   match_id: string;
-  scope: "moment" | "live_line" | "halftime" | "fulltime" | "dugout";
+  scope: "moment" | "live_line" | "halftime" | "fulltime" | "dugout" | "insight";
   moment_id?: string;
   persona: string;
   language: string;
@@ -790,3 +790,56 @@ export type Ops = {
     price_note: string;
   };
 };
+
+// Realtime broadcast (Azure Web PubSub): one shared live timeline, published once per tick and fanned out by Web
+// PubSub to every viewer. Groups: match.{id} (tick, end), match.{id}.{language} (narrative), overlay.{id} (cue).
+export type BroadcastSnapshot = { momentum: number; win_prob: WinProb; control_chaos: number };
+export type BroadcastTick = {
+  type: "tick";
+  match_id: string;
+  seq: number;
+  /** Epoch ms when the API published the tick: now - sent_at is the delivery latency. */
+  sent_at: number;
+  t: number;
+  minute: number;
+  score: Score;
+  /** Events since the previous tick, without freeze frames. */
+  events: MatchEvent[];
+  snapshot: BroadcastSnapshot;
+  moments: Moment[];
+  insights: Insight[];
+};
+export type BroadcastNarrative = {
+  type: "narrative";
+  match_id: string;
+  ref_type: "moment" | "insight";
+  ref_id: string;
+  language: string;
+  text: string;
+  citations: Citation[];
+  fact_check: FactCheck;
+  verification?: Verification | null;
+  /** Not in the contract yet; read when present. */
+  persona?: string;
+  engine?: Engine;
+};
+export type BroadcastCue = { type: "cue"; match_id: string; action: "on_air" | "kill"; item: StudioItem | { id: string } };
+export type BroadcastEnd = { type: "end"; match_id: string; t: number };
+export type BroadcastMessage = BroadcastTick | BroadcastNarrative | BroadcastCue | BroadcastEnd;
+
+export type BroadcastStatus = {
+  match_id: string;
+  live: boolean;
+  source: "replay" | "eventhub";
+  speed: number;
+  t: number;
+  minute: number;
+  started_at: string | null;
+  ticks_published: number;
+  bytes_published: number;
+  languages: string[];
+};
+
+export type RealtimeNegotiate =
+  | { enabled: false }
+  | { enabled: true; url: string; groups: string[]; hub: string };

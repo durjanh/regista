@@ -35,6 +35,17 @@ param publicNetworkAccess string = 'Enabled'
 ])
 param registrySku string = 'Basic'
 
+@allowed([
+  'Free_F1'
+  'Standard_S1'
+  'Premium_P1'
+])
+param webPubSubSku string = 'Standard_S1'
+param webPubSubUnits int = 1
+
+@description('Enterprise: Web PubSub accepts only client connections publicly; server traffic uses a private endpoint.')
+param webPubSubPrivateServerTraffic bool = false
+
 param budgetContactEmail string = ''
 param budgetAmount int = 300
 param budgetStartDate string
@@ -54,6 +65,7 @@ var names = {
   cosmos: dashed('cosmos', environmentName, tok)
   storage: compact('st', environmentName, tok)
   fabricCapacity: compact('fab', environmentName, tok)
+  webPubSub: dashed('wps', environmentName, tok)
 }
 
 var functionsDeploymentContainer = 'func-deploy'
@@ -145,6 +157,20 @@ module storage 'storage.bicep' = {
   }
 }
 
+module webPubSub 'webpubsub.bicep' = {
+  name: 'webpubsub'
+  params: {
+    location: location
+    tags: tags
+    name: names.webPubSub
+    sku: webPubSubSku
+    units: webPubSubUnits
+    publisherPrincipalId: identity.properties.principalId
+    privateServerTraffic: webPubSubPrivateServerTraffic
+    logAnalyticsId: resourceId('Microsoft.OperationalInsights/workspaces', monitoring.outputs.logAnalyticsName)
+  }
+}
+
 module budget 'budget.bicep' = if (!empty(budgetContactEmail)) {
   name: 'budget'
   params: {
@@ -196,4 +222,7 @@ output storageId string = storage.outputs.id
 output storageName string = storage.outputs.name
 output storageBlobEndpoint string = storage.outputs.blobEndpoint
 output functionsDeploymentContainer string = functionsDeploymentContainer
+output webPubSubId string = webPubSub.outputs.id
+output webPubSubEndpoint string = webPubSub.outputs.endpoint
+output webPubSubHub string = webPubSub.outputs.hubName
 output fabricCapacityName string = deployFabricCapacity ? names.fabricCapacity : ''

@@ -26,6 +26,7 @@ ICONS = {
     "cae": "other/02989-icon-service-Container-Apps-Environments.svg",
     "app": "other/02884-icon-service-Worker-Container-App.svg",
     "static": "web/01007-icon-service-Static-Apps.svg",
+    "webpubsub": "integration/02987-icon-service-pubsub.svg",
     "apim": "integration/10042-icon-service-API-Management-Services.svg",
     "cosmos": "databases/10121-icon-service-Azure-Cosmos-DB.svg",
     "eventhubs": "analytics/00039-icon-service-Event-Hubs.svg",
@@ -222,21 +223,23 @@ def container_apps():
 
     az = d.group("Azure subscription (UK South) · keyless: one user-assigned managed identity, Entra ID everywhere", 320, 90, 1760, 1040, icon="subscription")
 
-    swa = d.box("Azure Static Web Apps (Free)", "React 19 SPA · 9 surfaces + /overlay · global, HTTPS (metadata: West Europe)<br>the browser calls the API directly: fetch + SSE, CORS limited to this origin",
-                20, 48, 520, 92, AZURE, parent=az, icon="static")
+    swa = d.box("Azure Static Web Apps (Free)", "React 19 SPA · 9 surfaces + /overlay · global, HTTPS (metadata: East US 2) · "
+                "calls the API directly: fetch + SSE, CORS limited to this origin", 20, 48, 520, 60, AZURE, parent=az, icon="static", size=10)
+    wps = d.box("Azure Web PubSub (Standard S1)", "shared live broadcast: the API publishes once per tick · groups match.{id} / .{lang} / overlay.{id}<br>"
+                "1,000 viewers per unit, 100 units = 100,000 · keyless (Entra tokens)", 20, 118, 520, 72, AZURE, parent=az, icon="webpubsub", size=10)
 
-    cae = d.group("Container Apps environment (consumption, KEDA autoscale)", 20, 160, 520, 400, stroke=AZURE, fill="#FFFFFF", parent=az, icon="cae")
+    cae = d.group("Container Apps environment (consumption, KEDA autoscale)", 20, 210, 520, 400, stroke=AZURE, fill="#FFFFFF", parent=az, icon="cae")
     api = d.box("regista-api (FastAPI, Python 3.12)",
                 "• Data Forge: conditioned engine + planted scenarios<br>• Analytics: xG, xT, win prob, PPDA, shapes<br>• Detectors + Grader (truth loop)<br>"
-                "• Live engine: moments, insights → SSE<br>• Agent runtime (Agent Framework) · MCP /mcp (14 tools)<br>• Scouting · Dugout · Ops (SLO, cost)<br>"
+                "• Live: SSE (personal replay) + Web PubSub (shared broadcast)<br>• Agent runtime (Agent Framework) · MCP /mcp (14 tools)<br>• Scouting · Dugout · Ops (SLO, cost)<br>"
                 "• Verifier + fair-commentary guardrail · CORS: SPA origin",
                 15, 44, 490, 186, AZURE, parent=cae, icon="app", size=10)
     feeder = d.box("Job: regista-feeder", "replays a match into Event Hubs at real or accelerated speed", 15, 240, 490, 58, AZURE, parent=cae, icon="app")
     d.box("Container Registry", "ACR Tasks builds · AcrPull via identity", 15, 308, 240, 72, AZURE, parent=cae, icon="acr", size=10)
     d.box("Managed identity", "Entra ID · RBAC only · no keys, no connection strings", 265, 308, 240, 72, AZURE, parent=cae, icon="identity", size=10)
 
-    d.box("Application Insights + Log Analytics", "OpenTelemetry: requests, agent spans, latency", 20, 580, 330, 64, GREY, parent=az, icon="appinsights", size=10)
-    d.box("Budget alert", "monthly, from Bicep", 360, 580, 180, 64, GREY, parent=az, icon="budget", size=10)
+    d.box("Application Insights + Log Analytics", "OpenTelemetry: requests, agent spans, latency", 20, 630, 330, 64, GREY, parent=az, icon="appinsights", size=10)
+    d.box("Budget alert", "monthly, from Bicep", 360, 630, 180, 64, GREY, parent=az, icon="budget", size=10)
 
     fdy = d.group("Microsoft Foundry (AI Services account + project)", 570, 48, 600, 352, stroke=PURPLE, fill="#FBF7FF", parent=az, icon="foundry")
     agents = d.box("Multi-agent workflows (Microsoft Agent Framework)",
@@ -287,12 +290,16 @@ def container_apps():
     # Edges: browser -> SPA and browser -> API, then the runtime flows through the free channel between columns.
     gap_x = d.geo[cae][0] + 520 + 15            # channel between the Container Apps column and the Foundry/Data column
     # One lane per edge in the gap between the users column and the subscription, so vertical legs never overlap.
-    d.edge(fans, swa, "SPA (HTTPS)", exit=(1, 0.3), entry=(0, 0.35), via_x=297)
-    d.edge(prod, swa, "", exit=(1, 0.3), entry=(0, 0.65), via_x=305)
-    d.edge(fans, api, "/api · SSE (CORS)", exit=(1, 0.75), entry=(0, 0.2), via_x=313)
-    d.edge(ovl, api, "SSE", exit=(1, 0.5), entry=(0, 0.45), via_x=326)
+    d.edge(fans, swa, "SPA (HTTPS)", exit=(1, 0.25), entry=(0, 0.35), via_x=296)
+    d.edge(prod, swa, "", exit=(1, 0.3), entry=(0, 0.7), via_x=302)
+    d.edge(fans, wps, "WebSocket", exit=(1, 0.5), entry=(0, 0.35), via_x=308)
+    d.edge(ovl, wps, "", exit=(1, 0.3), entry=(0, 0.7), via_x=314)
+    d.edge(fans, api, "/api · SSE (CORS)", exit=(1, 0.75), entry=(0, 0.2), via_x=320)
+    d.edge(ovl, api, "", exit=(1, 0.6), entry=(0, 0.45), via_x=326)
     d.edge(cop, api, "/mcp", exit=(1, 0.5), entry=(0, 0.7), via_x=332)
-    d.edge(mcp, api, "", exit=(1, 0.5), entry=(0, 0.9), via_x=338)
+    d.edge(mcp, api, "", exit=(1, 0.5), entry=(0, 0.9), via_x=337)
+    # API -> Web PubSub: straight up at the right edge of the column, clear of the environment's title.
+    d.edge(api, wps, "", exit=(0.97, 0), entry=(0.95, 1))
     d.edge(api, agents, "Entra token", color=PURPLE, exit=(1, 0.12), entry=(0, 0.5), via_x=gap_x - 5)
     d.edge(api, cos, "", color=GREEN, exit=(1, 0.85), entry=(0, 0.5), via_x=gap_x - 10)
     d.edge(feeder, eh, "events", color=GREEN, exit=(1, 0.5), entry=(0, 0.5), via_x=gap_x + 5)
@@ -320,12 +327,14 @@ def aks_standard():
     azd = d.box("azd", "deploy/aks/azure.yaml · hooks install cert-manager, grant AKS RBAC by role name, smoke-test", 12, 222, 226, 92, DEVOPS, parent=cicd)
 
     az = d.group("Azure subscription (UK South) · one resource group · keyless: Entra ID + managed identities everywhere",
-                 300, 90, 1450, 865, icon="subscription")
+                 300, 90, 1450, 925, icon="subscription")
 
-    swa = d.box("Azure Static Web Apps (Free)", "React SPA + /overlay · global, HTTPS (metadata: West Europe) · the browser calls the API directly: fetch + SSE, CORS limited to this origin",
-                20, 48, 900, 66, AZURE, parent=az, icon="static")
+    swa = d.box("Azure Static Web Apps (Free)", "React SPA + /overlay · global, HTTPS (metadata: East US 2) · the browser calls the API directly: fetch + SSE, CORS limited to this origin",
+                20, 48, 900, 56, AZURE, parent=az, icon="static", size=10)
+    wps = d.box("Azure Web PubSub (Standard S1)", "shared live broadcast: the API publishes once per tick · groups match.{id} / .{lang} / overlay.{id} · "
+                "1,000 viewers per unit, 100 units = 100,000 · keyless (Entra tokens)", 20, 114, 900, 60, AZURE, parent=az, icon="webpubsub", size=10)
 
-    aks = d.group("AKS · public API server (Entra ID only, optional authorized IPs) · Free or Standard tier", 20, 134, 900, 424,
+    aks = d.group("AKS · public API server (Entra ID only, optional authorized IPs) · Free or Standard tier", 20, 194, 900, 424,
                   stroke=AZURE, fill="#FFFFFF", parent=az, icon="aks")
     d.text("local accounts disabled · Azure RBAC · workload identity · Azure CNI overlay + Cilium · Azure Linux nodes autoscale 1–3 · "
            "automatic patch + node-image upgrades", 15, 34, 870, 20, parent=aks)
@@ -335,35 +344,39 @@ def aks_standard():
                  parent=aks, dashed=True, icon="netpol")
     d.text("probes on /api/health · non-root · seccomp RuntimeDefault · capabilities dropped · resource limits · one API replica "
            "(live state is in memory)", 15, 50, 390, 60, parent=ns)
-    api = d.box("regista-api", "FastAPI · live engine · detectors + Grader · Agent Framework · MCP · SSE · workload identity",
-                435, 44, 420, 72, AZURE, parent=ns)
+    api = d.box("regista-api", "FastAPI · detectors + Grader · Agent Framework · MCP · SSE replay + Web PubSub broadcast · workload identity",
+                435, 44, 420, 72, AZURE, parent=ns, size=10)
     feeder = d.box("regista-feeder (CronJob)", "suspended · run on demand · replays a match into Event Hubs", 435, 124, 420, 50, AZURE, parent=ns, size=10)
     d.box("Container Insights", "Entra-authenticated agent → Log Analytics", 15, 348, 420, 60, GREY, parent=aks, icon="monitor")
     d.box("Kubelet identity", "AcrPull on the registry (no pull secrets)", 450, 348, 435, 60, AZURE, parent=aks, icon="identity")
 
-    acr = d.box("Container Registry (Basic)", "admin user disabled · AcrPush for azd", 20, 578, 440, 66, AZURE, parent=az, icon="acr")
-    d.box("Workload identity (user-assigned)", "federated: system:serviceaccount:regista:regista-api<br>Foundry · Event Hubs · Cosmos DB · Storage roles",
-          480, 578, 440, 66, AZURE, parent=az, icon="identity")
-    fab = d.group("Microsoft Fabric (trial or F2)", 20, 664, 900, 130, stroke=TEAL, fill="#F2FBF9", parent=az)
+    acr = d.box("Container Registry (Basic)", "admin user disabled · AcrPush for azd", 20, 638, 440, 66, AZURE, parent=az, icon="acr")
+    d.box("Workload identity (user-assigned)", "federated: system:serviceaccount:regista:regista-api<br>Foundry · Event Hubs · Cosmos DB · Storage · Web PubSub roles",
+          480, 638, 440, 66, AZURE, parent=az, icon="identity", size=10)
+    fab = d.group("Microsoft Fabric (trial or F2)", 20, 724, 900, 130, stroke=TEAL, fill="#F2FBF9", parent=az)
     d.box("Eventstream → Eventhouse (KQL)", "reads match-events (consumer group fabric) · live momentum queries", 15, 42, 425, 70, TEAL, parent=fab)
     d.box("Lakehouse (OneLake)", "synthetic season + realism report · reference CSVs", 460, 42, 425, 70, TEAL, parent=fab)
     d.text("<b>Legend</b> — solid: runtime traffic · dashed: deployment. Same app and platform as the Container Apps "
-           "profile; only the compute changes.", 20, 812, 900, 40, parent=az)
+           "profile; only the compute changes.", 20, 872, 900, 40, parent=az)
 
     p = platform(d, az, 945, 48, 485, private=False)
 
     gap_x = d.geo[aks][0] + 900 + 12          # channel between the AKS column and the platform column
-    d.edge(fans, swa, "SPA (HTTPS)", exit=(1, 0.3), entry=(0, 0.5), via_x=278)
-    d.edge(fans, ing, "/api · SSE (CORS)", exit=(1, 0.75), entry=(0, 0.4), via_x=290)
-    d.edge(ovl, ing, "", exit=(1, 0.5), entry=(0, 0.6), via_x=302)
-    d.edge(cop, ing, "/mcp", exit=(1, 0.5), entry=(0, 0.8), via_x=312)
+    d.edge(fans, swa, "SPA (HTTPS)", exit=(1, 0.25), entry=(0, 0.5), via_x=276)
+    d.edge(fans, wps, "WebSocket", exit=(1, 0.45), entry=(0, 0.35), via_x=283)
+    d.edge(ovl, wps, "", exit=(1, 0.3), entry=(0, 0.7), via_x=290)
+    d.edge(fans, ing, "/api · SSE (CORS)", exit=(1, 0.75), entry=(0, 0.4), via_x=297)
+    d.edge(ovl, ing, "", exit=(1, 0.6), entry=(0, 0.6), via_x=304)
+    d.edge(cop, ing, "/mcp", exit=(1, 0.5), entry=(0, 0.8), via_x=311)
     d.edge(ing, api, "HTTPS → :8000", exit=(0.5, 1), entry=(0.5, 0))
     d.edge(api, p["models"], "Entra token", color=PURPLE, exit=(1, 0.25), entry=(0, 0.5), via_x=gap_x - 4)
     d.edge(api, p["cosmos"], "", color=GREEN, exit=(1, 0.75), entry=(0, 0.5), via_x=gap_x + 4)
     d.edge(feeder, p["eh"], "events", color=GREEN, exit=(1, 0.5), entry=(0, 0.5), via_x=gap_x)
+    # API -> Web PubSub up the channel on the right, so it never crosses the ingress box above the API.
+    d.edge(api, wps, "", color=AZURE, exit=(1, 0.15), entry=(1, 0.5), via_x=gap_x + 8)
     d.edge(azd, acr, "docker push", color=DEVOPS, dashed=True, exit=(1, 0.3), entry=(0, 0.5))
     d.edge(azd, aks, "kubectl apply (Entra)", color=DEVOPS, dashed=True, exit=(1, 0.7), entry=(0, 0.95))
-    d.write(OUT / "architecture-aks.drawio", 1780, 975)
+    d.write(OUT / "architecture-aks.drawio", 1780, 1035)
 
 
 # ---------------------------------------------------------------------------------------------------------------
@@ -373,7 +386,7 @@ def aks_standard():
 def aks_enterprise():
     d = Diagram("Regista on AKS (enterprise)")
     title(d, "Regista on AKS — enterprise profile",
-          "SPA on Static Web Apps (Standard) · API Management Standard v2 is the API's only public endpoint → VNet integration → "
+          "SPA on Static Web Apps (Free) · API Management Standard v2 is the API's only public endpoint → VNet integration → "
           "internal NGINX → private AKS · every PaaS service behind a private endpoint · deployed with <b>azd</b> from an in-VNet Managed DevOps Pool",
           2000)
 
@@ -386,10 +399,13 @@ def aks_enterprise():
     d.box("Service connection", "workload identity federation · no secret · Contributor + RBAC Administrator on the resource group", 12, 272, 226, 104, DEVOPS, parent=ado, icon="identity", size=10)
     d.text("Hooks grant AKS RBAC and AcrPush by role name and smoke-test the gateway.", 12, 386, 226, 50, parent=ado)
 
-    az = d.group("Azure subscription (UK South) · keyless: Entra ID + managed identities", 300, 90, 1760, 1125, icon="subscription")
-    swa = d.box("Azure Static Web Apps (Standard)", "React SPA + /overlay · global, HTTPS (metadata: West Europe) · the browser calls the API Management gateway directly: fetch + SSE, CORS limited to this origin",
-                20, 48, 1110, 70, AZURE, parent=az, icon="static")
-    vnet = d.group("VNet 10.40.0.0/16 · NSG on every subnet · 9 private DNS zones linked", 20, 138, 1110, 965, stroke=AZURE, fill="#FFFFFF",
+    az = d.group("Azure subscription (UK South) · keyless: Entra ID + managed identities", 300, 90, 1760, 1181, icon="subscription")
+    swa = d.box("Azure Static Web Apps (Free)", "React SPA + /overlay · global, HTTPS (metadata: East US 2) · the browser calls the API Management gateway directly: fetch + SSE, CORS limited to this origin",
+                20, 48, 1110, 56, AZURE, parent=az, icon="static", size=10)
+    wps = d.box("Azure Web PubSub (Standard S1)", "shared live broadcast: the API publishes once per tick · groups match.{id} / .{lang} / overlay.{id} · 1,000 viewers per unit, "
+                "100 units = 100,000<br>keyless (Entra tokens) · public: client connections only · the API publishes via its private endpoint",
+                20, 114, 1110, 62, AZURE, parent=az, icon="webpubsub", size=10)
+    vnet = d.group("VNet 10.40.0.0/16 · NSG on every subnet · 10 private DNS zones linked", 20, 194, 1110, 965, stroke=AZURE, fill="#FFFFFF",
                    parent=az, icon="vnet")
 
     sapim = d.group("snet-apim 10.40.5.0/24 · delegated Microsoft.Web/serverFarms", 20, 48, 525, 190, stroke=ORANGE, fill="#FFF8F2", parent=vnet, icon="subnet")
@@ -409,16 +425,19 @@ def aks_enterprise():
     ns = d.group("namespace regista · NetworkPolicy: default deny; NGINX → api", 15, 130, 1040, 172, stroke=AZURE, fill="#FFFFFF",
                  parent=saks, dashed=True, icon="netpol")
     feeder = d.box("regista-feeder (CronJob)", "on demand · replays a match into Event Hubs", 15, 44, 480, 96, AZURE, parent=ns)
-    api = d.box("regista-api", "FastAPI · agents · detectors + Grader · MCP · SSE · workload identity · CORS: SPA origin<br>"
+    api = d.box("regista-api", "FastAPI · agents · detectors + Grader · MCP · SSE replay + Web PubSub broadcast · workload identity · CORS: SPA origin<br>"
                 "non-root · seccomp · capabilities dropped · probes · limits", 515, 44, 510, 96, AZURE, parent=ns, size=10)
 
-    spe = d.group("snet-pe 10.40.6.0/24 · private endpoints (public access disabled on every service)", 20, 596, 1070, 140, stroke=GREEN, fill="#F6FBF4",
+    spe = d.group("snet-pe 10.40.6.0/24 · private endpoints", 20, 596, 1070, 140, stroke=GREEN, fill="#F6FBF4",
                   parent=vnet, icon="pe")
-    pe_eh = d.box("Event Hubs", "namespace", 15, 44, 190, 74, GREEN, parent=spe, icon="eventhubs")
-    d.box("Container Registry", "registry (Premium)", 220, 44, 200, 74, GREEN, parent=spe, icon="acr", size=10)
-    d.box("Storage", "blob · queue · table", 435, 44, 190, 74, GREEN, parent=spe, icon="storage")
-    pe_cos = d.box("Cosmos DB", "Sql", 640, 44, 200, 74, GREEN, parent=spe, icon="cosmos")
-    pe_ai = d.box("Foundry", "account · 3 DNS zones", 855, 44, 200, 74, GREEN, parent=spe, icon="foundry")
+    pw = (1070 - 30 - 5 * 12) / 6          # six private endpoints in one row
+    # Event Hubs sits third, right of the subnet title, so the feeder's edge drops onto it without crossing text.
+    d.box("Container Registry", "registry (Premium)", 15, 44, pw, 74, GREEN, parent=spe, icon="acr", size=10)
+    d.box("Storage", "blob · queue · table", 15 + (pw + 12), 44, pw, 74, GREEN, parent=spe, icon="storage", size=10)
+    pe_eh = d.box("Event Hubs", "namespace", 15 + 2 * (pw + 12), 44, pw, 74, GREEN, parent=spe, icon="eventhubs", size=10)
+    pe_cos = d.box("Cosmos DB", "Sql", 15 + 3 * (pw + 12), 44, pw, 74, GREEN, parent=spe, icon="cosmos", size=10)
+    pe_ai = d.box("Foundry", "account · 3 DNS zones", 15 + 4 * (pw + 12), 44, pw, 74, GREEN, parent=spe, icon="foundry", size=10)
+    pe_wps = d.box("Web PubSub", "webpubsub · server traffic", 15 + 5 * (pw + 12), 44, pw, 74, GREEN, parent=spe, icon="webpubsub", size=10)
 
     sfn = d.group("snet-functions 10.40.7.0/24", 20, 756, 525, 140, stroke=GREEN, fill="#F6FBF4", parent=vnet, icon="subnet")
     d.box("Functions Flex VNet integration", "delegated Microsoft.App/environments<br>recaps reach Storage, Event Hubs and Cosmos DB privately", 15, 44, 495, 80, GREEN, parent=sfn, icon="functions")
@@ -432,19 +451,28 @@ def aks_enterprise():
     d.text("<b>Fabric</b> (no icon in the Azure set): Eventstream needs a Fabric managed private endpoint (F SKU) to read the private "
            "Event Hubs namespace; the Lakehouse season export runs from the pipeline.", 1155, 860, 585, 60, parent=az)
 
-    d.edge(fans, swa, "SPA (HTTPS)", exit=(1, 0.3), entry=(0, 0.5), via_x=280)
-    d.edge(fans, apim, "/api · SSE (CORS)", exit=(1, 0.75), entry=(0, 0.3), via_x=292)
-    d.edge(ovl, apim, "", exit=(1, 0.5), entry=(0, 0.55), via_x=310)
-    d.edge(cop, apim, "/api · /mcp", exit=(1, 0.5), entry=(0, 0.8), via_x=325)
+    d.edge(fans, swa, "SPA (HTTPS)", exit=(1, 0.25), entry=(0, 0.5), via_x=278)
+    d.edge(fans, wps, "WebSocket", exit=(1, 0.45), entry=(0, 0.35), via_x=285)
+    d.edge(ovl, wps, "", exit=(1, 0.3), entry=(0, 0.7), via_x=292)
+    d.edge(fans, apim, "/api · SSE (CORS)", exit=(1, 0.75), entry=(0, 0.3), via_x=299)
+    d.edge(ovl, apim, "", exit=(1, 0.6), entry=(0, 0.55), via_x=306)
+    d.edge(cop, apim, "/api · /mcp", exit=(1, 0.5), entry=(0, 0.8), via_x=313)
     d.edge(apim, ilb, "VNet integration", color=ORANGE, width=2, exit=(1, 0.4), entry=(0, 0.5))
     d.edge(ilb, api, "", exit=(0.5, 1), entry=(0.55, 0))
-    d.edge(api, pe_cos, "", color=GREEN, exit=(0.41, 1), entry=(0.5, 0))
-    d.edge(api, pe_ai, "", color=PURPLE, exit=(0.84, 1), entry=(0.5, 0))
-    d.edge(feeder, pe_eh, "", color=GREEN, exit=(0.3, 1), entry=(0.5, 0))
+    def straight_down(src, tgt):
+        """Exit point on src's bottom edge directly above tgt's centre, so the edge drops vertically."""
+        sx, _, sw, _ = d.geo[src]
+        tx, _, tw, _ = d.geo[tgt]
+        return (round((tx + tw / 2 - sx) / sw, 3), 1)
+
+    d.edge(api, pe_cos, "", color=GREEN, exit=straight_down(api, pe_cos), entry=(0.5, 0))
+    d.edge(api, pe_ai, "", color=PURPLE, exit=straight_down(api, pe_ai), entry=(0.5, 0))
+    d.edge(api, pe_wps, "publish", color=AZURE, exit=straight_down(api, pe_wps), entry=(0.5, 0))
+    d.edge(feeder, pe_eh, "", color=GREEN, exit=straight_down(feeder, pe_eh), entry=(0.5, 0))
     d.edge(spe, p["data"], "private link", color=GREEN, dashed=True, exit=(1, 0.5), entry=(0, 0.6))
     d.edge(mdp, spe, "docker push · kubectl (private)", color=DEVOPS, dashed=True, exit=(0.5, 0), entry=(0.75, 1))
     d.edge(prov, az, "ARM (Bicep)", color=DEVOPS, dashed=True, exit=(1, 0.5), entry=(0, 0.4))
-    d.write(OUT / "architecture-aks-enterprise.drawio", 2080, 1235)
+    d.write(OUT / "architecture-aks-enterprise.drawio", 2080, 1295)
 
 
 container_apps()

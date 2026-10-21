@@ -46,8 +46,12 @@ spec:
             - { name: EVENTHUB_NAME, value: "{{.Env.EVENTHUB_NAME}}" }
             - { name: EVENTHUB_CONSUMER_GROUP, value: api }
             - { name: LIVE_SOURCE, value: replay }
+            - { name: ONELAKE_WORKSPACE, value: "{{.Env.ONELAKE_WORKSPACE}}" }   # empty unless the Fabric setup ran
+            - { name: ONELAKE_LAKEHOUSE, value: "{{.Env.ONELAKE_LAKEHOUSE}}" }
             - { name: APPLICATIONINSIGHTS_CONNECTION_STRING, value: "{{.Env.APPLICATIONINSIGHTS_CONNECTION_STRING}}" }
             - { name: OTEL_SERVICE_NAME, value: regista-api }
+            - { name: WEBPUBSUB_ENDPOINT, value: "{{.Env.WEBPUBSUB_ENDPOINT}}" }   # shared live broadcast fan-out
+            - { name: WEBPUBSUB_HUB, value: "{{.Env.WEBPUBSUB_HUB}}" }
             - { name: PUBLIC_BASE_URL, value: "{{.Env.API_URL}}" }      # the API's own public URL (MCP)
             - { name: CORS_ORIGINS, value: "{{.Env.WEB_URL}}" }         # only the Static Web App may call it from a browser
           resources:

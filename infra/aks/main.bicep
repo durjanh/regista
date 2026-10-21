@@ -44,9 +44,12 @@ param reasoningCapacity int = 50
   'Standard'
 ])
 param aksTier string = 'Free'
-param aksNodeVmSize string = 'Standard_D4ds_v5'
-param aksNodeMinCount int = 1
-param aksNodeMaxCount int = 3
+@description('VM size for the nodes. v6 by default: new subscriptions often have 0 quota for the v5 families (check: az vm list-usage -l uksouth).')
+param aksNodeVmSize string = 'Standard_D4ds_v6'
+
+@description('Node counts as strings (azd substitutes parameters as text). 1-2 x 4 vCPU fits a new subscription\'s 10 vCPU limit.')
+param aksNodeMinCount string = '1'
+param aksNodeMaxCount string = '2'
 
 @description('Comma-separated CIDRs allowed to reach the AKS API server (your IP, the pipeline\'s egress). Empty = any, still Entra-only.')
 param aksAuthorizedIpRanges string = ''
@@ -54,13 +57,28 @@ param aksAuthorizedIpRanges string = ''
 param deployFunctions bool = true
 
 @allowed([
+  'Free_F1'
+  'Standard_S1'
+  'Premium_P1'
+])
+@description('Web PubSub tier for the shared live broadcast (1,000 concurrent viewers per Standard unit).')
+param webPubSubSku string = 'Standard_S1'
+
+@description('Web PubSub units as a string (azd substitutes text): 1 = 1,000 viewers, 100 = 100,000.')
+param webPubSubUnits string = '1'
+
+@description('Fabric OneLake workspace and lakehouse for Data Forge exports (set by deploy/hooks/fabric.sh). Empty = none.')
+param oneLakeWorkspace string = ''
+param oneLakeLakehouse string = ''
+
+@allowed([
   'Free'
   'Standard'
 ])
 param staticWebAppSku string = 'Free'
 
-@description('Static Web Apps region (metadata only; files are served from the global edge). Not offered in UK South.')
-param staticWebAppLocation string = 'westeurope'
+@description('Static Web Apps region (metadata only; files are served from the global edge). Not offered in UK South; West Europe refuses some new subscriptions.')
+param staticWebAppLocation string = 'eastus2'
 param budgetContactEmail string = ''
 @description('Monthly budget (string because azd substitutes parameters as text).')
 param budgetAmount string = '300'
@@ -97,6 +115,8 @@ module platform '../modules/platform.bicep' = {
     budgetStartDate: budgetStartDate
     deployFabricCapacity: deployFabricCapacity
     fabricAdminEmail: fabricAdminEmail
+    webPubSubSku: webPubSubSku
+    webPubSubUnits: int(webPubSubUnits)
   }
 }
 
@@ -112,8 +132,8 @@ module aks '../modules/aks.bicep' = {
     logAnalyticsId: platform.outputs.logAnalyticsId
     tier: aksTier
     nodeVmSize: aksNodeVmSize
-    nodeMinCount: aksNodeMinCount
-    nodeMaxCount: aksNodeMaxCount
+    nodeMinCount: int(aksNodeMinCount)
+    nodeMaxCount: int(aksNodeMaxCount)
     authorizedIpRanges: empty(aksAuthorizedIpRanges) ? [] : map(split(aksAuthorizedIpRanges, ','), r => trim(r))
   }
 }
@@ -200,6 +220,11 @@ output API_URL string = apiUrl
 output WEB_URL string = staticWebApp.outputs.url
 output STATIC_WEB_APP_NAME string = staticWebApp.outputs.name
 output AZURE_CLIENT_ID string = platform.outputs.identityClientId
+output IDENTITY_NAME string = platform.outputs.identityName
+output WEBPUBSUB_ENDPOINT string = platform.outputs.webPubSubEndpoint
+output WEBPUBSUB_HUB string = platform.outputs.webPubSubHub
+output ONELAKE_WORKSPACE string = oneLakeWorkspace
+output ONELAKE_LAKEHOUSE string = oneLakeLakehouse
 output AZURE_OPENAI_ENDPOINT string = platform.outputs.openAiEndpoint
 output AZURE_OPENAI_CHAT_DEPLOYMENT string = platform.outputs.chatDeploymentName
 output AZURE_OPENAI_REASONING_DEPLOYMENT string = platform.outputs.reasoningDeploymentName

@@ -473,3 +473,48 @@ Overlay SSE also emits `event: kill` `data: {id}`. If the AI is slow or down, it
 | Method & path | Response |
 |---|---|
 | `GET /api/ops` | `{ mode, uptime_s, slo: { target_p95_ms: number; p50_ms: number \| null; p95_ms: number \| null; samples: number; compliant: boolean \| null }, cost: { model_calls: number; input_tokens: number; output_tokens: number; est_cost_usd: number; per_match: { match_id: string; model_calls: number; est_cost_usd: number }[]; price_note: string } }` |
+
+## Realtime broadcast (Azure Web PubSub)
+
+The per-viewer SSE stream (`/api/matches/{id}/live`) is a **personal replay**: each viewer picks speed, start and persona, and each connection is served by the API. A **broadcast** is one shared live timeline for everyone: the API publishes **once** per tick to Azure Web PubSub groups and Web PubSub fans it out (1,000 concurrent connections per unit, up to 100 units = 100,000 viewers per resource; Premium P2 to 1,000,000). Narratives are generated once per language, never per viewer.
+
+Source of a broadcast: `LIVE_SOURCE=eventhub` (feeder → Event Hubs → API), or a server-side shared replay started from the Studio (`POST /api/broadcast/{match_id}/start`). Without `WEBPUBSUB_ENDPOINT` the API reports `enabled: false` and clients use SSE.
+
+Groups (all JSON, Web PubSub subprotocol `json.webpubsub.azure.v1`):
+
+| Group | Messages |
+|---|---|
+| `match.{match_id}` | `tick` (once per second while live), `end` |
+| `match.{match_id}.{language}` | `narrative` (moment and insight lines in that language) |
+| `overlay.{match_id}` | `cue` (`on_air`, `kill`) for broadcast overlays |
+
+```ts
+type BroadcastTick = {
+  type: "tick"; match_id: string; seq: number; sent_at: number;   // epoch ms, for delivery-latency measurement
+  t: number; minute: number; score: { home: number; away: number };
+  events: MatchEvent[];               // events since the previous tick, without freeze frames (kept small: billing counts 2 KB chunks)
+  snapshot: { momentum: number; win_prob: { home: number; draw: number; away: number }; control_chaos: number };
+  moments: LiveMoment[];              // detected since the previous tick (no narrative; see the language group)
+  insights: Insight[];                // detected changes since the previous tick
+};
+type BroadcastNarrative = { type: "narrative"; match_id: string; ref_type: "moment" | "insight"; ref_id: string; language: string;
+  scope: "moment" | "insight"; persona: string; engine: "azure" | "offline";
+  text: string; citations: Citation[]; fact_check: FactCheck; verification?: Verification | null };
+// Late joiners load history once with GET /api/matches/{id}/events?to_t=<tick.t> (inclusive), then apply ticks.
+type BroadcastCue = { type: "cue"; match_id: string; action: "on_air" | "kill"; item: StudioItem | { id: string } };
+type BroadcastEnd = { type: "end"; match_id: string; t: number };
+
+type BroadcastStatus = { match_id: string; live: boolean; source: "replay" | "eventhub"; speed: number; t: number; minute: number;
+  started_at: string | null; ticks_published: number; bytes_published: number; languages: string[] };
+```
+
+| Method & path | Request | Response |
+|---|---|---|
+| `GET /api/realtime/negotiate` | query `match_id`, `language` (default `en`) | `{ enabled: false }` or `{ enabled: true, url: string /* wss://…?access_token=… (Entra-issued, ~60 min) */, groups: string[], hub: string }` |
+| `POST /api/broadcast/{match_id}/start` | `{ speed?: number = 1, start_t?: number = 0, languages?: string[] = ["en"] }` | `BroadcastStatus` (idempotent: an already-live match returns its status) |
+| `POST /api/broadcast/{match_id}/stop` | | `BroadcastStatus` |
+| `GET /api/broadcast/status` | | `BroadcastStatus[]` |
+
+Client flow: negotiate → `new WebSocket(url, "json.webpubsub.azure.v1")` → send `{type:"joinGroup", group, ackId}` for each group → handle `{type:"message", from:"group", group, data}`. Re-negotiate on close (tokens are short-lived). Studio `on_air`/`kill` actions are published to `overlay.{match_id}` as well as the SSE overlay stream.
+
+Billing note: Web PubSub counts every outbound delivery in 2 KB chunks, so the tick is batched once per second and trimmed (no freeze frames). Keyless: the API generates client tokens with Microsoft Entra ID (`Web PubSub Service Owner` on the resource); local auth is disabled.

@@ -60,3 +60,61 @@ export class FakeEventSource {
     return FakeEventSource.instances[FakeEventSource.instances.length - 1];
   }
 }
+
+/**
+ * Minimal WebSocket stand-in for the Azure Web PubSub client (subprotocol json.webpubsub.azure.v1): records sent
+ * frames, lets tests open the socket, acknowledge joins and push group messages.
+ */
+export class FakeWebSocket {
+  static CONNECTING = 0;
+  static OPEN = 1;
+  static CLOSING = 2;
+  static CLOSED = 3;
+  static instances: FakeWebSocket[] = [];
+  url: string;
+  protocol: string | string[] | undefined;
+  readyState = FakeWebSocket.CONNECTING;
+  sent: Record<string, unknown>[] = [];
+  onopen: (() => void) | null = null;
+  onmessage: ((e: MessageEvent) => void) | null = null;
+  onclose: (() => void) | null = null;
+  onerror: (() => void) | null = null;
+  constructor(url: string, protocol?: string | string[]) {
+    this.url = url;
+    this.protocol = protocol;
+    FakeWebSocket.instances.push(this);
+  }
+  send(data: string) {
+    this.sent.push(JSON.parse(data) as Record<string, unknown>);
+  }
+  /** The service accepts the connection. */
+  open() {
+    this.readyState = FakeWebSocket.OPEN;
+    this.onopen?.();
+  }
+  receive(frame: unknown) {
+    this.onmessage?.(new MessageEvent("message", { data: typeof frame === "string" ? frame : JSON.stringify(frame) }));
+  }
+  /** Acknowledge every joinGroup sent so far. */
+  ackJoins(success = true, errorName?: string) {
+    for (const f of this.sent.filter((x) => x.type === "joinGroup")) {
+      this.receive({ type: "ack", ackId: f.ackId, success, ...(success ? {} : { error: { name: errorName ?? "Forbidden", message: "no" } }) });
+    }
+  }
+  group(group: string, data: unknown) {
+    this.receive({ type: "message", from: "group", group, dataType: "json", data });
+  }
+  /** Closed by the client. */
+  close() {
+    this.readyState = FakeWebSocket.CLOSED;
+    this.onclose?.();
+  }
+  /** Dropped by the network or the service. */
+  drop() {
+    this.readyState = FakeWebSocket.CLOSED;
+    this.onclose?.();
+  }
+  static get last() {
+    return FakeWebSocket.instances[FakeWebSocket.instances.length - 1];
+  }
+}

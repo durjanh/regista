@@ -43,10 +43,17 @@ param reasoningCapacity int = 50
   'Free'
   'Standard'
 ])
-param aksTier string = 'Standard'
-param aksNodeVmSize string = 'Standard_D4ds_v5'
-param aksNodeMinCount int = 2
-param aksNodeMaxCount int = 4
+@description('Free tier by default (no control-plane charge). Standard adds the uptime SLA: azd env set AKS_TIER Standard.')
+param aksTier string = 'Free'
+@description('VM size for the nodes. v6 by default: new subscriptions often have 0 quota for the v5 families (check: az vm list-usage -l uksouth).')
+param aksNodeVmSize string = 'Standard_D4ds_v6'
+
+@description('Node counts as strings (azd substitutes parameters as text). 2 x 4 vCPU + the 2 vCPU agent = a new subscription\'s 10 vCPU limit; raise both after a quota increase.')
+param aksNodeMinCount string = '2'
+param aksNodeMaxCount string = '2'
+
+@description('Managed DevOps Pool agent size (v6: see aksNodeVmSize).')
+param agentVmSize string = 'Standard_D2ds_v6'
 
 @allowed([
   'true'
@@ -72,8 +79,15 @@ param apimSku string = 'StandardV2'
 @description('Calls per minute per client IP at the gateway.')
 param apimCallsPerMinute int = 600
 
-@description('Static Web Apps region (metadata only; files are served from the global edge). Not offered in UK South.')
-param staticWebAppLocation string = 'westeurope'
+@description('Static Web Apps region (metadata only; files are served from the global edge). Not offered in UK South; West Europe refuses some new subscriptions.')
+param staticWebAppLocation string = 'eastus2'
+
+@allowed([
+  'Free'
+  'Standard'
+])
+@description('Static Web Apps plan. Free by default; Standard adds the SLA and custom domains with private endpoints.')
+param staticWebAppSku string = 'Free'
 
 @description('Azure DevOps organization URL for the Managed DevOps Pool. Empty = no pool (deploy with az aks command invoke).')
 param azureDevOpsOrganizationUrl string = ''
@@ -82,6 +96,21 @@ param azureDevOpsOrganizationUrl string = ''
 param devOpsInfrastructurePrincipalId string = ''
 
 param deployFunctions bool = true
+
+@allowed([
+  'Free_F1'
+  'Standard_S1'
+  'Premium_P1'
+])
+@description('Web PubSub tier for the shared live broadcast (1,000 concurrent viewers per Standard unit).')
+param webPubSubSku string = 'Standard_S1'
+
+@description('Web PubSub units as a string (azd substitutes text): 1 = 1,000 viewers, 100 = 100,000.')
+param webPubSubUnits string = '1'
+
+@description('Fabric OneLake workspace and lakehouse for Data Forge exports (set by deploy/hooks/fabric.sh). Empty = none.')
+param oneLakeWorkspace string = ''
+param oneLakeLakehouse string = ''
 param budgetContactEmail string = ''
 param budgetAmount string = '1400'
 param budgetStartDate string = utcNow('yyyy-MM-01')
@@ -108,6 +137,7 @@ var zones = {
   cognitive: 'privatelink.cognitiveservices.azure.com'
   openai: 'privatelink.openai.azure.com'
   foundry: 'privatelink.services.ai.azure.com'
+  webPubSub: 'privatelink.webpubsub.azure.com'
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -135,6 +165,9 @@ module platform '../modules/platform.bicep' = {
     budgetStartDate: budgetStartDate
     deployFabricCapacity: deployFabricCapacity
     fabricAdminEmail: fabricAdminEmail
+    webPubSubSku: webPubSubSku
+    webPubSubUnits: int(webPubSubUnits)
+    webPubSubPrivateServerTraffic: true
   }
 }
 
@@ -169,6 +202,7 @@ var endpoints = [
   { key: 'cosmos', target: 'cosmos', group: 'Sql', zoneKeys: ['cosmos'] }
   { key: 'eventhubs', target: 'eventHubs', group: 'namespace', zoneKeys: ['eventHubs'] }
   { key: 'foundry', target: 'foundry', group: 'account', zoneKeys: ['cognitive', 'openai', 'foundry'] }
+  { key: 'webpubsub', target: 'webPubSub', group: 'webpubsub', zoneKeys: ['webPubSub'] }
 ]
 
 var targets = {
@@ -177,6 +211,7 @@ var targets = {
   cosmos: platform.outputs.cosmosId
   eventHubs: platform.outputs.eventHubsId
   foundry: platform.outputs.aiAccountId
+  webPubSub: platform.outputs.webPubSubId
 }
 
 module privateEndpoints '../modules/private-endpoint.bicep' = [
@@ -210,8 +245,8 @@ module aks '../modules/aks.bicep' = {
     logAnalyticsId: platform.outputs.logAnalyticsId
     tier: aksTier
     nodeVmSize: aksNodeVmSize
-    nodeMinCount: aksNodeMinCount
-    nodeMaxCount: aksNodeMaxCount
+    nodeMinCount: int(aksNodeMinCount)
+    nodeMaxCount: int(aksNodeMaxCount)
     nodeSubnetId: network.outputs.aksSubnetId
     vnetName: network.outputs.name
     privateCluster: aksPrivateCluster == 'true'
@@ -237,14 +272,15 @@ module apim '../modules/apim.bicep' = {
   }
 }
 
-// The React SPA: Standard plan for the SLA. Static files are public by nature; it calls the API Management gateway.
+// The React SPA on the Free plan (STATIC_WEB_APP_SKU=Standard adds the SLA). Static files are public by nature; it calls
+// the API Management gateway.
 module staticWebApp '../modules/staticwebapp.bicep' = {
   name: 'staticwebapp'
   params: {
     tags: allTags
     name: dashed('swa', environmentName, tok)
     location: staticWebAppLocation
-    sku: 'Standard'
+    sku: staticWebAppSku
   }
 }
 
@@ -298,6 +334,7 @@ module devOpsPool '../modules/devops-pool.bicep' = if (!empty(azureDevOpsOrganiz
     devOpsInfrastructurePrincipalId: devOpsInfrastructurePrincipalId
     vnetName: network.outputs.name
     subnetId: network.outputs.agentsSubnetId
+    vmSize: agentVmSize
   }
 }
 
@@ -321,6 +358,11 @@ output WEB_URL string = staticWebApp.outputs.url
 output STATIC_WEB_APP_NAME string = staticWebApp.outputs.name
 output AZURE_DEVOPS_POOL_NAME string = (!empty(azureDevOpsOrganizationUrl) && !empty(devOpsInfrastructurePrincipalId)) ? dashed('mdp', environmentName, tok) : ''
 output AZURE_CLIENT_ID string = platform.outputs.identityClientId
+output IDENTITY_NAME string = platform.outputs.identityName
+output WEBPUBSUB_ENDPOINT string = platform.outputs.webPubSubEndpoint
+output WEBPUBSUB_HUB string = platform.outputs.webPubSubHub
+output ONELAKE_WORKSPACE string = oneLakeWorkspace
+output ONELAKE_LAKEHOUSE string = oneLakeLakehouse
 output AZURE_OPENAI_ENDPOINT string = platform.outputs.openAiEndpoint
 output AZURE_OPENAI_CHAT_DEPLOYMENT string = platform.outputs.chatDeploymentName
 output AZURE_OPENAI_REASONING_DEPLOYMENT string = platform.outputs.reasoningDeploymentName

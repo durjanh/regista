@@ -26,7 +26,7 @@ param logAnalyticsId string
 @description('Free has no uptime SLA; Standard adds the financially backed SLA.')
 param tier string = 'Free'
 
-param nodeVmSize string = 'Standard_D4ds_v5'
+param nodeVmSize string = 'Standard_D4ds_v6'
 
 @minValue(1)
 param nodeMinCount int = 1

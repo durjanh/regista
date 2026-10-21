@@ -28,6 +28,7 @@ jobs:
           pip install -r requirements-dev.txt
           ruff check .
           pytest --cov=app --cov-report=term --cov-report=xml:coverage.xml --junitxml=test-results.xml
+          pytest -m integration --no-cov --junitxml=integration-results.xml
           python -m app.evals.run --mode offline --threshold 0.95 --output eval-results/results.json
         displayName: Ruff, pytest with coverage, evaluation gate
       - task: PublishTestResults@2
@@ -59,6 +60,30 @@ jobs:
           npm run build
         displayName: npm ci, typecheck, Vitest with coverage, build
 
+  - job: e2e
+    displayName: Web — Playwright end-to-end (real browser, real API)
+    steps:
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: "3.12"
+      - task: UseNode@1
+        inputs:
+          version: "24.x"
+      - bash: |
+          set -euo pipefail
+          python -m venv services/api/.venv
+          services/api/.venv/bin/pip install -r services/api/requirements.txt
+          cd apps/web
+          npm ci
+          npx playwright install --with-deps chromium
+          CI=true npm run e2e
+        displayName: API venv, Chromium, Playwright
+      - task: PublishPipelineArtifact@1
+        condition: always()
+        inputs:
+          targetPath: apps/web/playwright-report
+          artifact: playwright-report
+
   - job: infra
     displayName: Bicep build and lint (Container Apps, AKS, AKS enterprise)
     steps:
@@ -80,6 +105,7 @@ jobs:
     steps:
       - bash: |
           set -euo pipefail
+          ruby scripts/check-yaml.rb azure.yaml deploy/aks/azure.yaml deploy/aks-enterprise/azure.yaml .github/workflows/*.yml .azuredevops/pipelines/*.yml .azuredevops/pipelines/templates/*.yml deploy/k8s/*/*.yaml
           ruby -ryaml -e '
             %w[azure.yaml deploy/aks/azure.yaml deploy/aks-enterprise/azure.yaml].each { |f| YAML.load_file(f) }
             Dir["deploy/k8s/**/*.yaml"].each { |f| YAML.load_stream(File.read(f)).each { |d| abort("#{f}: missing kind") unless d["kind"] } }'

@@ -9,9 +9,15 @@ Creates (or reuses):
   * a Contributor workspace role for the API's managed identity so it can write to OneLake
   * the real CC0 reference dataset (``data/reference/international-results/*.csv``) uploaded to the
     Lakehouse ``Files/reference/`` folder, so real results sit next to the synthetic events in Fabric
+  * the workspace identity, granted *Azure Event Hubs Data Receiver* on the namespace (keyless: Event Hubs has
+    local auth disabled, and workspace identity is the keyless option Fabric documents for this source)
+  * the Eventstream ``regista_live`` (Event Hubs ``match-events`` / consumer group ``fabric`` -> ``match_events``),
+    once a Fabric connection to the namespace exists (--eventhub-connection-id). The Connections API doesn't
+    document Event Hubs + workspace identity, so that connection is the one portal step (docs/DEPLOYMENT.md).
 
-The Eventstream (Event Hubs ``match-events`` / consumer group ``fabric`` -> ``match_events``) is wired in
-the Fabric portal, because its Event Hubs source needs a Fabric cloud connection. See docs/DEPLOYMENT.md.
+Without --capacity-name/--capacity-id it uses your active Fabric **trial** capacity (start it once at
+https://app.fabric.microsoft.com). Every step is find-or-create, so re-running changes nothing.
+Run by azd (deploy/hooks/fabric.sh) when FABRIC_WORKSPACE_NAME is set, or by hand.
 
 Auth: DefaultAzureCredential (``az login`` locally, OIDC in CI). The caller must be allowed to create
 workspaces in the Fabric tenant and be an admin of the capacity.
@@ -45,6 +51,8 @@ REFERENCE_DIR = pathlib.Path(__file__).resolve().parent.parent / "data" / "refer
 LAKEHOUSE_NAME = "regista_lakehouse"
 EVENTHOUSE_NAME = "regista_eventhouse"
 KQL_DATABASE_NAME = "regista_live"
+EVENTSTREAM_NAME = "regista_live_stream"
+EVENT_HUBS_RECEIVER_ROLE = "Azure Event Hubs Data Receiver"
 
 # Table + mapping for the contract `Event` JSON (plus match_id and the feeder's emitted_at timestamp).
 MATCH_EVENTS_SCHEMA = r"""
@@ -104,6 +112,14 @@ class Fabric:
             if state in ("Failed", "Cancelled"):
                 raise SystemExit(f"Operation on {path} {state}: {json.dumps(op.get('error'), indent=2)}")
 
+    def try_request(self, method: str, path: str, body: dict | None = None) -> tuple[int, dict, dict] | None:
+        """Like request(), but report a failure instead of stopping: optional steps must not break a provision."""
+        try:
+            return self.request(method, path, body)
+        except SystemExit as err:
+            print(f"⚠ {err}")
+            return None
+
     def find(self, path: str, display_name: str) -> dict | None:
         _, _, payload = self.request("GET", path)
         return next((i for i in payload.get("value", []) if i.get("displayName") == display_name), None)
@@ -145,6 +161,30 @@ def az_tsv(*args: str) -> str:
     return subprocess.run(["az", *args, "-o", "tsv"], check=True, capture_output=True, text=True).stdout.strip()
 
 
+def eventstream_definition(connection_id: str, workspace_id: str, database: dict) -> dict:
+    """Event Hubs (consumer group fabric) -> default stream -> Eventhouse table match_events (processed ingestion:
+    JSON fields map to columns by name). Shapes from Microsoft Learn: Eventstream item definition + REST API."""
+    spec = {
+        "sources": [{
+            "name": "match-events", "type": "AzureEventHub",
+            "properties": {"dataConnectionId": connection_id, "consumerGroupName": "fabric",
+                           "inputSerialization": {"type": "Json", "properties": {"encoding": "UTF8"}}},
+        }],
+        "streams": [{"name": f"{EVENTSTREAM_NAME}-stream", "type": "DefaultStream", "properties": {},
+                     "inputNodes": [{"name": "match-events"}]}],
+        "destinations": [{
+            "name": "regista-eventhouse", "type": "Eventhouse",
+            "properties": {"dataIngestionMode": "ProcessedIngestion", "workspaceId": workspace_id, "itemId": database["id"],
+                           "databaseName": KQL_DATABASE_NAME, "tableName": "match_events",
+                           "inputSerialization": {"type": "Json", "properties": {"encoding": "UTF8"}}},
+            "inputNodes": [{"name": f"{EVENTSTREAM_NAME}-stream"}],
+        }],
+        "operators": [],
+        "compatibilityLevel": "1.0",
+    }
+    return {"parts": [{"path": "eventstream.json", "payload": b64(json.dumps(spec)), "payloadType": "InlineBase64"}]}
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--workspace", default="Regista", help="Fabric workspace display name")
@@ -154,6 +194,9 @@ def main() -> int:
     parser.add_argument("--identity-name", help="User-assigned managed identity name (output IDENTITY_NAME)")
     parser.add_argument("--identity-principal-id", help="Principal (object) id of the workload identity")
     parser.add_argument("--skip-reference-upload", action="store_true", help="Don't upload the CC0 reference CSVs to the Lakehouse")
+    parser.add_argument("--eventhub-namespace", help="Event Hubs namespace name (grants the workspace identity Data Receiver)")
+    parser.add_argument("--eventhub-connection-id", help="Fabric connection id for the Event Hubs namespace (creates the Eventstream)")
+    parser.add_argument("--skip-eventstream", action="store_true", help="No workspace identity or Eventstream (e.g. private Event Hubs)")
     args = parser.parse_args()
 
     fabric = Fabric()
@@ -167,6 +210,14 @@ def main() -> int:
         if cap.get("state") != "Active":
             raise SystemExit(f"Capacity '{args.capacity_name}' is {cap.get('state')}. Resume it first.")
         capacity_id = cap["id"]
+    if not capacity_id:
+        _, _, caps = fabric.request("GET", "/capacities")
+        trial = next((c for c in caps.get("value", []) if str(c.get("sku", "")).upper().startswith("FT") and c.get("state") == "Active"), None)
+        if not trial:
+            raise SystemExit("No capacity given and no active Fabric trial found. Start the free trial at https://app.fabric.microsoft.com "
+                             "(signed in as the deploying account) or pass --capacity-name.")
+        capacity_id = trial["id"]
+        print(f"Using the Fabric trial capacity '{trial.get('displayName')}' ({trial.get('region')})")
 
     # Workspace -----------------------------------------------------------------------------------
     workspace = fabric.find("/workspaces", args.workspace)
@@ -234,12 +285,49 @@ def main() -> int:
     else:
         print("Skipped workspace access for the API identity (pass --resource-group and --identity-name).")
 
-    print(
-        "\nSet these on the API (main.bicepparam: oneLakeWorkspace / oneLakeLakehouse, or the container env):\n"
-        f"  ONELAKE_WORKSPACE={args.workspace}\n"
-        f"  ONELAKE_LAKEHOUSE={LAKEHOUSE_NAME}\n"
-        "\nNext: create the Eventstream in the Fabric portal (docs/DEPLOYMENT.md, step 5)."
-    )
+    # Workspace identity -> Event Hubs Data Receiver (keyless source for the Eventstream) ------------
+    if not args.skip_eventstream and args.eventhub_namespace:
+        _, _, details = fabric.request("GET", f"/workspaces/{ws}")
+        identity = details.get("workspaceIdentity")
+        if not identity:
+            try:
+                identity = fabric.create_item(f"/workspaces/{ws}/provisionIdentity", {})
+            except SystemExit as err:
+                print(f"⚠ Could not provision the workspace identity: {err}")
+        sp_id = (identity or {}).get("servicePrincipalId")
+        if sp_id:
+            try:
+                namespace_id = az_tsv("eventhubs", "namespace", "list", "--query", f"[?name=='{args.eventhub_namespace}'].id | [0]")
+                held = az_tsv("role", "assignment", "list", "--assignee", sp_id, "--role", EVENT_HUBS_RECEIVER_ROLE,
+                              "--scope", namespace_id, "--query", "length(@)")
+                if held in ("", "0"):   # create only if missing: re-runs never fail
+                    subprocess.run(["az", "role", "assignment", "create", "--assignee-object-id", sp_id, "--assignee-principal-type",
+                                    "ServicePrincipal", "--role", EVENT_HUBS_RECEIVER_ROLE, "--scope", namespace_id, "-o", "none"],
+                                   check=True, capture_output=True, text=True)
+                print(f"Workspace identity {sp_id} has '{EVENT_HUBS_RECEIVER_ROLE}' on {args.eventhub_namespace}")
+            except subprocess.CalledProcessError as err:
+                print(f"⚠ Could not grant '{EVENT_HUBS_RECEIVER_ROLE}' to the workspace identity: {err.stderr or err}")
+
+    # Eventstream ----------------------------------------------------------------------------------
+    if args.skip_eventstream:
+        print("Skipped the Eventstream (--skip-eventstream).")
+    elif fabric.find(f"/workspaces/{ws}/eventstreams", EVENTSTREAM_NAME):
+        print(f"Eventstream {EVENTSTREAM_NAME} exists")
+    elif args.eventhub_connection_id:
+        try:
+            stream = fabric.create_item(f"/workspaces/{ws}/eventstreams", {
+                "displayName": EVENTSTREAM_NAME, "description": "match-events (Event Hubs, consumer group fabric) -> match_events",
+                "definition": eventstream_definition(args.eventhub_connection_id, ws, database)})
+            print(f"Created Eventstream {EVENTSTREAM_NAME}: {stream.get('id')}")
+        except SystemExit as err:
+            print(f"⚠ Eventstream not created ({err}).\n  Create it in the portal instead: docs/DEPLOYMENT.md, step 5.")
+    else:
+        print("\nEventstream: one portal step, then re-run.\n"
+              f"  1. Fabric portal > workspace '{args.workspace}' > Settings > Manage connections > New: Azure Event Hubs,\n"
+              f"     namespace {args.eventhub_namespace or '<namespace>'}, hub match-events, authentication: Workspace identity.\n"
+              "  2. Copy the connection id, then: azd env set FABRIC_EVENTHUB_CONNECTION_ID <id> && azd provision")
+
+    print(f"\nOneLake for the API: ONELAKE_WORKSPACE={args.workspace}  ONELAKE_LAKEHOUSE={LAKEHOUSE_NAME}")
     return 0
 
 

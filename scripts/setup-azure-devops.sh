@@ -60,8 +60,7 @@ SP_ID=$(az ad sp show --id "$APP_ID" --query id -o tsv 2>/dev/null || az ad sp c
 RG_ID=$(az group show -n "$RG" --query id -o tsv)
 # Contributor to create resources; RBAC Administrator because the templates assign roles (Contributor alone can't).
 for role in "Contributor" "Role Based Access Control Administrator"; do
-  az role assignment create --assignee-object-id "$SP_ID" --assignee-principal-type ServicePrincipal \
-    --role "$role" --scope "$RG_ID" -o none
+  sh "$(dirname "$0")/../deploy/hooks/role-assign.sh" "$SP_ID" ServicePrincipal "$role" "$RG_ID"
 done
 
 echo "▶ Service connection $CONNECTION (workload identity federation, no secret)"
@@ -116,7 +115,7 @@ if [[ -n "$REPO" ]]; then
   for p in ci azure-dev; do
     az pipelines show --name "regista-$p" -o none 2>/dev/null || \
       az pipelines create --name "regista-$p" --yml-path ".azuredevops/pipelines/$p.yml" --repository "$REPO" \
-        --repository-type "$REPO_TYPE" --branch main --skip-first-run true "${extra[@]}" -o none
+        --repository-type "$REPO_TYPE" --branch main --skip-first-run true ${extra[@]+"${extra[@]}"} -o none
   done
 else
   echo "  --repo not given: create pipelines from .azuredevops/pipelines/ci.yml and azure-dev.yml in the portal."
