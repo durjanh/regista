@@ -1,0 +1,90 @@
+# Regista CI on Azure DevOps (mirror of .github/workflows/ci.yml): lint, tests with coverage floors, the offline
+# evaluation gate (truth score, Verifier drill, grounding, fidelity, calibration, scouting), web tests and build,
+# Bicep build + lint for all three profiles, azd/Kubernetes config checks.
+
+trigger:
+  branches:
+    include:
+      - main
+pr:
+  branches:
+    include:
+      - main
+
+pool:
+  vmImage: ubuntu-latest
+
+jobs:
+  - job: api
+    displayName: API — lint, tests (coverage ≥ 90%), evaluation gate
+    steps:
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: "3.12"
+      - bash: |
+          set -euo pipefail
+          cd services/api
+          python -m pip install --upgrade pip
+          pip install -r requirements-dev.txt
+          ruff check .
+          pytest --cov=app --cov-report=term --cov-report=xml:coverage.xml --junitxml=test-results.xml
+          python -m app.evals.run --mode offline --threshold 0.95 --output eval-results/results.json
+        displayName: Ruff, pytest with coverage, evaluation gate
+      - task: PublishTestResults@2
+        condition: always()
+        inputs:
+          testResultsFiles: services/api/test-results.xml
+      - task: PublishCodeCoverageResults@2
+        condition: always()
+        inputs:
+          summaryFileLocation: services/api/coverage.xml
+      - task: PublishPipelineArtifact@1
+        condition: always()
+        inputs:
+          targetPath: services/api/eval-results
+          artifact: eval-results
+
+  - job: web
+    displayName: Web — typecheck, tests (coverage floor), build
+    steps:
+      - task: UseNode@1
+        inputs:
+          version: "24.x"
+      - bash: |
+          set -euo pipefail
+          cd apps/web
+          npm ci
+          npm run typecheck
+          npm run test:coverage
+          npm run build
+        displayName: npm ci, typecheck, Vitest with coverage, build
+
+  - job: infra
+    displayName: Bicep build and lint (Container Apps, AKS, AKS enterprise)
+    steps:
+      - bash: |
+          set -euo pipefail
+          az bicep install
+          for f in infra/main.bicep infra/aks/main.bicep infra/aks-enterprise/main.bicep; do az bicep build --file "$f" --stdout > /dev/null; done
+          az bicep build-params --file infra/main.bicepparam --stdout > /dev/null
+          out=""
+          for f in infra/main.bicep infra/aks/main.bicep infra/aks-enterprise/main.bicep infra/modules/*.bicep; do
+            out="$out$(az bicep lint --file "$f" 2>&1 || true)"
+          done
+          echo "$out"
+          if echo "$out" | grep -Eq "(Warning|Error) "; then echo "##vso[task.logissue type=error]Bicep lint diagnostics"; exit 1; fi
+        displayName: Build and lint
+
+  - job: deployConfig
+    displayName: azd projects, Kubernetes manifests, hooks
+    steps:
+      - bash: |
+          set -euo pipefail
+          ruby -ryaml -e '
+            %w[azure.yaml deploy/aks/azure.yaml deploy/aks-enterprise/azure.yaml].each { |f| YAML.load_file(f) }
+            Dir["deploy/k8s/**/*.yaml"].each { |f| YAML.load_stream(File.read(f)).each { |d| abort("#{f}: missing kind") unless d["kind"] } }'
+          diff deploy/k8s/web/10-deployment.yaml deploy/k8s/web-enterprise/10-deployment.yaml
+          diff deploy/k8s/web/11-service.yaml deploy/k8s/web-enterprise/11-service.yaml
+          for f in deploy/hooks/*.sh; do sh -n "$f"; done; for f in scripts/*.sh; do bash -n "$f"; done
+          shellcheck -S warning deploy/hooks/*.sh
+        displayName: Parse, compare shared manifests, check scripts

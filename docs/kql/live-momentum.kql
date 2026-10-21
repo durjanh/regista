@@ -1,0 +1,10 @@
+// Live momentum per minute: expected threat (xT) added by each team, plus the running total.
+// Run in the regista_live KQL database. Replace the match id or keep the latest-match lookup.
+let match = toscalar(match_events | top 1 by ingestion_time() desc | project match_id);
+match_events
+| where match_id == match and isnotnull(xt_added)
+| summarize xt = sum(xt_added) by minute, team_id
+| order by team_id asc, minute asc
+| extend cumulative_xt = row_cumsum(xt, team_id != prev(team_id))
+| project minute, team_id, xt, cumulative_xt
+| render timechart with (xcolumn = minute, ycolumns = xt, series = team_id)

@@ -1,0 +1,129 @@
+#!/usr/bin/env bash
+# One-time Azure DevOps setup for .azuredevops/pipelines: a keyless service connection (workload identity
+# federation), the variable group for a profile, the "regista-<profile>" environment, and the two pipelines.
+# Run it signed in to the Azure subscription you will deploy to (a personal one for the hackathon).
+#
+#   export AZURE_DEVOPS_EXT_PAT=<PAT with Service Connections, Variable Groups, Environment, Build (read+manage)>
+#   scripts/setup-azure-devops.sh --org https://dev.azure.com/<org> --project <project> \
+#       --profile aks-enterprise --rg rg-regista-ent --location uksouth --env regent \
+#       --apim-email you@example.com --repo-type github --repo <owner>/<repo> --github-connection <name>
+#
+# Nothing here creates billable resources; `azure-dev.yml` does, after its what-if and your approval.
+set -euo pipefail
+
+ORG="" PROJECT="" PROFILE="containerapps" RG="rg-regista" LOCATION="uksouth" ENV_NAME="regista"
+APIM_EMAIL="" BUDGET_EMAIL="" REPO_TYPE="github" REPO="" GH_CONNECTION="" CONNECTION="regista-azure"
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --org) ORG="$2"; shift 2 ;;
+    --project) PROJECT="$2"; shift 2 ;;
+    --profile) PROFILE="$2"; shift 2 ;;
+    --rg) RG="$2"; shift 2 ;;
+    --location) LOCATION="$2"; shift 2 ;;
+    --env) ENV_NAME="$2"; shift 2 ;;
+    --apim-email) APIM_EMAIL="$2"; shift 2 ;;
+    --budget-email) BUDGET_EMAIL="$2"; shift 2 ;;
+    --repo-type) REPO_TYPE="$2"; shift 2 ;;
+    --repo) REPO="$2"; shift 2 ;;
+    --github-connection) GH_CONNECTION="$2"; shift 2 ;;
+    --connection-name) CONNECTION="$2"; shift 2 ;;
+    -h|--help) sed -n '2,12p' "$0"; exit 0 ;;
+    *) echo "Unknown argument: $1" >&2; exit 2 ;;
+  esac
+done
+[[ -n "$ORG" && -n "$PROJECT" ]] || { echo "--org and --project are required" >&2; exit 2; }
+[[ "$PROFILE" =~ ^(containerapps|aks|aks-enterprise)$ ]] || { echo "--profile: containerapps | aks | aks-enterprise" >&2; exit 2; }
+[[ "$PROFILE" != "aks-enterprise" || -n "$APIM_EMAIL" ]] || { echo "--apim-email is required for aks-enterprise" >&2; exit 2; }
+
+az extension add --name azure-devops --only-show-errors 2>/dev/null || true
+az devops configure --defaults organization="$ORG" project="$PROJECT"
+
+SUB_ID=$(az account show --query id -o tsv)
+SUB_NAME=$(az account show --query name -o tsv)
+TENANT_ID=$(az account show --query tenantId -o tsv)
+echo "▶ Subscription: $SUB_NAME ($SUB_ID). Make sure this is the subscription you mean to use."
+
+echo "▶ Resource providers"
+for ns in Microsoft.ContainerService Microsoft.ApiManagement Microsoft.Network Microsoft.App \
+          Microsoft.DevOpsInfrastructure Microsoft.DevCenter Microsoft.CognitiveServices Microsoft.DocumentDB \
+          Microsoft.EventHub Microsoft.ContainerRegistry Microsoft.Web Microsoft.OperationalInsights; do
+  az provider register --namespace "$ns" -o none
+done
+
+echo "▶ Resource group $RG and the pipeline identity"
+az group create -n "$RG" -l "$LOCATION" -o none
+APP_ID=$(az ad app list --display-name "regista-pipeline-$PROFILE" --query "[0].appId" -o tsv)
+[[ -n "$APP_ID" ]] || APP_ID=$(az ad app create --display-name "regista-pipeline-$PROFILE" --query appId -o tsv)
+SP_ID=$(az ad sp show --id "$APP_ID" --query id -o tsv 2>/dev/null || az ad sp create --id "$APP_ID" --query id -o tsv)
+RG_ID=$(az group show -n "$RG" --query id -o tsv)
+# Contributor to create resources; RBAC Administrator because the templates assign roles (Contributor alone can't).
+for role in "Contributor" "Role Based Access Control Administrator"; do
+  az role assignment create --assignee-object-id "$SP_ID" --assignee-principal-type ServicePrincipal \
+    --role "$role" --scope "$RG_ID" -o none
+done
+
+echo "▶ Service connection $CONNECTION (workload identity federation, no secret)"
+PROJECT_ID=$(az devops project show --project "$PROJECT" --query id -o tsv)
+SE_ID=$(az devops service-endpoint list --query "[?name=='$CONNECTION'].id | [0]" -o tsv)
+if [[ -z "$SE_ID" ]]; then
+  cfg=$(mktemp)
+  cat > "$cfg" <<JSON
+{
+  "name": "$CONNECTION", "type": "AzureRM", "url": "https://management.azure.com/",
+  "data": { "subscriptionId": "$SUB_ID", "subscriptionName": "$SUB_NAME", "environment": "AzureCloud",
+            "scopeLevel": "Subscription", "creationMode": "Manual" },
+  "authorization": { "scheme": "WorkloadIdentityFederation",
+                     "parameters": { "tenantid": "$TENANT_ID", "serviceprincipalid": "$APP_ID" } },
+  "isShared": false, "isReady": true,
+  "serviceEndpointProjectReferences": [ { "projectReference": { "id": "$PROJECT_ID", "name": "$PROJECT" }, "name": "$CONNECTION" } ]
+}
+JSON
+  SE_ID=$(az devops service-endpoint create --service-endpoint-configuration "$cfg" --query id -o tsv)
+  rm -f "$cfg"
+fi
+ISSUER=$(az devops service-endpoint show --id "$SE_ID" --query "authorization.parameters.workloadIdentityFederationIssuer" -o tsv)
+SUBJECT=$(az devops service-endpoint show --id "$SE_ID" --query "authorization.parameters.workloadIdentityFederationSubject" -o tsv)
+if ! az ad app federated-credential list --id "$APP_ID" --query "[?subject=='$SUBJECT'] | [0].name" -o tsv | grep -q .; then
+  az ad app federated-credential create --id "$APP_ID" --parameters \
+    "{\"name\":\"azure-devops-$CONNECTION\",\"issuer\":\"$ISSUER\",\"subject\":\"$SUBJECT\",\"audiences\":[\"api://AzureADTokenExchange\"]}" -o none
+fi
+
+echo "▶ Variable group regista-$PROFILE"
+vars=(AZURE_ENV_NAME="$ENV_NAME" AZURE_LOCATION="$LOCATION" AZURE_SUBSCRIPTION_ID="$SUB_ID" AZURE_RESOURCE_GROUP="$RG")
+[[ -n "$BUDGET_EMAIL" ]] && vars+=(BUDGET_EMAIL="$BUDGET_EMAIL")
+if [[ "$PROFILE" == "aks-enterprise" ]]; then
+  DOI=$(az ad sp list --display-name DevOpsInfrastructure --query "[0].id" -o tsv)
+  [[ -n "$DOI" ]] || echo "⚠ DevOpsInfrastructure service principal not found yet: register Microsoft.DevOpsInfrastructure and rerun."
+  vars+=(APIM_PUBLISHER_EMAIL="$APIM_EMAIL" AZURE_DEVOPS_ORG_URL="$ORG" DEVOPS_INFRASTRUCTURE_PRINCIPAL_ID="$DOI")
+fi
+VG_ID=$(az pipelines variable-group list --group-name "regista-$PROFILE" --query "[0].id" -o tsv)
+if [[ -z "$VG_ID" ]]; then
+  az pipelines variable-group create --name "regista-$PROFILE" --variables "${vars[@]}" -o none
+else
+  for kv in "${vars[@]}"; do
+    az pipelines variable-group variable update --group-id "$VG_ID" --name "${kv%%=*}" --value "${kv#*=}" -o none 2>/dev/null \
+      || az pipelines variable-group variable create --group-id "$VG_ID" --name "${kv%%=*}" --value "${kv#*=}" -o none
+  done
+fi
+
+echo "▶ Pipelines"
+if [[ -n "$REPO" ]]; then
+  extra=()
+  [[ "$REPO_TYPE" == "github" ]] && extra=(--service-connection "$GH_CONNECTION")
+  for p in ci azure-dev; do
+    az pipelines show --name "regista-$p" -o none 2>/dev/null || \
+      az pipelines create --name "regista-$p" --yml-path ".azuredevops/pipelines/$p.yml" --repository "$REPO" \
+        --repository-type "$REPO_TYPE" --branch main --skip-first-run true "${extra[@]}" -o none
+  done
+else
+  echo "  --repo not given: create pipelines from .azuredevops/pipelines/ci.yml and azure-dev.yml in the portal."
+fi
+
+cat <<EOF
+
+Done. In Azure DevOps:
+  1. Pipelines > Environments > regista-$PROFILE (created on first run) > Approvals and checks: add yourself,
+     so every Provision and Deploy waits for a person to read the what-if.
+  2. Run "regista-azure-dev" with profile=$PROFILE.
+EOF
+[[ "$PROFILE" == "aks-enterprise" ]] && echo "  3. After the first Provision, the pool's name is the AZURE_DEVOPS_POOL_NAME output; pass it as managedPool."

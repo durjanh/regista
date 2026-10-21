@@ -1,0 +1,158 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "services/**"
+      - "apps/web/**"
+      - "data/**"
+      - ".github/workflows/deploy.yml"
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: deploy-${{ vars.AZURE_RESOURCE_GROUP }}
+  cancel-in-progress: false
+
+env:
+  AZURE_RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP }}
+  # Let az install the containerapp extension on first use without prompting.
+  AZURE_EXTENSION_USE_DYNAMIC_INSTALL: yes_without_prompt
+  AZURE_ENV_NAME: ${{ vars.AZURE_ENV_NAME }}
+  AZURE_LOCATION: ${{ vars.AZURE_LOCATION }}
+  DEPLOYER_PRINCIPAL_TYPE: ServicePrincipal
+  DEPLOYMENT_NAME: main
+  IMAGE_TAG: ${{ github.sha }}
+
+jobs:
+  containers:
+    name: Build images and roll out Container Apps
+    runs-on: ubuntu-latest
+    environment: production
+    outputs:
+      api_url: ${{ steps.names.outputs.api_url }}
+      web_url: ${{ steps.names.outputs.web_url }}
+      function_app: ${{ steps.names.outputs.function_app }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Read infrastructure outputs
+        id: names
+        run: |
+          out() { az deployment group show -g "$AZURE_RESOURCE_GROUP" -n "$DEPLOYMENT_NAME" --query "properties.outputs.$1.value" -o tsv; }
+          {
+            echo "acr=$(out ACR_NAME)"
+            echo "login_server=$(out ACR_LOGIN_SERVER)"
+            echo "api_app=$(out API_APP_NAME)"
+            echo "web_app=$(out WEB_APP_NAME)"
+            echo "feeder_job=$(out FEEDER_JOB_NAME)"
+            echo "api_url=$(out API_URL)"
+            echo "web_url=$(out WEB_URL)"
+            echo "function_app=$(out FUNCTION_APP_NAME)"
+          } >> "$GITHUB_OUTPUT"
+
+      # ACR Tasks builds in Azure: no Docker daemon or registry credentials on the runner.
+      # The API build context is the repo root because the image bundles data/.
+      - name: Build API image (ACR Tasks)
+        run: |
+          az acr build -r "${{ steps.names.outputs.acr }}" \
+            -t "regista-api:${IMAGE_TAG}" -t "regista-api:latest" \
+            -f services/api/Dockerfile .
+
+      - name: Build web image (ACR Tasks)
+        run: |
+          az acr build -r "${{ steps.names.outputs.acr }}" \
+            -t "regista-web:${IMAGE_TAG}" -t "regista-web:latest" \
+            -f apps/web/Dockerfile apps/web
+
+      - name: Roll out
+        env:
+          DEPLOYER_PRINCIPAL_ID: ""
+        run: |
+          RG="$AZURE_RESOURCE_GROUP"
+          API_IMG="${{ steps.names.outputs.login_server }}/regista-api:${IMAGE_TAG}"
+          WEB_IMG="${{ steps.names.outputs.login_server }}/regista-web:${IMAGE_TAG}"
+          current=$(az containerapp show -g "$RG" -n "${{ steps.names.outputs.api_app }}" --query "properties.template.containers[0].image" -o tsv)
+
+          if [[ "$current" == mcr.microsoft.com/* ]]; then
+            # First real rollout: run the full template so ports, probes and the feeder command switch
+            # from the placeholder configuration to the real one. Same template, same names: idempotent.
+            echo "Placeholder detected → full Bicep rollout"
+            token=$(az account get-access-token --query accessToken -o tsv)
+            export DEPLOYER_PRINCIPAL_ID=$(python3 -c "import base64,json,sys; p=sys.argv[1].split('.')[1]; p+='='*(-len(p)%4); print(json.loads(base64.urlsafe_b64decode(p))['oid'])" "$token")
+            az deployment group create -g "$RG" -n "$DEPLOYMENT_NAME" \
+              --template-file infra/main.bicep --parameters infra/main.bicepparam \
+              --parameters "apiImage=$API_IMG" "webImage=$WEB_IMG" -o none
+          else
+            echo "Fast path → new revisions with the new images"
+            az containerapp update -g "$RG" -n "${{ steps.names.outputs.api_app }}" --image "$API_IMG" -o none
+            az containerapp update -g "$RG" -n "${{ steps.names.outputs.web_app }}" --image "$WEB_IMG" -o none
+            az containerapp job update -g "$RG" -n "${{ steps.names.outputs.feeder_job }}" --image "$API_IMG" -o none
+          fi
+
+  functions:
+    name: Deploy Azure Functions (recap automation)
+    needs: containers
+    if: needs.containers.outputs.function_app != ''
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - uses: Azure/functions-action@v1
+        with:
+          app-name: ${{ needs.containers.outputs.function_app }}
+          package: services/functions
+          remote-build: true
+
+  smoke:
+    name: Smoke test
+    needs: [containers, functions]
+    if: always() && needs.containers.result == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - name: API health
+        run: |
+          for i in $(seq 1 30); do
+            if curl -fsS "${{ needs.containers.outputs.api_url }}/api/health" -o health.json; then
+              cat health.json; echo; exit 0
+            fi
+            echo "waiting for API ($i/30)…"; sleep 10
+          done
+          exit 1
+
+      - name: Web health
+        run: |
+          for i in $(seq 1 30); do
+            curl -fsS "${{ needs.containers.outputs.web_url }}/healthz" && exit 0
+            echo "waiting for web ($i/30)…"; sleep 10
+          done
+          exit 1
+
+      - name: Web proxies the API
+        run: curl -fsS "${{ needs.containers.outputs.web_url }}/api/matches" | head -c 400
+
+      - name: Summary
+        run: |
+          {
+            echo "## Deployed"
+            echo "- Web: ${{ needs.containers.outputs.web_url }}"
+            echo "- API: ${{ needs.containers.outputs.api_url }}/api/health"
+            echo "- MCP: ${{ needs.containers.outputs.api_url }}/mcp"
+          } >> "$GITHUB_STEP_SUMMARY"

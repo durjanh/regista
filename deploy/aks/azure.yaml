@@ -1,0 +1,49 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
+#
+# Regista on AKS, standard profile: public ingress (application routing add-on), keyless PaaS.
+#   cd deploy/aks && azd auth login && azd up
+# Prerequisites: azd, Azure CLI, Docker, kubectl and kubelogin (az aks install-cli); local accounts are disabled.
+name: regista-aks
+metadata:
+  template: regista-aks@1.0.0
+infra:
+  provider: bicep
+  path: ../../infra/aks
+  module: main
+services:
+  api:
+    project: ../../services/api
+    language: python
+    host: aks
+    docker:
+      path: ./Dockerfile
+      context: ../..
+    k8s:
+      namespace: regista
+      deploymentPath: ../../deploy/k8s/api      # relative to the service project
+      deployment:
+        name: regista-api
+      service:
+        name: regista-api
+  web:
+    project: ../../apps/web
+    language: js
+    host: aks
+    docker:
+      path: ./Dockerfile
+    k8s:
+      namespace: regista
+      deploymentPath: ../../deploy/k8s/web
+      deployment:
+        name: regista-web
+      service:
+        name: regista-web
+      ingress:
+        name: regista-web
+hooks:
+  postprovision:
+    shell: sh
+    run: ../hooks/postprovision.sh
+  postdeploy:
+    shell: sh
+    run: ../hooks/postdeploy.sh

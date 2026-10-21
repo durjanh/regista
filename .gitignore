@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+eval-results/
+
+# Node
+node_modules/
+apps/web/dist/
+
+# Local settings and secrets
+.env
+.env.*
+local.settings.json
+*.local.json
+
+# Generated what-if matches (featured real-result rebuilds in data/matches are committed)
+data/matches/whatif-*.json
+
+# OS / editors
+.DS_Store
+.idea/

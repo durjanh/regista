@@ -1,0 +1,6 @@
+# Azure Functions Python worker dependencies (remote build installs these on deploy).
+azure-functions>=1.21
+azure-identity>=1.19
+azure-cosmos>=4.9
+azure-storage-blob>=12.24
+requests>=2.32

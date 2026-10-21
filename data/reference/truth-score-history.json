@@ -1,0 +1,9 @@
+[
+ {
+  "date": "2026-10-21",
+  "commit": "local",
+  "recall": 0.413,
+  "false_alarms_per_match": 0.92,
+  "median_seconds_to_detect": 508
+ }
+]

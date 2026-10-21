@@ -1,0 +1,121 @@
+import { NavLink, Outlet, useOutletContext, useParams } from "react-router-dom";
+import { api } from "../api/client";
+import type { MatchMeta } from "../api/types";
+import { useAsync } from "../hooks/useAsync";
+import { usePrefs } from "../lib/prefs";
+import { SourceBadge } from "./SourceBadge";
+import { TeamLink, TeamSwatch } from "./TeamSwatch";
+import { ErrorState, Skeleton } from "./States";
+import { TopBar } from "./TopBar";
+import { teamReportPath } from "../lib/players";
+
+export function AppLayout() {
+  const { t } = usePrefs();
+  return (
+    <div className="app">
+      <a href="#main" className="sr-only skip-link">
+        Skip to content
+      </a>
+      <TopBar />
+      <main id="main" className="main">
+        <Outlet />
+      </main>
+      <footer className="footer">
+        <span>{t("footer.disclaimer")}</span>
+        <span>
+          Built with Microsoft Foundry · Agent Framework · Azure AI Services · Fabric · Azure Container Apps ·{" "}
+          <NavLink to="/ops" className="team-link">{t("ops.title")}</NavLink>
+        </span>
+      </footer>
+    </div>
+  );
+}
+
+export type MatchContext = { match: MatchMeta };
+
+export function useMatch(): MatchMeta {
+  return useOutletContext<MatchContext>().match;
+}
+
+export function MatchLayout() {
+  const { id = "" } = useParams();
+  const { t } = usePrefs();
+  const { data: match, error, loading, reload } = useAsync(() => api.match(id), [id]);
+
+  if (error) return <ErrorState message={error} onRetry={reload} />;
+  if (loading || !match)
+    return (
+      <div className="stack">
+        <Skeleton h={28} w="40%" />
+        <Skeleton h={44} />
+        <Skeleton h={420} />
+      </div>
+    );
+
+  const tabs = [
+    { to: `/match/${id}`, label: t("nav.matchday"), end: true },
+    { to: `/match/${id}/tactics`, label: t("nav.tactics") },
+    { to: `/match/${id}/ask`, label: t("nav.ask") },
+    { to: `/match/${id}/recap`, label: t("nav.recap") },
+    { to: `/match/${id}/dugout`, label: `🧢 ${t("nav.dugout")}` },
+  ];
+
+  return (
+    <div>
+      <div className="match-header">
+        <div className="row" style={{ gap: 12, justifyContent: "space-between" }}>
+          <div className="row" style={{ gap: 10 }}>
+            <TeamSwatch team={match.home} />
+            <h1 className="display" style={{ fontSize: 26, fontWeight: 800, textTransform: "uppercase" }}>
+              <TeamLink team={match.home} /> <span className="faint">v</span> <TeamLink team={match.away} />
+            </h1>
+            <TeamSwatch team={match.away} />
+          </div>
+          <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
+            <SourceBadge source={match.source} />
+            <span className="row xs" style={{ gap: 4 }}>
+              <span className="muted">{t("scout.teamReport")}:</span>
+              <NavLink to={teamReportPath(match.home.team_id)} className="btn sm">
+                {match.home.short}
+              </NavLink>
+              <NavLink to={teamReportPath(match.away.team_id)} className="btn sm">
+                {match.away.short}
+              </NavLink>
+            </span>
+            <NavLink to={`/studio/${id}`} className="btn sm">
+              🎛 {t("nav.studio")}
+            </NavLink>
+          </div>
+        </div>
+        <div className="row xs muted" style={{ gap: 8, marginTop: -4 }}>
+          <span style={{ fontWeight: 700, color: "var(--text)" }}>{match.source?.real?.tournament ?? match.competition}</span>
+          <span>·</span>
+          <span className="tnum">{match.source?.real?.date ?? match.kickoff}</span>
+          {match.source?.real?.city ? (
+            <>
+              <span>·</span>
+              <span>
+                {match.source.real.city}
+                {match.source.real.country ? `, ${match.source.real.country}` : ""}
+                {match.source.real.neutral ? " (neutral)" : ""}
+              </span>
+            </>
+          ) : (
+            <>
+              <span>·</span>
+              <span>{match.venue}</span>
+            </>
+          )}
+        </div>
+        <nav className="subnav" aria-label="Match sections">
+          {tabs.map((tab) => (
+            <NavLink key={tab.to} to={tab.to} end={tab.end}>
+              {tab.label}
+            </NavLink>
+          ))}
+        </nav>
+      </div>
+      <Outlet context={{ match } satisfies MatchContext} />
+    </div>
+  );
+}

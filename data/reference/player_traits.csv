@@ -1,0 +1,113 @@
+team,name,foot,aerial,long_shot
+England,Harry Kane,right,1.1,1.3
+England,Bukayo Saka,left,0.4,1.0
+England,Jude Bellingham,right,1.0,1.2
+England,Declan Rice,right,1.0,1.1
+England,Phil Foden,left,0.4,1.3
+England,Cole Palmer,left,0.4,1.4
+England,Marcus Rashford,right,0.6,1.3
+England,Anthony Gordon,right,0.5,0.9
+England,Ollie Watkins,right,1.1,0.8
+England,Jack Grealish,right,0.4,0.7
+England,Eberechi Eze,right,0.5,1.3
+England,Morgan Rogers,right,0.7,1.1
+England,Trent Alexander-Arnold,right,0.5,1.4
+England,Harry Maguire,right,1.6,0.6
+England,Luke Shaw,left,0.7,0.8
+England,Raheem Sterling,right,0.4,0.7
+England,Mason Mount,right,0.6,1.2
+England,Noni Madueke,left,0.5,1.0
+England,Jarrod Bowen,left,0.6,1.1
+England,Myles Lewis-Skelly,left,0.6,0.8
+England,Marc Guéhi,right,1.3,0.5
+England,Ezri Konsa,right,1.3,0.5
+England,Kyle Walker,right,0.8,0.6
+England,Reece James,right,0.9,1.2
+Argentina,Lionel Messi,left,0.2,1.5
+Argentina,Ángel Di María,left,0.3,1.4
+Argentina,Lautaro Martínez,right,1.1,1.0
+Argentina,Julián Álvarez,right,0.8,1.1
+Argentina,Enzo Fernández,right,0.8,1.3
+Argentina,Alexis Mac Allister,right,0.7,1.2
+Argentina,Rodrigo De Paul,right,0.6,1.1
+Argentina,Paulo Dybala,left,0.3,1.4
+Argentina,Nicolás Otamendi,right,1.6,0.5
+Argentina,Cristian Romero,right,1.5,0.5
+Argentina,Lisandro Martínez,left,1.1,0.6
+Argentina,Nicolás Tagliafico,left,0.7,0.6
+France,Kylian Mbappé,right,0.7,1.2
+France,Ousmane Dembélé,both,0.4,1.2
+France,Michael Olise,left,0.4,1.4
+France,Antoine Griezmann,left,0.8,1.2
+France,Olivier Giroud,left,1.8,0.9
+France,Marcus Thuram,right,1.2,0.9
+France,Bradley Barcola,right,0.5,1.0
+France,Aurélien Tchouaméni,right,1.2,1.2
+France,Théo Hernandez,left,0.9,1.2
+France,Dayot Upamecano,right,1.4,0.5
+France,Randal Kolo Muani,right,1.1,0.8
+France,Rayan Cherki,both,0.4,1.4
+Spain,Lamine Yamal,left,0.3,1.3
+Spain,Nico Williams,right,0.5,1.0
+Spain,Mikel Oyarzabal,left,0.9,1.0
+Spain,Álvaro Morata,right,1.5,0.8
+Spain,Joselu,right,1.7,0.6
+Spain,Pedri,right,0.4,1.0
+Spain,Rodri,right,1.2,1.3
+Spain,Dani Olmo,right,0.6,1.3
+Spain,Fabián Ruiz,left,0.7,1.4
+Spain,Ferran Torres,right,0.6,0.9
+Spain,Pedro Porro,right,0.7,1.2
+Spain,Marc Cucurella,left,0.6,0.7
+Spain,Aymeric Laporte,left,1.4,0.5
+Spain,Mikel Merino,left,1.3,1.0
+Brazil,Neymar,right,0.4,1.2
+Brazil,Vinícius Júnior,right,0.4,0.9
+Brazil,Raphinha,left,0.5,1.4
+Brazil,Rodrygo,right,0.5,1.1
+Brazil,Richarlison,right,1.3,0.9
+Brazil,Lucas Paquetá,left,0.8,1.2
+Brazil,Casemiro,right,1.3,1.2
+Brazil,Marquinhos,right,1.4,0.5
+Brazil,Gabriel Magalhães,left,1.7,0.5
+Brazil,Gabriel Martinelli,right,0.5,1.0
+Norway,Erling Haaland,left,1.3,0.6
+Norway,Martin Ødegaard,left,0.4,1.4
+Norway,Alexander Sørloth,right,1.6,0.8
+Norway,Antonio Nusa,right,0.4,0.9
+Norway,Andreas Schjelderup,right,0.4,1.1
+Netherlands,Xavi Simons,right,0.5,1.3
+Netherlands,Cody Gakpo,right,0.8,1.3
+Netherlands,Memphis Depay,right,0.6,1.4
+Netherlands,Wout Weghorst,right,1.8,0.6
+Netherlands,Luuk de Jong,right,1.9,0.5
+Netherlands,Virgil van Dijk,right,1.8,0.6
+Netherlands,Denzel Dumfries,right,1.4,0.8
+Netherlands,Frenkie de Jong,right,0.6,0.9
+Netherlands,Tijjani Reijnders,right,0.6,1.2
+Germany,Jamal Musiala,right,0.4,1.1
+Germany,Kai Havertz,left,1.3,1.0
+Germany,Niclas Füllkrug,right,1.7,0.7
+Germany,Leroy Sané,left,0.4,1.3
+Germany,Serge Gnabry,right,0.5,1.1
+Germany,İlkay Gündoğan,right,0.6,1.2
+Germany,Toni Kroos,right,0.5,1.5
+Germany,Joshua Kimmich,right,0.6,1.2
+Germany,Thomas Müller,right,1.0,0.8
+Germany,Antonio Rüdiger,right,1.5,0.6
+Japan,Ritsu Dōan,left,0.4,1.3
+Japan,Takuma Asano,right,0.7,0.9
+Japan,Kaoru Mitoma,right,0.4,0.9
+Japan,Takumi Minamino,right,0.5,1.1
+Japan,Daichi Kamada,right,0.6,1.1
+Japan,Junya Itō,right,0.5,1.0
+Japan,Kō Itakura,right,1.3,0.5
+Mexico,Raúl Jiménez,right,1.4,0.8
+Mexico,Santiago Giménez,right,1.3,0.8
+Mexico,Julián Quiñones,right,0.8,1.0
+Mexico,Alexis Vega,right,0.5,1.2
+Mexico,Edson Álvarez,right,1.3,1.0
+Mexico,César Montes,right,1.5,0.5
+Saudi Arabia,Salem Al-Dawsari,right,0.5,1.3
+Saudi Arabia,Saleh Al-Shehri,right,1.2,0.8
+Saudi Arabia,Firas Al-Buraikan,right,1.0,0.8

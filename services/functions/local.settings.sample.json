@@ -1,0 +1,14 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "FUNCTIONS_WORKER_RUNTIME": "python",
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "EventHubConnection__fullyQualifiedNamespace": "<evh-namespace>.servicebus.windows.net",
+    "EVENTHUB_NAME": "match-events",
+    "EVENTHUB_CONSUMER_GROUP": "functions",
+    "REGISTA_API_URL": "http://localhost:8000",
+    "COSMOS_ENDPOINT": "https://<cosmos-account>.documents.azure.com:443/",
+    "COSMOS_DATABASE": "regista",
+    "STORAGE_ACCOUNT_URL": "https://<storage-account>.blob.core.windows.net/"
+  }
+}

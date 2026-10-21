@@ -1,0 +1,13 @@
+// End-to-end latency: feeder emit time -> Event Hubs -> Eventstream -> Eventhouse ingestion.
+// Requires the feeder to stamp `emitted_at` (UTC ISO-8601) on each event.
+match_events
+| where ingestion_time() > ago(2h) and isnotnull(emitted_at)
+| extend latency_ms = datetime_diff('millisecond', ingestion_time(), emitted_at)
+| summarize
+    events = count(),
+    p50_ms = percentile(latency_ms, 50),
+    p95_ms = percentile(latency_ms, 95),
+    p99_ms = percentile(latency_ms, 99)
+  by window = bin(ingestion_time(), 1m)
+| order by window asc
+| render timechart with (xcolumn = window, ycolumns = p50_ms, p95_ms, p99_ms)

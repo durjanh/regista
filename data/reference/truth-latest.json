@@ -1,0 +1,61 @@
+{
+  "date": "2026-10-21",
+  "matches": 48,
+  "control_matches": 12,
+  "plants": 63,
+  "unobservable": 9,
+  "recall": 0.413,
+  "false_alarms_per_match": 0.92,
+  "control_false_alarms_per_match": 0.92,
+  "median_seconds_to_detect": 508,
+  "explanation_accuracy": 1.0,
+  "by_difficulty": [
+    {
+      "difficulty": "obvious",
+      "recall": 0.375,
+      "plants": 24
+    },
+    {
+      "difficulty": "moderate",
+      "recall": 0.462,
+      "plants": 26
+    },
+    {
+      "difficulty": "subtle",
+      "recall": 0.385,
+      "plants": 13
+    }
+  ],
+  "by_mechanism": [
+    {
+      "mechanism": "press_switch",
+      "recall": 0.429,
+      "plants": 14
+    },
+    {
+      "mechanism": "tiring_fullback",
+      "recall": 0.3,
+      "plants": 10
+    },
+    {
+      "mechanism": "chaos_spell",
+      "recall": 0.562,
+      "plants": 16
+    },
+    {
+      "mechanism": "hot_streak",
+      "recall": 0.2,
+      "plants": 5
+    },
+    {
+      "mechanism": "set_piece_routine",
+      "recall": 0.4,
+      "plants": 5
+    },
+    {
+      "mechanism": "shape_change",
+      "recall": 0.385,
+      "plants": 13
+    }
+  ]
+}

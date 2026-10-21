@@ -1,0 +1,16 @@
+# Enterprise profile: a second, *internal* NGINX controller from the application routing add-on. Its load balancer
+# takes a fixed private IP in snet-ingress, which API Management (VNet-integrated) uses as its backend.
+# Nothing in the cluster is reachable from the internet; the only public path is API Management -> this IP.
+# Note: Microsoft supports the add-on's NGINX through November 2026; Gateway API is the migration path.
+apiVersion: approuting.kubernetes.azure.com/v1alpha1
+kind: NginxIngressController
+metadata:
+  name: nginx-internal
+spec:
+  ingressClassName: nginx-internal
+  controllerNamePrefix: nginx-internal
+  loadBalancerAnnotations:
+    service.beta.kubernetes.io/azure-load-balancer-internal: "true"
+    service.beta.kubernetes.io/azure-load-balancer-internal-subnet: "{{.Env.INGRESS_SUBNET}}"
+    service.beta.kubernetes.io/azure-load-balancer-ipv4: "{{.Env.INGRESS_PRIVATE_IP}}"
+    service.beta.kubernetes.io/azure-load-balancer-health-probe-request-path: /healthz

@@ -1,0 +1,12 @@
+# deploy/k8s/web-enterprise/11-service.yaml must stay identical (checked in CI).
+apiVersion: v1
+kind: Service
+metadata:
+  name: regista-web
+  namespace: regista
+spec:
+  selector:
+    app: regista-web
+  ports:
+    - port: 8080
+      targetPort: 8080

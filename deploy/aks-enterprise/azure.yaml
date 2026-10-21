@@ -1,0 +1,55 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
+#
+# Regista on AKS, enterprise profile: API Management Standard v2 is the only public endpoint; it reaches the
+# internal NGINX ingress through VNet integration. Private AKS; every PaaS service behind a private endpoint.
+#   cd deploy/aks-enterprise
+#   azd env set APIM_PUBLISHER_EMAIL you@example.com
+#   azd provision          # one pass
+#   azd deploy             # from inside the VNet: the Managed DevOps Pool (.azuredevops/pipelines/azure-dev.yml)
+# The API server and registry are private, so `azd deploy` from a laptop fails by design. Development only:
+#   azd env set AKS_PRIVATE_CLUSTER false && azd env set AKS_AUTHORIZED_IP_RANGES <your-ip>/32
+# makes the API server public but IP-restricted (the registry and data services stay private).
+name: regista-aks-enterprise
+metadata:
+  template: regista-aks-enterprise@1.0.0
+infra:
+  provider: bicep
+  path: ../../infra/aks-enterprise
+  module: main
+services:
+  api:
+    project: ../../services/api
+    language: python
+    host: aks
+    docker:
+      path: ./Dockerfile
+      context: ../..
+    k8s:
+      namespace: regista
+      deploymentPath: ../../deploy/k8s/api
+      deployment:
+        name: regista-api
+      service:
+        name: regista-api
+  web:
+    project: ../../apps/web
+    language: js
+    host: aks
+    docker:
+      path: ./Dockerfile
+    k8s:
+      namespace: regista
+      deploymentPath: ../../deploy/k8s/web-enterprise
+      deployment:
+        name: regista-web
+      service:
+        name: regista-web
+      ingress:
+        name: regista-web
+hooks:
+  postprovision:
+    shell: sh
+    run: ../hooks/postprovision.sh
+  postdeploy:
+    shell: sh
+    run: ../hooks/postdeploy.sh

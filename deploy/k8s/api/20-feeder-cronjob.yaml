@@ -1,0 +1,41 @@
+# The Event Hubs feeder (replays a match into match-events). Suspended: run it on demand with
+#   kubectl -n regista create job feeder-$(date +%s) --from=cronjob/regista-feeder
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: regista-feeder
+  namespace: regista
+spec:
+  schedule: "0 0 1 1 *"
+  suspend: true
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      template:
+        metadata:
+          labels:
+            app: regista-feeder
+            azure.workload.identity/use: "true"
+        spec:
+          serviceAccountName: regista-api
+          restartPolicy: Never
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 10001
+            seccompProfile:
+              type: RuntimeDefault
+          containers:
+            - name: feeder
+              image: "{{.Env.SERVICE_API_IMAGE_NAME}}"
+              command: ["python", "-m", "app.live.feeder", "--speed", "1"]
+              env:
+                - { name: AZURE_CLIENT_ID, value: "{{.Env.AZURE_CLIENT_ID}}" }
+                - { name: EVENTHUB_FQDN, value: "{{.Env.EVENTHUB_FQDN}}" }
+                - { name: EVENTHUB_NAME, value: "{{.Env.EVENTHUB_NAME}}" }
+              resources:
+                requests: { cpu: 250m, memory: 512Mi }
+                limits: { cpu: "1", memory: 1Gi }
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop: ["ALL"]

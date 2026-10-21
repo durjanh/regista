@@ -1,0 +1,30 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
+#
+# Regista on Azure Container Apps (default profile: cheapest, scale-to-zero friendly, used for the live judge demo).
+#   azd auth login && azd up
+# Other profiles: deploy/aks (AKS standard) and deploy/aks-enterprise (private AKS behind Front Door + API Management).
+name: regista
+metadata:
+  template: regista-containerapps@1.0.0
+infra:
+  provider: bicep
+  path: infra
+  module: main
+services:
+  api:
+    project: ./services/api
+    language: python
+    host: containerapp
+    docker:
+      path: ./Dockerfile
+      context: ../..        # the API image bundles data/ from the repository root
+  web:
+    project: ./apps/web
+    language: js
+    host: containerapp
+    docker:
+      path: ./Dockerfile
+hooks:
+  postdeploy:
+    shell: sh
+    run: deploy/hooks/postdeploy.sh

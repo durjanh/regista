@@ -1,0 +1,45 @@
+{
+  "inputs": [
+    {
+      "type": "promptString",
+      "id": "regista-api-url",
+      "description": "Deployed Regista API base URL (output API_URL), e.g. https://regista-api.<env>.uksouth.azurecontainerapps.io",
+      "default": "http://localhost:8000"
+    },
+    {
+      "type": "promptString",
+      "id": "eventhouse-mcp-url",
+      "description": "Fabric Eventhouse MCP Server URI (Fabric portal > KQL database > Overview > Copy MCP Server URI)",
+      "default": ""
+    }
+  ],
+  "servers": {
+    "regista-local": {
+      "type": "http",
+      "url": "http://localhost:8000/mcp"
+    },
+    "regista-cloud": {
+      "type": "http",
+      "url": "${input:regista-api-url}/mcp"
+    },
+    "azure-mcp": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@azure/mcp@latest",
+        "server",
+        "start",
+        "--mode",
+        "consolidated"
+      ]
+    },
+    "microsoft-learn": {
+      "type": "http",
+      "url": "https://learn.microsoft.com/api/mcp"
+    },
+    "fabric-eventhouse": {
+      "type": "http",
+      "url": "${input:eventhouse-mcp-url}"
+    }
+  }
+}

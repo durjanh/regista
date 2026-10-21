@@ -1,0 +1,20 @@
+# Build context for the API image is the repo root (az acr build -f services/api/Dockerfile .).
+# data/ MUST stay in the context: the image bundles data/reference (CC0 results) and data/matches.
+.git
+.github
+.vscode
+**/.venv
+**/venv
+**/node_modules
+**/__pycache__
+**/.pytest_cache
+**/.ruff_cache
+**/.mypy_cache
+**/.env
+**/.env.*
+**/local.settings.json
+apps/web/dist
+infra
+docs
+scripts
+services/functions

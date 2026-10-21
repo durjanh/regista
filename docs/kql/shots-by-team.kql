@@ -1,0 +1,13 @@
+// Shots, shots on target, goals and expected goals (xG) by team for the latest match.
+let match = toscalar(match_events | top 1 by ingestion_time() desc | project match_id);
+match_events
+| where match_id == match and type == "shot"
+| summarize
+    shots = count(),
+    on_target = countif(shot_outcome in ("goal", "saved")),
+    goals = countif(shot_outcome == "goal"),
+    xg = round(sum(xg), 2),
+    big_chances = countif(xg >= 0.3)
+  by team_id
+| extend xg_per_shot = round(xg / shots, 3), finishing_delta = round(goals - xg, 2)
+| order by xg desc

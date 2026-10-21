@@ -1,0 +1,271 @@
+team,name,position
+England,Harry Kane,ST
+England,Ollie Watkins,ST
+England,Callum Wilson,ST
+England,Dominic Calvert-Lewin,ST
+England,Tammy Abraham,ST
+England,Bukayo Saka,RW
+England,Jarrod Bowen,RW
+England,Noni Madueke,RW
+England,Marcus Rashford,LW
+England,Anthony Gordon,LW
+England,Jack Grealish,LW
+England,Raheem Sterling,LW
+England,Jude Bellingham,AM
+England,Phil Foden,AM
+England,Cole Palmer,AM
+England,Eberechi Eze,AM
+England,Morgan Rogers,AM
+England,Mason Mount,AM
+England,Jesse Lingard,AM
+England,Declan Rice,DM
+England,Kalvin Phillips,DM
+England,Conor Gallagher,CM
+England,Elliot Anderson,CM
+England,Jordan Henderson,CM
+England,James Ward-Prowse,CM
+England,Trent Alexander-Arnold,RB
+England,Reece James,RB
+England,Kyle Walker,RB
+England,Luke Shaw,LB
+England,Myles Lewis-Skelly,LB
+England,Harry Maguire,CB
+England,Marc Guéhi,CB
+England,Ezri Konsa,CB
+Argentina,Lionel Messi,RW
+Argentina,Ángel Di María,RW
+Argentina,Giuliano Simeone,RW
+Argentina,Lautaro Martínez,ST
+Argentina,Julián Álvarez,ST
+Argentina,Sergio Agüero,ST
+Argentina,José Manuel López,ST
+Argentina,Joaquín Correa,ST
+Argentina,Ángel Correa,ST
+Argentina,Nicolás González,LW
+Argentina,Papu Gómez,LW
+Argentina,Paulo Dybala,AM
+Argentina,Giovani Lo Celso,AM
+Argentina,Thiago Almada,AM
+Argentina,Enzo Fernández,CM
+Argentina,Alexis Mac Allister,CM
+Argentina,Rodrigo De Paul,CM
+Argentina,Leandro Paredes,DM
+Argentina,Guido Rodríguez,DM
+Argentina,Gonzalo Montiel,RB
+Argentina,Nahuel Molina,RB
+Argentina,Nicolás Tagliafico,LB
+Argentina,Cristian Romero,CB
+Argentina,Nicolás Otamendi,CB
+Argentina,Lisandro Martínez,CB
+Argentina,Facundo Medina,CB
+France,Kylian Mbappé,ST
+France,Olivier Giroud,ST
+France,Marcus Thuram,ST
+France,Randal Kolo Muani,ST
+France,Hugo Ekitike,ST
+France,Jean-Philippe Mateta,ST
+France,Ousmane Dembélé,RW
+France,Michael Olise,RW
+France,Désiré Doué,RW
+France,Florian Thauvin,RW
+France,Bradley Barcola,LW
+France,Kingsley Coman,LW
+France,Antoine Griezmann,AM
+France,Christopher Nkunku,AM
+France,Rayan Cherki,AM
+France,Maghnes Akliouche,AM
+France,Aurélien Tchouaméni,DM
+France,Adrien Rabiot,CM
+France,Eduardo Camavinga,CM
+France,Youssouf Fofana,CM
+France,Théo Hernandez,LB
+France,Dayot Upamecano,CB
+Spain,Mikel Oyarzabal,ST
+Spain,Álvaro Morata,ST
+Spain,Joselu,ST
+Spain,Gerard Moreno,ST
+Spain,Lamine Yamal,RW
+Spain,Ferran Torres,RW
+Spain,Yéremy Pino,RW
+Spain,Pablo Sarabia,RW
+Spain,Nico Williams,LW
+Spain,Bryan Zaragoza,LW
+Spain,Bryan Gil,LW
+Spain,Ayoze Pérez,LW
+Spain,Dani Olmo,AM
+Spain,Álex Baena,AM
+Spain,Oihan Sancet,AM
+Spain,Pedri,CM
+Spain,Gavi,CM
+Spain,Fabián Ruiz,CM
+Spain,Mikel Merino,CM
+Spain,Carlos Soler,CM
+Spain,Marcos Llorente,CM
+Spain,Rodri,DM
+Spain,Martín Zubimendi,DM
+Spain,Pedro Porro,RB
+Spain,Dani Carvajal,RB
+Spain,César Azpilicueta,RB
+Spain,Marc Cucurella,LB
+Spain,Jordi Alba,LB
+Spain,José Gayà,LB
+Spain,Aymeric Laporte,CB
+Spain,Robin Le Normand,CB
+Brazil,Neymar,LW
+Brazil,Vinícius Júnior,LW
+Brazil,Gabriel Martinelli,LW
+Brazil,Raphinha,RW
+Brazil,Rodrygo,RW
+Brazil,Estêvão Willian,RW
+Brazil,Sávio,RW
+Brazil,Luiz Henrique,RW
+Brazil,Rayan,RW
+Brazil,Richarlison,ST
+Brazil,Igor Jesus,ST
+Brazil,Matheus Cunha,ST
+Brazil,Lucas Paquetá,AM
+Brazil,Andreas Pereira,AM
+Brazil,Bruno Guimarães,CM
+Brazil,Gerson,CM
+Brazil,Casemiro,DM
+Brazil,Marquinhos,CB
+Brazil,Thiago Silva,CB
+Brazil,Gabriel Magalhães,CB
+Norway,Erling Haaland,ST
+Norway,Alexander Sørloth,ST
+Norway,Jørgen Strand Larsen,ST
+Norway,Martin Ødegaard,AM
+Norway,Thelo Aasgaard,AM
+Norway,Andreas Schjelderup,LW
+Norway,Antonio Nusa,LW
+Norway,Jens Petter Hauge,LW
+Norway,Mohamed Elyounoussi,LW
+Norway,Aron Dønnum,RW
+Norway,Ola Solbakken,RW
+Norway,Patrick Berg,DM
+Norway,Fredrik Aursnes,CM
+Norway,Felix Horn Myhre,CM
+Norway,Julian Ryerson,RB
+Norway,Marcus Holmgren Pedersen,RB
+Norway,David Møller Wolfe,LB
+Norway,Kristoffer Ajer,CB
+Norway,Leo Østigård,CB
+Netherlands,Memphis Depay,ST
+Netherlands,Wout Weghorst,ST
+Netherlands,Luuk de Jong,ST
+Netherlands,Joshua Zirkzee,ST
+Netherlands,Xavi Simons,AM
+Netherlands,Teun Koopmeiners,CM
+Netherlands,Davy Klaassen,CM
+Netherlands,Georginio Wijnaldum,CM
+Netherlands,Frenkie de Jong,CM
+Netherlands,Tijjani Reijnders,CM
+Netherlands,Mats Wieffer,DM
+Netherlands,Cody Gakpo,LW
+Netherlands,Steven Bergwijn,LW
+Netherlands,Noa Lang,LW
+Netherlands,Donyell Malen,RW
+Netherlands,Steven Berghuis,RW
+Netherlands,Calvin Stengs,RW
+Netherlands,Denzel Dumfries,RB
+Netherlands,Virgil van Dijk,CB
+Netherlands,Nathan Aké,CB
+Netherlands,Stefan de Vrij,CB
+Netherlands,Daley Blind,CB
+Germany,Kai Havertz,ST
+Germany,Niclas Füllkrug,ST
+Germany,Timo Werner,ST
+Germany,Jamal Musiala,AM
+Germany,Thomas Müller,AM
+Germany,Marco Reus,AM
+Germany,Julian Brandt,AM
+Germany,Leroy Sané,RW
+Germany,Serge Gnabry,RW
+Germany,Jonas Hofmann,RW
+Germany,Karim Adeyemi,RW
+Germany,İlkay Gündoğan,CM
+Germany,Toni Kroos,CM
+Germany,Leon Goretzka,CM
+Germany,Joshua Kimmich,DM
+Germany,Ridle Baku,RB
+Germany,David Raum,LB
+Germany,Marcel Halstenberg,LB
+Germany,Nico Schulz,LB
+Germany,Robin Gosens,LWB
+Germany,Antonio Rüdiger,CB
+Germany,Matthias Ginter,CB
+Japan,Takuma Asano,ST
+Japan,Kyogo Furuhashi,ST
+Japan,Yuya Osako,ST
+Japan,Ado Onaiwu,ST
+Japan,Kensuke Nagai,ST
+Japan,Ritsu Dōan,RW
+Japan,Junya Itō,RW
+Japan,Kaoru Mitoma,LW
+Japan,Daizen Maeda,LW
+Japan,Shoya Nakajima,LW
+Japan,Takumi Minamino,AM
+Japan,Daichi Kamada,AM
+Japan,Koji Miyoshi,AM
+Japan,Ao Tanaka,CM
+Japan,Hidemasa Morita,CM
+Japan,Genki Haraguchi,CM
+Japan,Sho Inagaki,CM
+Japan,Hayao Kawabe,CM
+Japan,Kento Hashimoto,DM
+Japan,Kō Itakura,CB
+Japan,Maya Yoshida,CB
+Japan,Sho Sasaki,CB
+Mexico,Raúl Jiménez,ST
+Mexico,Santiago Giménez,ST
+Mexico,Henry Martín,ST
+Mexico,Julián Quiñones,RW
+Mexico,Roberto Alvarado,RW
+Mexico,Alexis Vega,LW
+Mexico,Orbelín Pineda,AM
+Mexico,Luis Romo,CM
+Mexico,Luis Chávez,CM
+Mexico,Álvaro Fidalgo,CM
+Mexico,Érick Sánchez,CM
+Mexico,Edson Álvarez,DM
+Mexico,Érik Lira,DM
+Mexico,Jorge Sánchez,RB
+Mexico,Gerardo Arteaga,LB
+Mexico,Mateo Chávez,LB
+Mexico,César Montes,CB
+Saudi Arabia,Saleh Al-Shehri,ST
+Saudi Arabia,Firas Al-Buraikan,ST
+Saudi Arabia,Abdullah Al-Hamdan,ST
+Saudi Arabia,Salem Al-Dawsari,LW
+Saudi Arabia,Hattan Bahebri,LW
+Saudi Arabia,Fahad Al-Muwallad,RW
+Saudi Arabia,Abdulfattah Asiri,RW
+Saudi Arabia,Sami Al-Najei,AM
+Saudi Arabia,Salman Al-Faraj,CM
+Saudi Arabia,Ali Al-Hassan,CM
+Saudi Arabia,Housain Al-Mogahwi,CM
+Saudi Arabia,Yasser Al-Shahrani,LB
+Saudi Arabia,Mohammed Al-Fatil,CB
+France,Mattéo Guendouzi,CM
+France,Jonathan Clauss,RB
+France,Jules Koundé,RB
+France,Benjamin Pavard,RB
+France,William Saliba,CB
+France,Ibrahima Konaté,CB
+France,Raphaël Varane,CB
+France,Lucas Digne,LB
+France,Lucas Hernandez,LB
+France,N'Golo Kanté,CM
+France,Kingsley Coman,LW
+Brazil,Danilo,RB
+Brazil,Alex Sandro,LB
+Brazil,Éder Militão,CB
+Brazil,Fabinho,DM
+Germany,Niklas Süle,CB
+Germany,David Raum,LB
+Spain,Álvaro Carreras,LB
+Spain,Dean Huijsen,CB
+England,John Stones,CB
+England,Kieran Trippier,RB
+England,Kobbie Mainoo,CM
+England,Ivan Toney,ST

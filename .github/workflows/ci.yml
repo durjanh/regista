@@ -1,0 +1,181 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  api:
+    name: API — lint, tests (coverage floor 90%), offline eval gate
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/api
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: |
+            services/api/requirements*.txt
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements-dev.txt ]; then
+            pip install -r requirements-dev.txt
+          else
+            pip install -r requirements.txt pytest ruff
+          fi
+
+      - name: Ruff
+        run: ruff check .
+
+      - name: Pytest with coverage (fails below the 90% floor in pyproject.toml)
+        run: pytest --cov=app --cov-report=term --cov-report=xml:coverage.xml
+
+      - name: Coverage summary
+        if: always()
+        run: |
+          python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import pathlib, xml.etree.ElementTree as ET
+          p = pathlib.Path("coverage.xml")
+          if p.exists():
+              print(f"## API test coverage: **{float(ET.parse(p).getroot().get('line-rate')) * 100:.1f}%** (floor 90%)")
+          PY
+
+      - name: Evaluation gate (grounding, fidelity, calibration, scouting, truth score)
+        run: python -m app.evals.run --mode offline --threshold 0.95 --record --output eval-results/results.json
+
+      - name: Truth score summary
+        if: always()
+        run: |
+          python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json, pathlib
+          p = pathlib.Path("../../data/reference/truth-latest.json")
+          if p.exists():
+              t = json.loads(p.read_text())
+              print("## Truth score (planted changes vs agent detections, fresh seeds)")
+              print(f"- Recall on observable plants: **{t['recall']}** over {t['plants']} plants in {t['matches']} matches")
+              print(f"- False alarms per match: **{t['false_alarms_per_match']}** (controls: {t['control_false_alarms_per_match']})")
+              print(f"- Median seconds to detect: **{t['median_seconds_to_detect']}**; explanation accuracy: **{t['explanation_accuracy']}**")
+              print("| Difficulty | Recall | Plants |\n|---|---|---|")
+              for d in t["by_difficulty"]:
+                  print(f"| {d['difficulty']} | {d['recall']} | {d['plants']} |")
+          PY
+
+      - name: Upload evaluation results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: eval-results
+          path: |
+            services/api/eval-results/
+            services/api/coverage.xml
+            data/reference/truth-latest.json
+            data/reference/truth-score-history.json
+            docs/truth-score.svg
+
+  web:
+    name: Web — typecheck, tests (coverage floor), build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/web
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"   # jsdom needs Node >= 22.22
+          cache: npm
+          cache-dependency-path: apps/web/package-lock.json
+
+      - run: npm ci
+      - run: npm run typecheck
+      - name: Vitest with coverage (thresholds in vitest.config.ts)
+        run: npm run test:coverage
+      - run: npm run build
+
+  bicep:
+    name: Infrastructure — Bicep build and lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Bicep
+        run: az bicep install
+
+      - name: Build every profile (Container Apps, AKS standard, AKS enterprise)
+        run: |
+          az bicep build --file infra/main.bicep --stdout > /dev/null
+          az bicep build-params --file infra/main.bicepparam --stdout > /dev/null
+          az bicep build --file infra/aks/main.bicep --stdout > /dev/null
+          az bicep build --file infra/aks-enterprise/main.bicep --stdout > /dev/null
+          for f in infra/aks/main.parameters.json infra/aks-enterprise/main.parameters.json; do python3 -m json.tool "$f" > /dev/null; done
+
+      - name: Lint (warnings fail the build)
+        run: |
+          set -o pipefail
+          out=""
+          for f in infra/main.bicep infra/aks/main.bicep infra/aks-enterprise/main.bicep; do out="$out$(az bicep lint --file "$f" 2>&1 || true)"; done
+          for f in infra/modules/*.bicep; do out="$out$(az bicep lint --file "$f" 2>&1 || true)"; done
+          echo "$out"
+          if echo "$out" | grep -Eq "(Warning|Error) "; then
+            echo "::error::Bicep lint reported diagnostics"
+            exit 1
+          fi
+
+  deploy-config:
+    name: azd projects, Kubernetes manifests and hooks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: azure.yaml files and manifests parse
+        run: |
+          ruby -ryaml -e '
+            %w[azure.yaml deploy/aks/azure.yaml deploy/aks-enterprise/azure.yaml].each { |f| YAML.load_file(f) }
+            Dir["deploy/k8s/**/*.yaml"].each { |f| YAML.load_stream(File.read(f)).each { |d| abort("#{f}: missing kind") unless d["kind"] } }
+            puts "ok"'
+
+      - name: Shared web manifests are identical in both AKS profiles
+        run: |
+          diff deploy/k8s/web/10-deployment.yaml deploy/k8s/web-enterprise/10-deployment.yaml
+          diff deploy/k8s/web/11-service.yaml deploy/k8s/web-enterprise/11-service.yaml
+
+      - name: Hook scripts
+        run: |
+          for f in deploy/hooks/*.sh; do sh -n "$f"; done; for f in scripts/*.sh; do bash -n "$f"; done
+          shellcheck -S warning deploy/hooks/*.sh
+
+  functions:
+    name: Functions — dependency and import check
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/functions
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: services/functions/requirements.txt
+
+      - run: pip install -r requirements.txt
+
+      - name: Import function app (validates triggers and bindings register)
+        run: python -c "import function_app; print('registered:', [f.get_function_name() for f in function_app.app.get_functions()])"

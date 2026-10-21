@@ -1,0 +1,91 @@
+# Regista: provision and deploy any profile with azd from Azure DevOps.
+#
+#   containerapps   Azure Container Apps (default; the live judge demo)
+#   aks             AKS standard: public ingress, keyless PaaS
+#   aks-enterprise  private AKS behind API Management Standard v2 (VNet integration), private endpoints;
+#                   the deploy stage runs on the Managed DevOps Pool inside the VNet
+#
+# Preview (what-if) -> Provision -> Deploy. Provision and Deploy are deployment jobs on the environment
+# "regista-<profile>": add an approval check there so a person reads the what-if before anything changes.
+# Setup (service connection with workload identity federation, variable groups): scripts/setup-azure-devops.sh
+
+trigger: none
+pr: none
+
+parameters:
+  - name: profile
+    displayName: Deployment profile
+    type: string
+    default: containerapps
+    values:
+      - containerapps
+      - aks
+      - aks-enterprise
+  - name: serviceConnection
+    displayName: Azure service connection (workload identity federation)
+    type: string
+    default: regista-azure
+  - name: managedPool
+    displayName: Managed DevOps Pool for enterprise deploys (AZURE_DEVOPS_POOL_NAME output)
+    type: string
+    default: regista-mdp
+
+variables:
+  # AZURE_ENV_NAME, AZURE_LOCATION, AZURE_SUBSCRIPTION_ID, AZURE_RESOURCE_GROUP, and per profile:
+  # APIM_PUBLISHER_EMAIL, BUDGET_EMAIL, AZURE_DEVOPS_ORG_URL, DEVOPS_INFRASTRUCTURE_PRINCIPAL_ID
+  - group: regista-${{ parameters.profile }}
+
+stages:
+  - stage: Preview
+    displayName: What-if
+    jobs:
+      - job: preview
+        pool:
+          vmImage: ubuntu-latest
+        steps:
+          - template: templates/azd-steps.yml
+            parameters:
+              serviceConnection: ${{ parameters.serviceConnection }}
+              profile: ${{ parameters.profile }}
+              command: preview
+
+  - stage: Provision
+    displayName: Provision (Bicep)
+    dependsOn: Preview
+    jobs:
+      - deployment: provision
+        environment: regista-${{ parameters.profile }}
+        pool:
+          vmImage: ubuntu-latest
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - template: templates/azd-steps.yml
+                  parameters:
+                    serviceConnection: ${{ parameters.serviceConnection }}
+                    profile: ${{ parameters.profile }}
+                    command: provision
+
+  - stage: Deploy
+    displayName: Build and deploy (azd deploy)
+    dependsOn: Provision
+    jobs:
+      - deployment: deploy
+        environment: regista-${{ parameters.profile }}
+        # The enterprise API server and registry are private: only an agent inside the VNet can reach them.
+        ${{ if eq(parameters.profile, 'aks-enterprise') }}:
+          pool:
+            name: ${{ parameters.managedPool }}
+        ${{ else }}:
+          pool:
+            vmImage: ubuntu-latest
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - template: templates/azd-steps.yml
+                  parameters:
+                    serviceConnection: ${{ parameters.serviceConnection }}
+                    profile: ${{ parameters.profile }}
+                    command: deploy

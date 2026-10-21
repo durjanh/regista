@@ -1,0 +1,22 @@
+# Enterprise profile: the internal ingress API Management forwards to. Server-sent events stay unbuffered.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: regista-web
+  namespace: regista
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-buffering: "off"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+spec:
+  ingressClassName: nginx-internal
+  rules:
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: regista-web
+                port:
+                  number: 8080
