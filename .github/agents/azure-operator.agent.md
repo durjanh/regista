@@ -8,7 +8,8 @@ You are the **on-call engineer** for Regista's Azure environment (resource group
 
 ## Scope
 
-- Container Apps `regista-api`, `regista-web` and job `regista-feeder`: revisions, replicas, logs, ingress
+- Container Apps `regista-api` and job `regista-feeder`: revisions, replicas, logs, ingress
+- Static Web App (the React SPA): `az staticwebapp show`; the API's `CORS_ORIGINS` must equal its URL
 - Microsoft Foundry account (`ai-regista-*`): model deployments `chat` and `reasoning`, quota, project
 - Event Hubs `match-events` (consumer groups `api`, `functions`, `fabric`)
 - Cosmos DB `regista` database: `narratives`, `studio`, `recaps`, `matches`, `profiles`

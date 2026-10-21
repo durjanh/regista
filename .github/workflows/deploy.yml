@@ -30,11 +30,12 @@ env:
 
 jobs:
   containers:
-    name: Build images and roll out Container Apps
+    name: Build the API image and roll out Container Apps
     runs-on: ubuntu-latest
     environment: production
     outputs:
       api_url: ${{ steps.names.outputs.api_url }}
+      static_web_app: ${{ steps.names.outputs.static_web_app }}
       web_url: ${{ steps.names.outputs.web_url }}
       function_app: ${{ steps.names.outputs.function_app }}
     steps:
@@ -54,7 +55,7 @@ jobs:
             echo "acr=$(out ACR_NAME)"
             echo "login_server=$(out ACR_LOGIN_SERVER)"
             echo "api_app=$(out API_APP_NAME)"
-            echo "web_app=$(out WEB_APP_NAME)"
+            echo "static_web_app=$(out STATIC_WEB_APP_NAME)"
             echo "feeder_job=$(out FEEDER_JOB_NAME)"
             echo "api_url=$(out API_URL)"
             echo "web_url=$(out WEB_URL)"
@@ -69,19 +70,12 @@ jobs:
             -t "regista-api:${IMAGE_TAG}" -t "regista-api:latest" \
             -f services/api/Dockerfile .
 
-      - name: Build web image (ACR Tasks)
-        run: |
-          az acr build -r "${{ steps.names.outputs.acr }}" \
-            -t "regista-web:${IMAGE_TAG}" -t "regista-web:latest" \
-            -f apps/web/Dockerfile apps/web
-
       - name: Roll out
         env:
           DEPLOYER_PRINCIPAL_ID: ""
         run: |
           RG="$AZURE_RESOURCE_GROUP"
           API_IMG="${{ steps.names.outputs.login_server }}/regista-api:${IMAGE_TAG}"
-          WEB_IMG="${{ steps.names.outputs.login_server }}/regista-web:${IMAGE_TAG}"
           current=$(az containerapp show -g "$RG" -n "${{ steps.names.outputs.api_app }}" --query "properties.template.containers[0].image" -o tsv)
 
           if [[ "$current" == mcr.microsoft.com/* ]]; then
@@ -92,13 +86,45 @@ jobs:
             export DEPLOYER_PRINCIPAL_ID=$(python3 -c "import base64,json,sys; p=sys.argv[1].split('.')[1]; p+='='*(-len(p)%4); print(json.loads(base64.urlsafe_b64decode(p))['oid'])" "$token")
             az deployment group create -g "$RG" -n "$DEPLOYMENT_NAME" \
               --template-file infra/main.bicep --parameters infra/main.bicepparam \
-              --parameters "apiImage=$API_IMG" "webImage=$WEB_IMG" -o none
+              --parameters "apiImage=$API_IMG" -o none
           else
-            echo "Fast path → new revisions with the new images"
+            echo "Fast path → a new revision with the new image"
             az containerapp update -g "$RG" -n "${{ steps.names.outputs.api_app }}" --image "$API_IMG" -o none
-            az containerapp update -g "$RG" -n "${{ steps.names.outputs.web_app }}" --image "$WEB_IMG" -o none
             az containerapp job update -g "$RG" -n "${{ steps.names.outputs.feeder_job }}" --image "$API_IMG" -o none
           fi
+
+  web:
+    name: Build the SPA and deploy it to Azure Static Web Apps
+    needs: containers
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: apps/web/package-lock.json
+
+      - name: Build with the API's address (the SPA calls it directly; CORS allows only the Static Web App)
+        working-directory: apps/web
+        env:
+          VITE_API_BASE_URL: ${{ needs.containers.outputs.api_url }}
+        run: npm ci && npm run build
+
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      # The deployment token is read at run time through OIDC; it is never stored as a repository secret.
+      - name: Upload to Static Web Apps
+        run: |
+          token=$(az staticwebapp secrets list -n "${{ needs.containers.outputs.static_web_app }}" -g "$AZURE_RESOURCE_GROUP" --query properties.apiKey -o tsv)
+          echo "::add-mask::$token"
+          npx --yes @azure/static-web-apps-cli@2.0.10 deploy apps/web/dist --deployment-token "$token" --env production
 
   functions:
     name: Deploy Azure Functions (recap automation)
@@ -123,8 +149,8 @@ jobs:
 
   smoke:
     name: Smoke test
-    needs: [containers, functions]
-    if: always() && needs.containers.result == 'success'
+    needs: [containers, web, functions]
+    if: always() && needs.containers.result == 'success' && needs.web.result == 'success'
     runs-on: ubuntu-latest
     steps:
       - name: API health
@@ -137,22 +163,26 @@ jobs:
           done
           exit 1
 
-      - name: Web health
+      - name: Static Web App serves the SPA
         run: |
           for i in $(seq 1 30); do
-            curl -fsS "${{ needs.containers.outputs.web_url }}/healthz" && exit 0
-            echo "waiting for web ($i/30)…"; sleep 10
+            curl -fsS "${{ needs.containers.outputs.web_url }}/" -o /dev/null && exit 0
+            echo "waiting for the Static Web App ($i/30)…"; sleep 10
           done
           exit 1
 
-      - name: Web proxies the API
-        run: curl -fsS "${{ needs.containers.outputs.web_url }}/api/matches" | head -c 400
+      - name: API allows the Static Web App origin (CORS)
+        run: |
+          web="${{ needs.containers.outputs.web_url }}"
+          allowed=$(curl -fsS -H "Origin: $web" -D - -o /dev/null "${{ needs.containers.outputs.api_url }}/api/matches" | tr -d '\r' | awk -F': ' 'tolower($1)=="access-control-allow-origin"{print $2}')
+          echo "Access-Control-Allow-Origin: $allowed"
+          [ "$allowed" = "$web" ]
 
       - name: Summary
         run: |
           {
             echo "## Deployed"
-            echo "- Web: ${{ needs.containers.outputs.web_url }}"
+            echo "- Web (Static Web Apps): ${{ needs.containers.outputs.web_url }}"
             echo "- API: ${{ needs.containers.outputs.api_url }}/api/health"
             echo "- MCP: ${{ needs.containers.outputs.api_url }}/mcp"
           } >> "$GITHUB_STEP_SUMMARY"

@@ -26,26 +26,35 @@ services:
       context: ../..
     k8s:
       namespace: regista
-      deploymentPath: ../../deploy/k8s/api
+      deploymentPath: ../../deploy/k8s/aks-enterprise
       deployment:
         name: regista-api
       service:
+        name: regista-api
+      ingress:
         name: regista-api
   web:
     project: ../../apps/web
     language: js
-    host: aks
-    docker:
-      path: ./Dockerfile
-    k8s:
-      namespace: regista
-      deploymentPath: ../../deploy/k8s/web-enterprise
-      deployment:
-        name: regista-web
-      service:
-        name: regista-web
-      ingress:
-        name: regista-web
+    host: staticwebapp
+    dist: dist                 # Vite build output; the SPA calls API_URL directly (CORS)
+    hooks:
+      prepackage:
+      shell: sh
+      run: |
+        set -e
+        [ -f package.json ] || cd apps/web 2>/dev/null || cd ../../apps/web
+        if [ -z "${API_URL:-}" ]; then echo "API_URL not known yet: run 'azd provision' before packaging the web app"; exit 0; fi
+        printf 'VITE_API_BASE_URL=%s\n' "$API_URL" > .env.production.local
+      predeploy:
+      shell: sh
+      run: |
+        set -e
+        [ -f package.json ] || cd apps/web 2>/dev/null || cd ../../apps/web
+        if [ -z "${API_URL:-}" ]; then echo "API_URL not known yet: run 'azd provision' before packaging the web app"; exit 0; fi
+        printf 'VITE_API_BASE_URL=%s\n' "$API_URL" > .env.production.local
+        # azd up packages before it provisions; rebuild if this bundle was built without the API's address.
+        if [ -d dist ] && ! grep -rqs "${API_URL#https://}" dist/assets; then npm run build; fi
 hooks:
   postprovision:
     shell: sh

@@ -8,9 +8,11 @@ The app and the platform (Foundry, Event Hubs, Cosmos DB, Storage, Functions, Fa
 
 | Profile | azd project | Infrastructure | What it adds | Rough monthly cost* |
 |---|---|---|---|---|
-| **containerapps** (default, live judge demo) | `azure.yaml` (repo root) | `infra/main.bicep` | Container Apps (API, web, feeder job) | ~$110–200 |
-| **aks** | `deploy/aks/azure.yaml` | `infra/aks/main.bicep` | AKS (Entra RBAC, workload identity, CNI overlay + Cilium, app routing NGINX, Container Insights), Kubernetes manifests in `deploy/k8s` | ~$250–400 |
-| **aks-enterprise** | `deploy/aks-enterprise/azure.yaml` | `infra/aks-enterprise/main.bicep` | VNet + NSGs, private endpoints and private DNS for ACR (Premium), Storage, Cosmos DB, Event Hubs and Foundry; private AKS (Standard tier, Azure Policy); internal NGINX on 10.40.4.10; API Management Standard v2 as the only public endpoint (VNet integration out to the ingress); VNet-integrated Functions; Managed DevOps Pool | ~$1,000–1,400 |
+| **containerapps** (default, live judge demo) | `azure.yaml` (repo root) | `infra/main.bicep` | Container Apps (API, feeder job); React SPA on Static Web Apps (Free) | ~$90–180 |
+| **aks** | `deploy/aks/azure.yaml` | `infra/aks/main.bicep` | AKS (Entra RBAC, workload identity, CNI overlay + Cilium, Container Insights); the API on app-routing NGINX with a static IP, DNS label and Let's Encrypt HTTPS; SPA on Static Web Apps (Free); manifests in `deploy/k8s/aks` | ~$250–400 |
+| **aks-enterprise** | `deploy/aks-enterprise/azure.yaml` | `infra/aks-enterprise/main.bicep` | VNet + NSGs, private endpoints and private DNS for ACR (Premium), Storage, Cosmos DB, Event Hubs and Foundry; private AKS (Standard tier, Azure Policy); internal NGINX on 10.40.4.10; API Management Standard v2 as the only public API endpoint (VNet integration out to the ingress); SPA on Static Web Apps (Standard); VNet-integrated Functions; Managed DevOps Pool | ~$1,000–1,400 |
+
+**Front end in every profile: Azure Static Web Apps.** The SPA calls the API directly at the URL baked in at build time (`VITE_API_BASE_URL`), and the API's `CORS_ORIGINS` allows only the Static Web App. Static Web Apps isn't offered in UK South, so its resource lives in West Europe (metadata only; the files are served from the global edge).
 
 \*Estimates only, from list prices at the time of writing, before model tokens and Fabric. Check the [pricing calculator](https://azure.microsoft.com/pricing/calculator/) for your region. The biggest enterprise items are API Management Standard v2 and the AKS nodes; tear the enterprise profile down when you are not using it.
 
@@ -36,7 +38,7 @@ azd env set AKS_AUTHORIZED_IP_RANGES "$(curl -s https://api.ipify.org)/32"   # o
 azd provision --preview && azd up
 ```
 
-The postprovision hook grants you *Azure Kubernetes Service RBAC Cluster Admin* and AcrPush (by role name; `az role assignment create` is idempotent). The postdeploy hook waits for the ingress IP, stores it as `REGISTA_PUBLIC_URL` (so the next provision gives it to the recap Function without drift) and smoke-tests `/api/health`. The ingress is plain HTTP on the load balancer IP; add a domain and TLS (app routing with a Key Vault certificate) before real users.
+Set `azd env set LETSENCRYPT_EMAIL you@example.com` first. The postprovision hook grants you *Azure Kubernetes Service RBAC Cluster Admin* and AcrPush (by role name; `az role assignment create` is idempotent) and installs cert-manager (pinned v1.21.2). The API gets a stable name from a static public IP with a DNS label (`API_URL`, known at provision time) and a Let's Encrypt certificate; it must be HTTPS because the SPA on Static Web Apps is. The postdeploy hook smoke-tests `/api/health`, checks the API's CORS allows the Static Web App, and checks the site answers. The first certificate can take a minute or two.
 
 ### AKS enterprise (azd, deploy from inside the VNet)
 
@@ -47,7 +49,7 @@ azd env set APIM_PUBLISHER_EMAIL you@example.com
 azd env set AZURE_DEVOPS_ORG_URL https://dev.azure.com/<org>                       # for the Managed DevOps Pool
 azd env set DEVOPS_INFRASTRUCTURE_PRINCIPAL_ID "$(az ad sp list --display-name DevOpsInfrastructure --query '[0].id' -o tsv)"
 azd provision --preview
-azd provision      # one pass; the public URL is the API Management gateway (REGISTA_PUBLIC_URL)
+azd provision      # one pass; API_URL is the API Management gateway, WEB_URL the Static Web App
 ```
 
 Then deploy from the Azure DevOps pipeline (below): its Deploy stage runs on the Managed DevOps Pool inside `snet-agents`, the only place that can reach the private API server and the private registry. API Management is the only public endpoint: its gateway (HTTPS on `*.azure-api.net`, rate-limited per client IP) reaches the internal NGINX ingress on 10.40.4.10 through VNet integration. There is no WAF in this profile; for production, put Front Door Premium or Application Gateway WAF in front of the gateway. The Front Door design, with its pitfalls, is in [ARCHITECTURE.md: Future: Azure Front Door](ARCHITECTURE.md#future-azure-front-door-in-front-of-api-management). For development only, `azd env set AKS_PRIVATE_CLUSTER false` plus `AKS_AUTHORIZED_IP_RANGES` makes the API server public but IP-restricted; the registry and data services stay private, so `azd deploy` from a laptop still needs the in-VNet agent.
@@ -136,11 +138,11 @@ gh workflow run deploy.yml
 gh run watch
 ```
 
-1. **ACR Tasks** builds `regista-api` from the repo root (the image bundles `data/`) and `regista-web` from `apps/web`. No Docker daemon or registry password is needed on the runner.
+1. **ACR Tasks** builds `regista-api` from the repo root (the image bundles `data/`). No Docker daemon or registry password is needed on the runner. The web app is built with `VITE_API_BASE_URL` set to the API's URL and uploaded to **Azure Static Web Apps** with the SWA CLI; the deployment token is read at run time through OIDC and never stored.
 2. **First rollout:** the workflow detects the placeholder image and runs the full Bicep template with the new images. That switches the ports, health probes and the feeder command to the real configuration.
 3. **Later rollouts:** the workflow uses `az containerapp update --image`, which creates new revisions.
 4. The Function App is deployed with `Azure/functions-action` (Flex Consumption remote build).
-5. A smoke test checks `/api/health`, the web `/healthz`, and the web → API proxy.
+5. A smoke test checks `/api/health`, that the Static Web App serves the SPA, and that the API's CORS allows the Static Web App's origin.
 
 The run summary lists the URLs. You can also read them from the deployment outputs:
 

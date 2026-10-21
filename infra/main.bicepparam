@@ -1,17 +1,16 @@
 using 'main.bicep'
 
 // Values here are safe defaults for the hackathon. The GitHub workflows override
-// deployerPrincipalId, apiImage and webImage on the command line.
+// deployerPrincipalId and apiImage on the command line.
 
 param environmentName = readEnvironmentVariable('AZURE_ENV_NAME', 'regista')
 param location = readEnvironmentVariable('AZURE_LOCATION', 'uksouth')
 param deployerPrincipalId = readEnvironmentVariable('DEPLOYER_PRINCIPAL_ID', readEnvironmentVariable('AZURE_PRINCIPAL_ID', ''))
 param deployerPrincipalType = readEnvironmentVariable('DEPLOYER_PRINCIPAL_TYPE', 'User')
 
-// azd sets SERVICE_*_IMAGE_NAME after the first deploy, so re-provisioning keeps the running images
-// (the GitHub workflows pass apiImage/webImage explicitly instead).
+// azd sets SERVICE_API_IMAGE_NAME after the first deploy, so re-provisioning keeps the running image
+// (the GitHub workflows pass apiImage explicitly instead). The web app is on Static Web Apps (no image).
 param apiImage = readEnvironmentVariable('SERVICE_API_IMAGE_NAME', 'mcr.microsoft.com/k8se/quickstart:latest')
-param webImage = readEnvironmentVariable('SERVICE_WEB_IMAGE_NAME', 'mcr.microsoft.com/k8se/quickstart:latest')
 
 param chatModel = {
   name: 'gpt-5.4-mini'

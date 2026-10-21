@@ -12,7 +12,7 @@
 set -euo pipefail
 
 ORG="" PROJECT="" PROFILE="containerapps" RG="rg-regista" LOCATION="uksouth" ENV_NAME="regista"
-APIM_EMAIL="" BUDGET_EMAIL="" REPO_TYPE="github" REPO="" GH_CONNECTION="" CONNECTION="regista-azure"
+APIM_EMAIL="" BUDGET_EMAIL="" LE_EMAIL="" REPO_TYPE="github" REPO="" GH_CONNECTION="" CONNECTION="regista-azure"
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --org) ORG="$2"; shift 2 ;;
@@ -23,6 +23,7 @@ while [[ $# -gt 0 ]]; do
     --env) ENV_NAME="$2"; shift 2 ;;
     --apim-email) APIM_EMAIL="$2"; shift 2 ;;
     --budget-email) BUDGET_EMAIL="$2"; shift 2 ;;
+    --letsencrypt-email) LE_EMAIL="$2"; shift 2 ;;
     --repo-type) REPO_TYPE="$2"; shift 2 ;;
     --repo) REPO="$2"; shift 2 ;;
     --github-connection) GH_CONNECTION="$2"; shift 2 ;;
@@ -34,6 +35,7 @@ done
 [[ -n "$ORG" && -n "$PROJECT" ]] || { echo "--org and --project are required" >&2; exit 2; }
 [[ "$PROFILE" =~ ^(containerapps|aks|aks-enterprise)$ ]] || { echo "--profile: containerapps | aks | aks-enterprise" >&2; exit 2; }
 [[ "$PROFILE" != "aks-enterprise" || -n "$APIM_EMAIL" ]] || { echo "--apim-email is required for aks-enterprise" >&2; exit 2; }
+[[ "$PROFILE" != "aks" || -n "$LE_EMAIL" ]] || { echo "--letsencrypt-email is required for aks (the API's HTTPS certificate)" >&2; exit 2; }
 
 az extension add --name azure-devops --only-show-errors 2>/dev/null || true
 az devops configure --defaults organization="$ORG" project="$PROJECT"
@@ -91,6 +93,7 @@ fi
 echo "▶ Variable group regista-$PROFILE"
 vars=(AZURE_ENV_NAME="$ENV_NAME" AZURE_LOCATION="$LOCATION" AZURE_SUBSCRIPTION_ID="$SUB_ID" AZURE_RESOURCE_GROUP="$RG")
 [[ -n "$BUDGET_EMAIL" ]] && vars+=(BUDGET_EMAIL="$BUDGET_EMAIL")
+[[ -n "$LE_EMAIL" ]] && vars+=(LETSENCRYPT_EMAIL="$LE_EMAIL")
 if [[ "$PROFILE" == "aks-enterprise" ]]; then
   DOI=$(az ad sp list --display-name DevOpsInfrastructure --query "[0].id" -o tsv)
   [[ -n "$DOI" ]] || echo "⚠ DevOpsInfrastructure service principal not found yet: register Microsoft.DevOpsInfrastructure and rerun."

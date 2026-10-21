@@ -1,8 +1,9 @@
-# Enterprise profile: the internal ingress API Management forwards to. Server-sent events stay unbuffered.
+# Enterprise profile: the internal ingress API Management forwards to (API Management terminates TLS on its public
+# gateway; inside the VNet the hop is plain HTTP). Server-sent events stay unbuffered.
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: regista-web
+  name: regista-api
   namespace: regista
   annotations:
     nginx.ingress.kubernetes.io/proxy-buffering: "off"
@@ -17,6 +18,6 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: regista-web
+                name: regista-api
                 port:
-                  number: 8080
+                  number: 8000

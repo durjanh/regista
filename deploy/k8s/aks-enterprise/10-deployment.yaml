@@ -1,3 +1,4 @@
+# Shared by deploy/k8s/aks and deploy/k8s/aks-enterprise (CI checks they are identical).
 # One replica on purpose: live sessions, the studio queue and caches are in memory (Cosmos DB persists the
 # record). Scaling out needs sticky sessions or moving that state to Cosmos DB / Redis first.
 apiVersion: apps/v1
@@ -47,6 +48,8 @@ spec:
             - { name: LIVE_SOURCE, value: replay }
             - { name: APPLICATIONINSIGHTS_CONNECTION_STRING, value: "{{.Env.APPLICATIONINSIGHTS_CONNECTION_STRING}}" }
             - { name: OTEL_SERVICE_NAME, value: regista-api }
+            - { name: PUBLIC_BASE_URL, value: "{{.Env.API_URL}}" }      # the API's own public URL (MCP)
+            - { name: CORS_ORIGINS, value: "{{.Env.WEB_URL}}" }         # only the Static Web App may call it from a browser
           resources:
             requests: { cpu: 500m, memory: 1Gi }
             limits: { cpu: "2", memory: 2Gi }

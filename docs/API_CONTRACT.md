@@ -267,7 +267,7 @@ Each message is `event: <name>\ndata: <json>\n\n`.
 | `LIVE_SOURCE` | `replay` (default, in-process) or `eventhub` |
 | `ONELAKE_WORKSPACE` / `ONELAKE_LAKEHOUSE` | Fabric OneLake export target for Data Forge datasets |
 | `APPLICATIONINSIGHTS_CONNECTION_STRING` | OpenTelemetry export |
-| `CORS_ORIGINS` | comma list, default `*` in dev |
+| `CORS_ORIGINS` | comma list, default `*` in dev. Deployments set it to the Static Web App's URL (the SPA calls the API cross-origin) |
 | `PUBLIC_BASE_URL` | the API's public URL, used by agents to reach the MCP server (default `http://localhost:8000`) |
 
 Every Azure dependency is optional. With none set, the API runs in `offline` mode with deterministic, data-grounded narratives so the demo never breaks.

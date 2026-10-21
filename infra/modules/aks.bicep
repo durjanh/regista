@@ -224,3 +224,4 @@ resource diagnostics 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' 
 output name string = cluster.name
 output id string = cluster.id
 output oidcIssuerUrl string = cluster.properties.oidcIssuerProfile.issuerURL
+output controlPlanePrincipalId string = controlPlaneIdentity.properties.principalId

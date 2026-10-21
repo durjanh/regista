@@ -1,0 +1,29 @@
+# Standard profile: HTTPS for the API at its stable hostname. Server-sent events need unbuffered, long-lived
+# connections. Browsers reach /api and /mcp here directly; the SPA is on Azure Static Web Apps.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: regista-api
+  namespace: regista
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt
+    nginx.ingress.kubernetes.io/proxy-buffering: "off"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+spec:
+  ingressClassName: nginx-public
+  tls:
+    - hosts:
+        - "{{.Env.API_HOST}}"
+      secretName: regista-api-tls
+  rules:
+    - host: "{{.Env.API_HOST}}"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: regista-api
+                port:
+                  number: 8000

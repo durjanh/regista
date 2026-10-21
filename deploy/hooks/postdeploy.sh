@@ -1,48 +1,27 @@
 #!/usr/bin/env sh
-# azd postdeploy hook for every profile: find the public URL, store it in the azd environment (REGISTA_PUBLIC_URL,
-# which the next provision passes to the recap Function so nothing drifts), point the Function at it, smoke-test.
+# azd postdeploy hook for every profile: smoke-test the API and the Static Web App.
+#   containerapps   API on its Container Apps URL
+#   aks             API on its stable hostname over HTTPS; the certificate can take a minute or two to issue
+#   aks-enterprise  API Management gateway (deploy runs on the in-VNet agent; the gateway is public)
 set -eu
 
-profile="${DEPLOYMENT_PROFILE:-containerapps}"
-url="${REGISTA_PUBLIC_URL:-}"
+api="${API_URL:-}"
+web="${WEB_URL:-}"
+[ -n "$api" ] || { echo "⚠ API_URL not set; skipping the smoke test."; exit 0; }
 
-case "$profile" in
-  containerapps)
-    url="${WEB_URL:-$url}"
-    ;;
-  aks)
-    az aks get-credentials -g "$AZURE_RESOURCE_GROUP" -n "$AZURE_AKS_CLUSTER_NAME" --overwrite-existing -o none
-    kubelogin convert-kubeconfig -l azurecli
-    for _ in $(seq 1 30); do
-      ip=$(kubectl -n regista get ingress regista-web -o jsonpath='{.status.loadBalancer.ingress[0].ip}' 2>/dev/null || true)
-      [ -n "$ip" ] && break
-      sleep 10
-    done
-    [ -n "${ip:-}" ] && url="http://$ip"
-    ;;
-  aks-enterprise)
-    : # Front Door's endpoint is known at provision time (REGISTA_PUBLIC_URL output).
-    ;;
-esac
-
-if [ -z "$url" ]; then
-  echo "⚠ No public URL yet; skipping the smoke test."
-  exit 0
-fi
-
-azd env set REGISTA_PUBLIC_URL "$url"
-if [ -n "${FUNCTION_APP_NAME:-}" ] && [ "$profile" = "aks" ]; then
-  az functionapp config appsettings set -g "$AZURE_RESOURCE_GROUP" -n "$FUNCTION_APP_NAME" \
-    --settings "REGISTA_API_URL=$url" -o none
-fi
-
-echo "▶ Smoke test $url/api/health"
+echo "▶ Smoke test $api/api/health"
+ok=""
 for _ in $(seq 1 30); do
-  if curl -fsS --max-time 10 "$url/api/health" >/dev/null 2>&1; then
-    echo "✔ Regista is live: $url"
-    exit 0
-  fi
+  if curl -fsS --max-time 10 "$api/api/health" >/dev/null 2>&1; then ok=1; break; fi
   sleep 10
 done
-echo "✖ $url/api/health did not answer within 5 minutes" >&2
-exit 1
+[ -n "$ok" ] || { echo "✖ $api/api/health did not answer within 5 minutes" >&2; exit 1; }
+
+if [ -n "$web" ]; then
+  # CORS: the API must accept the Static Web App's origin, or the browser blocks every call.
+  allowed=$(curl -fsS --max-time 10 -H "Origin: $web" -D - -o /dev/null "$api/api/health" | tr -d '\r' | \
+            awk -F': ' 'tolower($1)=="access-control-allow-origin"{print $2}')
+  [ "$allowed" = "$web" ] || [ "$allowed" = "*" ] || { echo "✖ CORS: API does not allow $web (got '${allowed:-none}')" >&2; exit 1; }
+  curl -fsS --max-time 10 -o /dev/null "$web/" || { echo "✖ $web did not answer" >&2; exit 1; }
+fi
+echo "✔ Regista is live: $web  (API $api)"

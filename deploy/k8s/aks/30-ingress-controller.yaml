@@ -1,0 +1,13 @@
+# Standard profile: a public NGINX controller from the application routing add-on, bound to the static public IP
+# (with its DNS label) that infra/aks/main.bicep creates, so the API's hostname never changes.
+# Microsoft supports the add-on's NGINX through November 2026; Gateway API is the migration path.
+apiVersion: approuting.kubernetes.azure.com/v1alpha1
+kind: NginxIngressController
+metadata:
+  name: nginx-public
+spec:
+  ingressClassName: nginx-public
+  controllerNamePrefix: nginx-public
+  loadBalancerAnnotations:
+    service.beta.kubernetes.io/azure-pip-name: "{{.Env.INGRESS_PIP_NAME}}"
+    service.beta.kubernetes.io/azure-load-balancer-resource-group: "{{.Env.INGRESS_PIP_RESOURCE_GROUP}}"

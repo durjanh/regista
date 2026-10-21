@@ -28,11 +28,12 @@ cd apps/web && npm install && npm run dev
 | `/forge` | Data Forge: natural-language what-if scenarios and the calibration report |
 | `/team/:teamId` | Team DNA: 150-year Elo history, record, recent results, top scorers |
 
-## Container
+## Hosting: Azure Static Web Apps
+
+In Azure the SPA is a static build on **Azure Static Web Apps** (global edge, managed TLS). It calls the API directly, with fetch and server-sent events, at the URL baked in at build time:
 
 ```bash
-docker build -t regista-web .
-docker run -p 8080:8080 -e API_UPSTREAM=https://<api-fqdn> regista-web
+VITE_API_BASE_URL=https://<api-host> npm run build      # azd, the workflows and scripts/deploy.sh do this for you
 ```
 
-nginx serves the SPA on port 8080. It proxies `/api/` and `/mcp` to `API_UPSTREAM` without buffering, so live server-sent-event streams work. `/healthz` returns 200.
+The API's `CORS_ORIGINS` allows only the Static Web App's origin. `public/staticwebapp.config.json` sends every client route (for example `/studio/:id` and `/overlay/:id`) to `index.html` and sets caching and security headers. Locally `VITE_API_BASE_URL` stays empty and Vite proxies `/api` and `/mcp` to `localhost:8000`.

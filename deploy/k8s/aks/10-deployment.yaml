@@ -1,0 +1,70 @@
+# Shared by deploy/k8s/aks and deploy/k8s/aks-enterprise (CI checks they are identical).
+# One replica on purpose: live sessions, the studio queue and caches are in memory (Cosmos DB persists the
+# record). Scaling out needs sticky sessions or moving that state to Cosmos DB / Redis first.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: regista-api
+  namespace: regista
+  labels:
+    app: regista-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: regista-api
+  template:
+    metadata:
+      labels:
+        app: regista-api
+        azure.workload.identity/use: "true"
+    spec:
+      serviceAccountName: regista-api
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: api
+          image: "{{.Env.SERVICE_API_IMAGE_NAME}}"
+          ports:
+            - containerPort: 8000
+          env:
+            - { name: AZURE_CLIENT_ID, value: "{{.Env.AZURE_CLIENT_ID}}" }
+            - { name: AZURE_OPENAI_ENDPOINT, value: "{{.Env.AZURE_OPENAI_ENDPOINT}}" }
+            - { name: AZURE_OPENAI_CHAT_DEPLOYMENT, value: "{{.Env.AZURE_OPENAI_CHAT_DEPLOYMENT}}" }
+            - { name: AZURE_OPENAI_REASONING_DEPLOYMENT, value: "{{.Env.AZURE_OPENAI_REASONING_DEPLOYMENT}}" }
+            - { name: FOUNDRY_PROJECT_ENDPOINT, value: "{{.Env.FOUNDRY_PROJECT_ENDPOINT}}" }
+            - { name: AZURE_AI_SERVICES_ENDPOINT, value: "{{.Env.AZURE_AI_SERVICES_ENDPOINT}}" }
+            - { name: AZURE_AI_SERVICES_REGION, value: "{{.Env.AZURE_LOCATION}}" }
+            - { name: AZURE_AI_SERVICES_RESOURCE_ID, value: "{{.Env.AZURE_AI_SERVICES_RESOURCE_ID}}" }
+            - { name: COSMOS_ENDPOINT, value: "{{.Env.COSMOS_ENDPOINT}}" }
+            - { name: COSMOS_DATABASE, value: "{{.Env.COSMOS_DATABASE}}" }
+            - { name: STORAGE_ACCOUNT_URL, value: "{{.Env.STORAGE_ACCOUNT_URL}}" }
+            - { name: EVENTHUB_FQDN, value: "{{.Env.EVENTHUB_FQDN}}" }
+            - { name: EVENTHUB_NAME, value: "{{.Env.EVENTHUB_NAME}}" }
+            - { name: EVENTHUB_CONSUMER_GROUP, value: api }
+            - { name: LIVE_SOURCE, value: replay }
+            - { name: APPLICATIONINSIGHTS_CONNECTION_STRING, value: "{{.Env.APPLICATIONINSIGHTS_CONNECTION_STRING}}" }
+            - { name: OTEL_SERVICE_NAME, value: regista-api }
+            - { name: PUBLIC_BASE_URL, value: "{{.Env.API_URL}}" }      # the API's own public URL (MCP)
+            - { name: CORS_ORIGINS, value: "{{.Env.WEB_URL}}" }         # only the Static Web App may call it from a browser
+          resources:
+            requests: { cpu: 500m, memory: 1Gi }
+            limits: { cpu: "2", memory: 2Gi }
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          startupProbe:
+            httpGet: { path: /api/health, port: 8000 }
+            periodSeconds: 5
+            failureThreshold: 36
+          readinessProbe:
+            httpGet: { path: /api/health, port: 8000 }
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: { path: /api/health, port: 8000 }
+            periodSeconds: 30
+            failureThreshold: 3

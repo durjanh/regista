@@ -33,7 +33,6 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       api_image: ${{ steps.images.outputs.api_image }}
-      web_image: ${{ steps.images.outputs.web_image }}
       deployer: ${{ steps.principal.outputs.oid }}
     steps:
       - uses: actions/checkout@v4
@@ -51,16 +50,13 @@ jobs:
           oid=$(python3 -c "import base64,json,sys; p=sys.argv[1].split('.')[1]; p+='='*(-len(p)%4); print(json.loads(base64.urlsafe_b64decode(p))['oid'])" "$token")
           echo "oid=$oid" >> "$GITHUB_OUTPUT"
 
-      # Re-running infra must never revert a rolled-out image to the placeholder.
-      - name: Read currently deployed images
+      # Re-running infra must never revert a rolled-out image to the placeholder. (The web app is on Static Web Apps.)
+      - name: Read currently deployed image
         id: images
         run: |
           api=$(az containerapp show -g "$AZURE_RESOURCE_GROUP" -n "${AZURE_ENV_NAME}-api" --query "properties.template.containers[0].image" -o tsv 2>/dev/null || true)
-          web=$(az containerapp show -g "$AZURE_RESOURCE_GROUP" -n "${AZURE_ENV_NAME}-web" --query "properties.template.containers[0].image" -o tsv 2>/dev/null || true)
           echo "api_image=${api}" >> "$GITHUB_OUTPUT"
-          echo "web_image=${web}" >> "$GITHUB_OUTPUT"
           echo "Current API image: ${api:-<none — placeholder will be used>}"
-          echo "Current web image: ${web:-<none — placeholder will be used>}"
 
       - name: What-if
         env:
@@ -68,7 +64,6 @@ jobs:
         run: |
           extra=()
           [ -n "${{ steps.images.outputs.api_image }}" ] && extra+=(--parameters "apiImage=${{ steps.images.outputs.api_image }}")
-          [ -n "${{ steps.images.outputs.web_image }}" ] && extra+=(--parameters "webImage=${{ steps.images.outputs.web_image }}")
           az deployment group what-if \
             --resource-group "$AZURE_RESOURCE_GROUP" \
             --name "$DEPLOYMENT_NAME" \
@@ -110,7 +105,6 @@ jobs:
         run: |
           extra=()
           [ -n "${{ needs.what-if.outputs.api_image }}" ] && extra+=(--parameters "apiImage=${{ needs.what-if.outputs.api_image }}")
-          [ -n "${{ needs.what-if.outputs.web_image }}" ] && extra+=(--parameters "webImage=${{ needs.what-if.outputs.web_image }}")
           az deployment group create \
             --resource-group "$AZURE_RESOURCE_GROUP" \
             --name "$DEPLOYMENT_NAME" \

@@ -3,6 +3,7 @@
 #   1. Grant whoever ran azd (a user, or the pipeline's service principal) Kubernetes access through Azure RBAC.
 #      Roles are assigned by *name* here, so no role-definition GUID is hard-coded; `az role assignment create`
 #      is idempotent.
+#   2. Standard profile: install cert-manager for the API's HTTPS certificate.
 set -eu
 
 : "${AZURE_AKS_CLUSTER_NAME:?run azd provision first}"
@@ -30,6 +31,17 @@ else
   echo "⚠ Could not resolve the deploying principal; grant 'Azure Kubernetes Service RBAC Cluster Admin' by hand."
 fi
 
-if [ "${DEPLOYMENT_PROFILE:-}" = "aks-enterprise" ]; then
-  echo "▶ Public URL (API Management gateway; live after 'azd deploy' from the in-VNet agent): ${REGISTA_PUBLIC_URL:-}"
+# Standard profile: cert-manager issues the API's Let's Encrypt certificate (the SPA on Static Web Apps is HTTPS, so
+# the API must be too). Pinned version; bump it deliberately. The enterprise cluster is private and its TLS ends at
+# API Management, so it needs neither cert-manager nor a reachable API server from here.
+CERT_MANAGER_VERSION="v1.21.2"
+if [ "${DEPLOYMENT_PROFILE:-}" = "aks" ]; then
+  : "${LETSENCRYPT_EMAIL:?set it first: azd env set LETSENCRYPT_EMAIL you@example.com}"
+  az aks get-credentials -g "$AZURE_RESOURCE_GROUP" -n "$AZURE_AKS_CLUSTER_NAME" --overwrite-existing -o none
+  kubelogin convert-kubeconfig -l azurecli
+  echo "▶ cert-manager $CERT_MANAGER_VERSION"
+  kubectl apply -f "https://github.com/cert-manager/cert-manager/releases/download/$CERT_MANAGER_VERSION/cert-manager.yaml"
+  kubectl -n cert-manager rollout status deployment/cert-manager-webhook --timeout=300s
 fi
+
+echo "▶ Web: ${WEB_URL:-}   API: ${API_URL:-}"

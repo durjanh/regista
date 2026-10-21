@@ -1,6 +1,7 @@
-// Regista on AKS (standard profile): the same platform as Container Apps, with the API, web app and feeder on a
-// keyless AKS cluster. Public ingress through the application routing add-on; PaaS services stay public with
-// Entra-only auth (no keys anywhere). Deployed by azd from deploy/aks/azure.yaml:
+// Regista on AKS (standard profile): the same platform as Container Apps, with the API and feeder on a keyless AKS
+// cluster and the React front end on Azure Static Web Apps. The API is published by an app-routing NGINX controller
+// on a static public IP with a DNS label, with HTTPS from cert-manager + Let's Encrypt (the SPA is HTTPS, so the API
+// must be too). PaaS services stay public with Entra-only auth (no keys anywhere). Deployed by azd from deploy/aks:
 //
 //   cd deploy/aks && azd up
 //
@@ -52,8 +53,14 @@ param aksAuthorizedIpRanges string = ''
 
 param deployFunctions bool = true
 
-@description('Public URL of the app (set by the postdeploy hook once the ingress has an address), for the recap Function.')
-param publicUrl string = ''
+@allowed([
+  'Free'
+  'Standard'
+])
+param staticWebAppSku string = 'Free'
+
+@description('Static Web Apps region (metadata only; files are served from the global edge). Not offered in UK South.')
+param staticWebAppLocation string = 'westeurope'
 param budgetContactEmail string = ''
 @description('Monthly budget (string because azd substitutes parameters as text).')
 param budgetAmount string = '300'
@@ -111,6 +118,49 @@ module aks '../modules/aks.bicep' = {
   }
 }
 
+// Stable public address for the API: a static IP with a DNS label (<label>.<region>.cloudapp.azure.com). The
+// nginx-public controller (deploy/k8s/aks) binds to it, and cert-manager gets a Let's Encrypt certificate for the name.
+var apiDnsLabel = 'regista-${environmentName}-${tok}'
+var networkContributorRoleId = '4d97b98b-1d4f-4787-a291-c67834d212e7'   // verified on Microsoft Learn
+
+resource ingressIp 'Microsoft.Network/publicIPAddresses@2024-07-01' = {
+  name: dashed('pip-ingress', environmentName, tok)
+  location: location
+  tags: allTags
+  sku: {
+    name: 'Standard'
+  }
+  properties: {
+    publicIPAllocationMethod: 'Static'
+    dnsSettings: {
+      domainNameLabel: apiDnsLabel
+    }
+  }
+}
+
+// The AKS control plane attaches the IP to the controller's load balancer.
+resource ingressIpRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(ingressIp.id, aks.name, networkContributorRoleId)
+  scope: ingressIp
+  properties: {
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', networkContributorRoleId)
+    principalId: aks.outputs.controlPlanePrincipalId
+    principalType: 'ServicePrincipal'
+  }
+}
+
+var apiUrl = 'https://${ingressIp.properties.dnsSettings.fqdn}'
+
+module staticWebApp '../modules/staticwebapp.bicep' = {
+  name: 'staticwebapp'
+  params: {
+    tags: allTags
+    name: dashed('swa', environmentName, tok)
+    location: staticWebAppLocation
+    sku: staticWebAppSku
+  }
+}
+
 module functions '../modules/functions.bicep' = if (deployFunctions) {
   name: 'functions'
   params: {
@@ -127,8 +177,7 @@ module functions '../modules/functions.bicep' = if (deployFunctions) {
     eventHubName: platform.outputs.eventHubName
     cosmosEndpoint: platform.outputs.cosmosEndpoint
     cosmosDatabase: platform.outputs.cosmosDatabase
-    // The ingress address is only known after the first `azd deploy`; the postdeploy hook stores it as REGISTA_PUBLIC_URL.
-    apiUrl: publicUrl
+    apiUrl: apiUrl
     appInsightsConnectionString: platform.outputs.appInsightsConnectionString
   }
 }
@@ -143,7 +192,13 @@ output DEPLOYMENT_PROFILE string = 'aks'
 output AZURE_AKS_CLUSTER_NAME string = aks.outputs.name
 output AZURE_CONTAINER_REGISTRY_ENDPOINT string = platform.outputs.registryLoginServer
 output AZURE_CONTAINER_REGISTRY_NAME string = platform.outputs.registryName
-output INGRESS_CLASS string = 'webapprouting.kubernetes.azure.com'
+output INGRESS_CLASS string = 'nginx-public'
+output INGRESS_PIP_NAME string = ingressIp.name
+output INGRESS_PIP_RESOURCE_GROUP string = resourceGroup().name
+output API_HOST string = ingressIp.properties.dnsSettings.fqdn
+output API_URL string = apiUrl
+output WEB_URL string = staticWebApp.outputs.url
+output STATIC_WEB_APP_NAME string = staticWebApp.outputs.name
 output AZURE_CLIENT_ID string = platform.outputs.identityClientId
 output AZURE_OPENAI_ENDPOINT string = platform.outputs.openAiEndpoint
 output AZURE_OPENAI_CHAT_DEPLOYMENT string = platform.outputs.chatDeploymentName

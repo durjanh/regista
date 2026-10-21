@@ -34,9 +34,6 @@ param placeholderImage string = 'mcr.microsoft.com/k8se/quickstart:latest'
 @description('API container image. The workflows pass the current image so re-running infra never reverts a deployment.')
 param apiImage string = placeholderImage
 
-@description('Web container image.')
-param webImage string = placeholderImage
-
 @description('Fast model for live narration and translation. Verified Global Standard in uksouth: gpt-5.4-mini 2026-03-17.')
 param chatModel object = {
   name: 'gpt-5.4-mini'
@@ -86,6 +83,16 @@ param fabricAdminEmail string = ''
 
 param tags object = {}
 
+@allowed([
+  'Free'
+  'Standard'
+])
+@description('Static Web Apps plan for the React front end. Free has no SLA; Standard adds it.')
+param staticWebAppSku string = 'Free'
+
+@description('Static Web Apps region (metadata only; files are served from the global edge). Not offered in UK South.')
+param staticWebAppLocation string = 'westeurope'
+
 @description('E-mail for the monthly cost budget alerts (50%, 90% actual; 100% forecast). Leave empty to skip the budget.')
 param budgetContactEmail string = ''
 
@@ -118,7 +125,7 @@ var names = {
   storage: compact('st', environmentName, tok)
   containerEnv: dashed('cae', environmentName, tok)
   apiApp: '${environmentName}-api'
-  webApp: '${environmentName}-web'
+  staticWebApp: dashed('swa', environmentName, tok)
   feederJob: '${environmentName}-feeder'
   functionsPlan: dashed('plan', environmentName, tok)
   functionsApp: dashed('func', environmentName, tok)
@@ -246,6 +253,16 @@ var apiEnv = [
   { name: 'OTEL_SERVICE_NAME', value: 'regista-api' }
 ]
 
+module staticWebApp 'modules/staticwebapp.bicep' = {
+  name: 'staticwebapp'
+  params: {
+    tags: allTags
+    name: names.staticWebApp
+    location: staticWebAppLocation
+    sku: staticWebAppSku
+  }
+}
+
 module containerApps 'modules/containerapps.bicep' = {
   name: 'containerapps'
   params: {
@@ -253,15 +270,14 @@ module containerApps 'modules/containerapps.bicep' = {
     tags: allTags
     environmentName: names.containerEnv
     apiAppName: names.apiApp
-    webAppName: names.webApp
     feederJobName: names.feederJob
     logAnalyticsName: monitoring.outputs.logAnalyticsName
     identityId: identity.id
     registryLoginServer: registry.outputs.loginServer
     apiImage: apiImage
-    webImage: webImage
     placeholderImage: placeholderImage
     apiEnv: apiEnv
+    corsOrigins: staticWebApp.outputs.url
   }
 }
 
@@ -328,10 +344,10 @@ output ACR_NAME string = registry.outputs.name
 output ACR_LOGIN_SERVER string = registry.outputs.loginServer
 output CONTAINER_ENV_NAME string = containerApps.outputs.environmentName
 output API_APP_NAME string = containerApps.outputs.apiAppName
-output WEB_APP_NAME string = containerApps.outputs.webAppName
+output STATIC_WEB_APP_NAME string = staticWebApp.outputs.name
 output FEEDER_JOB_NAME string = containerApps.outputs.feederJobName
 output API_URL string = containerApps.outputs.apiUrl
-output WEB_URL string = containerApps.outputs.webUrl
+output WEB_URL string = staticWebApp.outputs.url
 output MCP_URL string = '${containerApps.outputs.apiUrl}/mcp'
 output FUNCTION_APP_NAME string = deployFunctions ? names.functionsApp : ''
 output AI_ACCOUNT_NAME string = foundry.outputs.accountName

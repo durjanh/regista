@@ -1,6 +1,7 @@
 // Regista on AKS (enterprise profile): API Management is the only public endpoint.
 //
-//   Internet ─HTTPS─▶ API Management Standard v2 (policies, rate limits) ─VNet integration─▶ internal NGINX ingress
+//   Browser ─HTTPS─▶ Azure Static Web Apps (React SPA, global edge)
+//   Browser ─HTTPS─▶ API Management Standard v2 (policies, rate limits) ─VNet integration─▶ internal NGINX ingress
 //            ─▶ AKS (private API server) ─private endpoints─▶ ACR · Storage · Cosmos DB · Event Hubs · Foundry
 //
 // Deploys run from a Managed DevOps Pool inside the VNet (the private API server and registry are unreachable
@@ -70,6 +71,9 @@ param apimSku string = 'StandardV2'
 
 @description('Calls per minute per client IP at the gateway.')
 param apimCallsPerMinute int = 600
+
+@description('Static Web Apps region (metadata only; files are served from the global edge). Not offered in UK South.')
+param staticWebAppLocation string = 'westeurope'
 
 @description('Azure DevOps organization URL for the Managed DevOps Pool. Empty = no pool (deploy with az aks command invoke).')
 param azureDevOpsOrganizationUrl string = ''
@@ -233,6 +237,17 @@ module apim '../modules/apim.bicep' = {
   }
 }
 
+// The React SPA: Standard plan for the SLA. Static files are public by nature; it calls the API Management gateway.
+module staticWebApp '../modules/staticwebapp.bicep' = {
+  name: 'staticwebapp'
+  params: {
+    tags: allTags
+    name: dashed('swa', environmentName, tok)
+    location: staticWebAppLocation
+    sku: 'Standard'
+  }
+}
+
 module apimApi '../modules/apim-api.bicep' = {
   name: 'apim-api'
   params: {
@@ -301,7 +316,9 @@ output INGRESS_PRIVATE_IP string = ingressPrivateIp
 output INGRESS_SUBNET string = network.outputs.ingressSubnetName
 output APIM_NAME string = apim.outputs.name
 output APIM_ID string = apim.outputs.id
-output REGISTA_PUBLIC_URL string = 'https://${apim.outputs.gatewayHost}'
+output API_URL string = 'https://${apim.outputs.gatewayHost}'
+output WEB_URL string = staticWebApp.outputs.url
+output STATIC_WEB_APP_NAME string = staticWebApp.outputs.name
 output AZURE_DEVOPS_POOL_NAME string = (!empty(azureDevOpsOrganizationUrl) && !empty(devOpsInfrastructurePrincipalId)) ? dashed('mdp', environmentName, tok) : ''
 output AZURE_CLIENT_ID string = platform.outputs.identityClientId
 output AZURE_OPENAI_ENDPOINT string = platform.outputs.openAiEndpoint

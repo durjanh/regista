@@ -19,8 +19,9 @@ flowchart LR
   subgraph ACA["Azure Container Apps"]
     FEED["Job: regista-feeder<br/>(replays a match in real time)"]
     API["regista-api<br/>FastAPI · live engine · analytics<br/>Agent Framework · MCP server /mcp"]
-    WEB["regista-web<br/>React SPA via nginx"]
   end
+
+  WEB["Azure Static Web Apps<br/>React SPA · global edge · managed TLS"]
 
   subgraph Foundry["Microsoft Foundry"]
     MODELS["Models: chat (gpt-5.4-mini)<br/>reasoning (gpt-5.5)"]
@@ -59,8 +60,8 @@ flowchart LR
   FUNC -->|POST /api/recap| API
   FUNC --> COSMOS
   FUNC --> BLOB
-  WEB -->|/api, SSE| API
-  USERS(("Fans · producers · broadcast overlay")) --> WEB
+  USERS(("Fans · producers · broadcast overlay")) -->|loads the SPA| WEB
+  USERS -->|/api · SSE · /mcp, CORS| API
   COPILOT(("GitHub Copilot Agent Mode<br/>+ Azure MCP Server")) -->|MCP| API
   EVALS -. CI gate .- API
   GRADER -. CI gate .- EVALS
@@ -114,13 +115,14 @@ The agents reach match data through the **same MCP server** (`/mcp`) that broadc
 
 ## Deployment profiles
 
-One platform, three ways to run the compute. All three are azd projects, built from the same Bicep modules, and deployed by azd, GitHub Actions or Azure Pipelines (details and costs in [DEPLOYMENT.md](DEPLOYMENT.md#deployment-profiles)).
+One platform, three ways to run the compute. In every profile the React front end is on **Azure Static Web Apps** and calls the API directly (fetch and server-sent events) at a URL baked in at build time, with the API's CORS limited to the Static Web App's origin. A linked backend was ruled out: it needs the Standard plan, can't link AKS, and would put a proxy in front of the live streams. All three are azd projects, built from the same Bicep modules, and deployed by azd, GitHub Actions or Azure Pipelines (details and costs in [DEPLOYMENT.md](DEPLOYMENT.md#deployment-profiles)).
 
 | | Container Apps | AKS standard | AKS enterprise |
 |---|---|---|---|
 | Diagram | [architecture.drawio](architecture.drawio) | [architecture-aks.drawio](architecture-aks.drawio) | [architecture-aks-enterprise.drawio](architecture-aks-enterprise.drawio) |
 | Entry point | `infra/main.bicep` | `infra/aks/main.bicep` | `infra/aks-enterprise/main.bicep` |
-| Edge | Container Apps ingress | App routing NGINX, public LB | API Management Standard v2 (public gateway, rate limits) → VNet integration → internal NGINX (10.40.4.10) |
+| Front end | Azure Static Web Apps (Free) | Azure Static Web Apps (Free) | Azure Static Web Apps (Standard) |
+| API edge | Container Apps ingress (HTTPS) | App routing NGINX on a static public IP with a DNS label, HTTPS from cert-manager + Let's Encrypt | API Management Standard v2 (public gateway, rate limits) → VNet integration → internal NGINX (10.40.4.10) |
 | Cluster access | n/a | Public API server, Entra-only, optional authorized IPs | Private API server; deploys from a Managed DevOps Pool in `snet-agents` |
 | PaaS network | Public endpoints, Entra-only | Public endpoints, Entra-only | Public access disabled; private endpoints + 9 private DNS zones |
 | Identity | User-assigned identity | Workload identity federated to the same identity; kubelet AcrPull | Same, plus NSGs, Cilium network policies, Azure Policy |
@@ -140,7 +142,7 @@ The enterprise profile ships without a WAF to keep it simple and affordable for 
 | API Management | Keep Standard v2 (it supports an inbound private endpoint *and* outbound VNet integration; classic tiers can't combine the two). Add a policy that rejects requests whose `X-Azure-FDID` header isn't your Front Door profile's `frontDoorId`, and key the rate limit on `X-Azure-ClientIP` |
 | Approval | Front Door's private endpoint arrives on API Management as *Pending*. Approve it in the postprovision hook: `az network private-endpoint-connection list --id <apim-id>`, then `... approve --id <connection-id>` |
 | Lock-down | API Management refuses `publicNetworkAccess: 'Disabled'` until a private endpoint exists. So the first provision runs twice: pass 1 creates everything and the hook approves the connection; pass 2 sets `Disabled`. Make it idempotent with a **preprovision** hook that checks Azure for an approved connection and sets `APIM_PUBLIC_NETWORK_ACCESS=Disabled`, so a fresh pipeline agent never re-opens the gateway |
-| Outputs | `REGISTA_PUBLIC_URL` becomes `https://<endpoint>.azurefd.net`; the recap Function and smoke tests use it |
+| Outputs | `API_URL` becomes `https://<endpoint>.azurefd.net`; the SPA build, the API's CORS check, the recap Function and the smoke tests use it |
 | Cost | Adds roughly $330 a month (Front Door Premium base fee) plus requests and data transfer. Estimate only |
 
 Alternatives: Application Gateway WAF v2 in the VNet in front of API Management (regional, no Private Link step), or Front Door with API Management Premium v2 VNet injection (a fully private gateway, at a higher API Management price).
@@ -149,14 +151,14 @@ Alternatives: Application Gateway WAF v2 in the VNet in front of API Management 
 
 | Resource | SKU / plan | Purpose |
 |---|---|---|
-| User-assigned managed identity | — | Single workload identity for API, web, feeder and Function |
+| User-assigned managed identity | — | Single workload identity for the API, feeder and Function |
 | Microsoft Foundry (`Microsoft.CognitiveServices/accounts`, kind `AIServices`) | S0, local auth disabled | Models, Speech, Translator, Content Safety on one endpoint |
 | Foundry project | — | Agents, evaluations, tracing |
 | Model deployment `chat` | gpt-5.4-mini `2026-03-17`, GlobalStandard, 100K TPM | Live narration, translation polish, fact-check passes |
 | Model deployment `reasoning` | gpt-5.5 `2026-04-24`, GlobalStandard, 50K TPM | Recaps, analyst, Scenario Director |
-| Container Apps environment | Consumption workload profile | Hosts api, web, feeder |
+| Container Apps environment | Consumption workload profile | Hosts the API and the feeder job |
 | Container App `regista-api` | 1 vCPU / 2 GiB, 1–5 replicas (HTTP-concurrency scaling) | API, live engine, agents, MCP |
-| Container App `regista-web` | 0.25 vCPU / 0.5 GiB, 1–3 replicas | SPA + reverse proxy to the API |
+| Azure Static Web Apps | Free (Standard in the enterprise profile); region West Europe for metadata, files served from the global edge | The React SPA and the broadcast overlay page; calls the API directly, and the API's CORS allows only this origin |
 | Container Apps job `regista-feeder` | Manual trigger | Streams a match into Event Hubs |
 | Azure Container Registry | Basic, admin disabled | Images, built by ACR Tasks; pulled with managed identity |
 | Event Hubs namespace | Standard, 1 TU, local auth disabled | `match-events`, 4 partitions, consumer groups `api` / `functions` / `fabric` |
@@ -206,13 +208,14 @@ Region: **UK South**. Both model versions are listed as Global Standard in `ukso
 
 | Item | Rough monthly cost |
 |---|---|
-| Container Apps (API always-on at 1 replica, web at 1 replica) | ~$60–100 |
+| Container Apps (API always-on at 1 replica) | ~$45–80 |
+| Static Web Apps (Free plan) | $0 |
 | Event Hubs Standard, 1 TU | ~$22 |
 | Cosmos DB serverless, Storage, ACR Basic | ~$10 |
 | Log Analytics / Application Insights | ~$5–15 |
 | Azure Functions Flex Consumption | ~$0–5 (free grant) |
 | Foundry tokens + Speech + Translator (demo volume) | ~$10–50 |
-| **Total without Fabric** | **~$110–200** |
+| **Total without Fabric** | **~$90–180** |
 | Fabric F2 if left running 24/7 (optional) | ~$260 — use the free Fabric trial, or pause between demos |
 
 A monthly **budget alert** (`infra/modules/budget.bicep`, actual and forecast thresholds) emails `BUDGET_EMAIL`. To save money between demos: set the API's `minReplicas` to 0, and pause the Fabric capacity. The rules require the demo to stay available to judges until **10 November 2026**, so keep it running until then.
@@ -224,6 +227,6 @@ A monthly **budget alert** (`infra/modules/budget.bicep`, actual and forecast th
 | More API traffic | KEDA HTTP scaling is already on (`concurrentRequests: 50`). Raise `maxReplicas`. |
 | More live matches | Add Event Hubs partitions or throughput units (auto-inflate). Run one feeder job execution per match. |
 | More than ~10k concurrent live viewers | Move SSE fan-out to **Azure Web PubSub**. The API publishes once per event and Web PubSub handles the connections. |
-| Global audience | Azure Front Door in front of `regista-web`. Data Zone deployments for regional processing. |
+| Global audience | The SPA is already on Static Web Apps' global edge; put Azure Front Door in front of the API. Data Zone deployments for regional processing. |
 | Predictable model latency | Provisioned throughput (PTU) for the `chat` deployment. Model router for cost/quality balance. |
 | Heavier analytics | Fabric capacity scale-up. Spark notebooks over the Lakehouse datasets (`python -m app.forge.season --upload` writes a full synthetic season with planted changes and a realism report to OneLake). Power BI on the Eventhouse. |

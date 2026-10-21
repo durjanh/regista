@@ -2,7 +2,7 @@
 
 **One wrong stat on air costs a broadcaster trust, and AI commentary usually cannot be checked.** Regista is a live match-intelligence studio that proves every claim. Our synthetic match engine *secretly plants* tactical changes; Microsoft Agent Framework agents on Microsoft Foundry detect and explain them from the live event stream; a Verifier re-checks every number; a human producer approves what airs as timed overlays; and a **Grader scores every explanation against the planted truth**, live and in CI.
 
-Built for the Microsoft + Premier League *Inside the Game* Developer Hackathon with Microsoft Foundry, Microsoft Agent Framework, MCP, Azure AI Services, Microsoft Fabric, Cosmos DB, Event Hubs, Azure Functions, Azure Container Apps and GitHub Copilot. Category: **Best Enterprise Solution**.
+Built for the Microsoft + Premier League *Inside the Game* Developer Hackathon with Microsoft Foundry, Microsoft Agent Framework, MCP, Azure AI Services, Microsoft Fabric, Cosmos DB, Event Hubs, Azure Functions, Azure Container Apps, Azure Static Web Apps and GitHub Copilot. Category: **Best Enterprise Solution**.
 
 ![Control room at 68': Argentina's planted press switch detected, the Verifier drill catching an overstated number (1.76 struck through, evidence says 0.82), and the truth panel scoring the detection in 286 seconds](docs/screenshots/studio-hero.png)
 
@@ -83,9 +83,9 @@ Every push runs `python -m app.evals.run --mode offline` as a gate:
 Diagrams (open in diagrams.net or the Draw.io VS Code extension): [Container Apps](docs/architecture.drawio) · [AKS standard](docs/architecture-aks.drawio) · [AKS enterprise: API Management, private endpoints](docs/architecture-aks-enterprise.drawio). Details: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) · API: [docs/API_CONTRACT.md](docs/API_CONTRACT.md) · Deploy: [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) · Strategy, hero moment and video script: [docs/PLAN.md](docs/PLAN.md)
 
 - **API** (`services/api`, Python/FastAPI): match engine with planted scenarios, detectors and Grader, analytics (xG, xT, win probability, PPDA, shapes), live engine (SSE), Agent Framework agents, MCP server at `/mcp`, guardrails, ops.
-- **Web** (`apps/web`, React + TypeScript): control room, overlay, matchday, dugout, scouting, tactics, ask, recap, forge, ops.
+- **Web** (`apps/web`, React + TypeScript, hosted on **Azure Static Web Apps**): control room, overlay, matchday, dugout, scouting, tactics, ask, recap, forge, ops. It calls the API directly; the API's CORS allows only the Static Web App.
 - **Infra** (`infra`, Bicep), three profiles on one shared platform (Foundry models, project, Speech, Translator, Content Safety; Event Hubs, Functions, Cosmos DB, Storage, ACR, App Insights, budget alert, optional Fabric capacity):
-  - **Container Apps** (`infra/main.bicep`): API, web and feeder job. The cheapest; runs the live demo.
+  - **Container Apps** (`infra/main.bicep`): API and feeder job. The cheapest; runs the live demo.
   - **AKS standard** (`infra/aks`): Entra-only AKS with workload identity, Cilium, app routing and Kubernetes manifests in `deploy/k8s`.
   - **AKS enterprise** (`infra/aks-enterprise`): API Management Standard v2 (the only public endpoint) → VNet integration → internal NGINX → private AKS; every PaaS service behind a private endpoint; deploys from a Managed DevOps Pool inside the VNet.
 - **CI/CD**: **azd** for every profile (`azure.yaml`, `deploy/aks`, `deploy/aks-enterprise`); **GitHub Actions** (`.github/workflows`) and **Azure Pipelines** (`.azuredevops/pipelines`) with lint, coverage floors, evaluation gates with the truth score in the job summary, Bicep what-if, approvals and smoke tests. GitHub OIDC; bootstrap with the GitHub CLI. GitHub Copilot agent mode: `.github/copilot-instructions.md`, custom agents and `.vscode/mcp.json` (Regista MCP, Azure MCP, Fabric Eventhouse MCP).
@@ -116,12 +116,12 @@ cd services/api && .venv/bin/ruff check . && .venv/bin/pytest && .venv/bin/pytho
 
 ## Deploy to Azure
 
-Three profiles share one platform (Foundry, Event Hubs, Cosmos DB, Storage, Functions, monitoring); only compute and networking change. Rough monthly cost, estimates only, before model tokens and Fabric:
+Three profiles share one platform (Foundry, Event Hubs, Cosmos DB, Storage, Functions, monitoring); only compute and networking change. In every profile the React front end is on **Azure Static Web Apps** and calls the API directly over HTTPS (CORS allows only the Static Web App). Rough monthly cost, estimates only, before model tokens and Fabric:
 
 | Profile | azd project | What you get | Est. cost |
 |---|---|---|---|
-| Container Apps | `azure.yaml` (repo root) | Cheapest; runs the live judge demo | ~$110–200 |
-| AKS standard | `deploy/aks` | Entra-only AKS, workload identity, Cilium, public app-routing ingress | ~$250–400 |
+| Container Apps | `azure.yaml` (repo root) | Cheapest; runs the live judge demo | ~$90–180 |
+| AKS standard | `deploy/aks` | Entra-only AKS, workload identity, Cilium; the API on a stable hostname with Let's Encrypt HTTPS | ~$250–400 |
 | AKS enterprise | `deploy/aks-enterprise` | API Management Standard v2 as the only public endpoint → private ingress → private AKS; private endpoints for every PaaS service | ~$1,000–1,400 |
 
 Nothing is created until you run `azd up` or `azd provision`; `--preview` is a what-if only. Each profile sets a monthly budget alert when `BUDGET_EMAIL` is set.
@@ -132,7 +132,7 @@ Nothing is created until you run `azd up` or `azd provision`; `--preview` is a w
 brew tap azure/azd && brew install azd     # Azure Developer CLI (or: curl -fsSL https://aka.ms/install-azd.sh | bash)
 brew install azure-cli                     # if az isn't installed
 az aks install-cli                         # kubectl + kubelogin (AKS profiles; local cluster accounts are disabled)
-# Docker Desktop must be running: azd builds the images locally
+# Docker Desktop must be running (azd builds the API image locally) and Node.js 22.12+ (it builds the SPA)
 azd version && az version && kubelogin --version && docker info > /dev/null && echo ready
 ```
 
@@ -164,12 +164,13 @@ Without azd: `scripts/deploy.sh --rg rg-regista --location uksouth --env regista
 cd deploy/aks
 azd env new regaks
 azd env set AZURE_RESOURCE_GROUP rg-regista-aks
+azd env set LETSENCRYPT_EMAIL you@example.com                               # for the API's HTTPS certificate
 azd env set AKS_AUTHORIZED_IP_RANGES "$(curl -s https://api.ipify.org)/32"   # optional: API server only from your IP
 azd provision --preview
 azd up
 ```
 
-The hooks grant you *Azure Kubernetes Service RBAC Cluster Admin* and AcrPush, wait for the ingress IP, store it as `REGISTA_PUBLIC_URL` and smoke-test `/api/health`.
+Set `LETSENCRYPT_EMAIL` first (`azd env set LETSENCRYPT_EMAIL you@example.com`): the API gets a stable hostname and a Let's Encrypt certificate, because the SPA on Static Web Apps is HTTPS. The hooks grant you *Azure Kubernetes Service RBAC Cluster Admin* and AcrPush, install cert-manager, and smoke-test the API, its CORS and the site.
 
 ### 3c. AKS enterprise (private, behind API Management)
 
@@ -181,7 +182,7 @@ azd env set APIM_PUBLISHER_EMAIL you@example.com
 azd env set AZURE_DEVOPS_ORG_URL https://dev.azure.com/<org>        # for the in-VNet Managed DevOps Pool
 azd env set DEVOPS_INFRASTRUCTURE_PRINCIPAL_ID "$(az ad sp list --display-name DevOpsInfrastructure --query '[0].id' -o tsv)"
 azd provision --preview
-azd provision                                                       # API Management gateway URL = REGISTA_PUBLIC_URL
+azd provision                                                       # API_URL = API Management gateway, WEB_URL = Static Web App
 ```
 
 The AKS API server and the registry are private, so **deploy from the Azure DevOps pipeline**: its Deploy stage runs on the Managed DevOps Pool inside the VNet. Development only: `azd env set AKS_PRIVATE_CLUSTER false` and `azd env set AKS_AUTHORIZED_IP_RANGES <your-ip>/32` make the API server public but IP-restricted. There is no WAF in this profile; for production, add Front Door Premium in front of API Management ([design and steps](docs/ARCHITECTURE.md#future-azure-front-door-in-front-of-api-management)).

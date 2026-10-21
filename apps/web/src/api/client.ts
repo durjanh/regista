@@ -13,7 +13,10 @@ export class ApiError extends Error {
   }
 }
 
-const BASE = "/api";
+// The SPA is served by Azure Static Web Apps and calls the API directly (CORS), so the API's origin is baked in at
+// build time. Empty in local development: Vite proxies /api to localhost:8000.
+export const API_ORIGIN = (import.meta.env.VITE_API_BASE_URL ?? "").replace(/\/+$/, "");
+const BASE = `${API_ORIGIN}/api`;
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${BASE}${path}`, {

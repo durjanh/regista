@@ -106,7 +106,7 @@ Record from replay with the deployed URL visible, `REGISTA_VIDEO_SAFE=1`, captio
 | Azure AI services | Speech, Translator, Content Safety and Prompt Shields (`ai/services.py`), all Entra-authenticated |
 | Microsoft Fabric | Lakehouse (season dataset, realism report, reference CSVs), Eventstream → Eventhouse/KQL (`scripts/fabric-setup.py`, `docs/kql/`) |
 | Azure data | Cosmos DB for NoSQL (narratives, studio decisions, audit log, profiles), Blob Storage |
-| Cloud native | Container Apps (API, web, feeder job) or **AKS** (standard, or private behind **API Management Standard v2** with private endpoints), Event Hubs, Functions (Flex), ACR, App Insights, budget alert |
+| Cloud native | **Static Web Apps** for the React SPA; Container Apps (API, feeder job) or **AKS** (standard, or private behind **API Management Standard v2** with private endpoints), Event Hubs, Functions (Flex), ACR, App Insights, budget alert |
 
 ## 9. Azure: what we need from you
 

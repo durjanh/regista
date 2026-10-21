@@ -83,8 +83,9 @@ jobs:
           ruby -ryaml -e '
             %w[azure.yaml deploy/aks/azure.yaml deploy/aks-enterprise/azure.yaml].each { |f| YAML.load_file(f) }
             Dir["deploy/k8s/**/*.yaml"].each { |f| YAML.load_stream(File.read(f)).each { |d| abort("#{f}: missing kind") unless d["kind"] } }'
-          diff deploy/k8s/web/10-deployment.yaml deploy/k8s/web-enterprise/10-deployment.yaml
-          diff deploy/k8s/web/11-service.yaml deploy/k8s/web-enterprise/11-service.yaml
+          for f in 00-namespace.yaml 01-serviceaccount.yaml 02-networkpolicy.yaml 10-deployment.yaml 11-service.yaml 20-feeder-cronjob.yaml; do
+            diff "deploy/k8s/aks/$f" "deploy/k8s/aks-enterprise/$f"
+          done
           for f in deploy/hooks/*.sh; do sh -n "$f"; done; for f in scripts/*.sh; do bash -n "$f"; done
           shellcheck -S warning deploy/hooks/*.sh
         displayName: Parse, compare shared manifests, check scripts

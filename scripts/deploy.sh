@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# One-command deploy from your machine: provision with Bicep (what-if first), build both images in ACR,
-# roll them out to Container Apps, and smoke-test. The same steps run in GitHub Actions (infra.yml + deploy.yml).
+# One-command deploy from your machine: provision with Bicep (what-if first), build the API image in ACR, roll it out
+# to Container Apps, build the SPA and upload it to Azure Static Web Apps, and smoke-test. The same steps run in
+# GitHub Actions (infra.yml + deploy.yml).
 #
 #   az login
 #   scripts/deploy.sh --rg rg-regista --location uksouth --env regista [--budget-email you@example.com] [--yes]
@@ -49,15 +50,21 @@ out() { az deployment group show -g "$RG" -n "$DEPLOYMENT" --query "properties.o
 ACR="$(out ACR_NAME)"; LOGIN="$(out ACR_LOGIN_SERVER)"
 TAG="$(git rev-parse --short HEAD 2>/dev/null || date +%s)"
 
-echo "▶ Build images in ACR ($ACR, tag $TAG)"
+echo "▶ Build the API image in ACR ($ACR, tag $TAG)"
 az acr build -r "$ACR" -t "regista-api:$TAG" -f services/api/Dockerfile . -o none
-az acr build -r "$ACR" -t "regista-web:$TAG" -f apps/web/Dockerfile apps/web -o none
 
-echo "▶ Roll out the real images (ports, probes and the feeder command switch from the placeholder)"
+echo "▶ Roll out the real image (ports, probes and the feeder command switch from the placeholder)"
 az deployment group create -g "$RG" -n "$DEPLOYMENT-apps" --template-file infra/main.bicep --parameters infra/main.bicepparam \
-  --parameters "apiImage=$LOGIN/regista-api:$TAG" "webImage=$LOGIN/regista-web:$TAG" -o none
+  --parameters "apiImage=$LOGIN/regista-api:$TAG" -o none
 API_URL="$(az deployment group show -g "$RG" -n "$DEPLOYMENT-apps" --query properties.outputs.API_URL.value -o tsv)"
 WEB_URL="$(az deployment group show -g "$RG" -n "$DEPLOYMENT-apps" --query properties.outputs.WEB_URL.value -o tsv)"
+SWA="$(az deployment group show -g "$RG" -n "$DEPLOYMENT-apps" --query properties.outputs.STATIC_WEB_APP_NAME.value -o tsv)"
+
+echo "▶ Build the SPA against $API_URL and upload it to Static Web Apps ($SWA)"
+command -v npm >/dev/null || { echo "Node.js/npm is required to build the web app" >&2; exit 1; }
+(cd apps/web && npm ci --no-audit --no-fund && VITE_API_BASE_URL="$API_URL" npm run build)
+SWA_TOKEN="$(az staticwebapp secrets list -n "$SWA" -g "$RG" --query properties.apiKey -o tsv)"
+npx --yes @azure/static-web-apps-cli@2.0.10 deploy apps/web/dist --deployment-token "$SWA_TOKEN" --env production
 
 echo "▶ Smoke test"
 for i in $(seq 1 30); do
@@ -65,7 +72,7 @@ for i in $(seq 1 30); do
   sleep 10
 done
 curl -fsS "$API_URL/api/health" && echo
-curl -fsS "$WEB_URL/healthz" >/dev/null && echo "web ok"
+curl -fsS "$WEB_URL/" >/dev/null && echo "web ok"
 
 cat <<DONE
 

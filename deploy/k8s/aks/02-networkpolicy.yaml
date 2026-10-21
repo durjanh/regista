@@ -1,0 +1,53 @@
+# Zero-trust inside the namespace (Cilium): nothing reaches a pod unless allowed below.
+#   ingress controller (app-routing-system) -> api :8000
+#   ingress controller -> cert-manager HTTP-01 solver :8089 (standard profile's Let's Encrypt challenge; unused in enterprise)
+# Shared by deploy/k8s/aks and deploy/k8s/aks-enterprise (CI checks they are identical).
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-ingress
+  namespace: regista
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-ingress-to-api
+  namespace: regista
+spec:
+  podSelector:
+    matchLabels:
+      app: regista-api
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: app-routing-system
+      ports:
+        - port: 8000
+          protocol: TCP
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-ingress-to-acme-solver
+  namespace: regista
+spec:
+  podSelector:
+    matchLabels:
+      acme.cert-manager.io/http01-solver: "true"
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: app-routing-system
+      ports:
+        - port: 8089
+          protocol: TCP

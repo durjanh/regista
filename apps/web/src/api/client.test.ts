@@ -119,3 +119,24 @@ describe("api client", () => {
     await expect(synthesize("hi", "en")).rejects.toBeInstanceOf(ApiError);
   });
 });
+
+describe("api base URL (Azure Static Web Apps build)", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    vi.unstubAllGlobals();
+    vi.resetModules();
+  });
+
+  it("calls the API's own origin when VITE_API_BASE_URL is set, for fetch and SSE alike", async () => {
+    vi.stubEnv("VITE_API_BASE_URL", "https://regista-api.example.net/");
+    vi.resetModules();
+    const fresh = await import("./client");
+    expect(fresh.API_ORIGIN).toBe("https://regista-api.example.net");
+    expect(fresh.liveUrl("m1", { speed: 30, start_t: 0, persona: "casual", language: "en" }))
+      .toMatch(/^https:\/\/regista-api\.example\.net\/api\/matches\/m1\/live\?/);
+    expect(fresh.overlayUrl("m1")).toBe("https://regista-api.example.net/api/studio/m1/overlay");
+    const fetch = mockApi([{ match: /./, reply: [] }]);
+    await fresh.api.analysis("m1");
+    expect(lastCall(fetch).url).toBe("https://regista-api.example.net/api/matches/m1/analysis");
+  });
+});
