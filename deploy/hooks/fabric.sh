@@ -2,8 +2,9 @@
 # Optional Microsoft Fabric setup after `azd provision`, for every profile. Runs only when FABRIC_WORKSPACE_NAME is set:
 #   azd env set FABRIC_WORKSPACE_NAME Regista
 # Creates (find-or-create) the workspace on your Fabric trial (or FABRIC_CAPACITY_NAME), the Lakehouse with the real
-# CC0 results, the Eventhouse / KQL table, the workspace identity with Event Hubs Data Receiver, and, once
-# FABRIC_EVENTHUB_CONNECTION_ID is set, the Eventstream (Event Hubs -> Eventhouse). See scripts/fabric-setup.py.
+# CC0 results, the Eventhouse / KQL table, the workspace identity with Event Hubs Data Receiver, the Event Hubs
+# connection (workspace identity) and the Eventstream (Event Hubs -> Eventhouse). FABRIC_EVENTHUB_CONNECTION_ID is
+# only for a connection you made yourself. Every step is find-or-create. See scripts/fabric-setup.py.
 set -eu
 
 if [ -z "${FABRIC_WORKSPACE_NAME:-}" ]; then

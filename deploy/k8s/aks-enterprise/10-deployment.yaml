@@ -70,6 +70,8 @@ spec:
             - { name: AZURE_CONTENT_SAFETY_SHIELD_PATH, value: "{{.Env.AZURE_CONTENT_SAFETY_SHIELD_PATH}}" }
             - { name: AZURE_CONTENT_SAFETY_MAX_CHARS, value: "{{.Env.AZURE_CONTENT_SAFETY_MAX_CHARS}}" }
             - { name: AZURE_CONTENT_SAFETY_BLOCK_SEVERITY, value: "{{.Env.AZURE_CONTENT_SAFETY_BLOCK_SEVERITY}}" }
+            - { name: BROADCAST_VIEWER_COUNT_INTERVAL_S, value: "{{.Env.BROADCAST_VIEWER_COUNT_INTERVAL_S}}" }
+            - { name: BROADCAST_VIEWER_COUNT_MAX, value: "{{.Env.BROADCAST_VIEWER_COUNT_MAX}}" }
             - { name: ONELAKE_DFS_ENDPOINT, value: "{{.Env.ONELAKE_DFS_ENDPOINT}}" }
           resources:
             requests: { cpu: 500m, memory: 1Gi }

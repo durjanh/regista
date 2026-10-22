@@ -118,6 +118,11 @@ export function GoLivePanel({ matchId, currentT, homeId, awayId }: { matchId: st
         <h2 className="card-title" id="golive-title">📡 {t("bc.goLive")}</h2>
         <span className="spacer" />
         <span className={live ? "pill accent" : "pill"}>{live ? `● ${t("bc.onAir")}` : `○ ${t("bc.offAir")}`}</span>
+        {live && status ? (
+          <span className="pill" role="status" aria-live="polite" title={t("bc.viewersHint")}>
+            👁 {status.viewers.toLocaleString(language)}{status.viewers_more ? "+" : ""} {t("bc.viewers")}
+          </span>
+        ) : null}
         {live ? <LiveBadge connection={bc.connection} latencyMs={bc.latencyMs} /> : null}
       </div>
       <p className="xs muted" style={{ margin: "0 0 10px" }}>{t("bc.explain")}</p>

@@ -35,6 +35,9 @@ export function Overlay() {
   const { id = "" } = useParams();
   const [params] = useSearchParams();
   const demo = params.get("demo") === "1";
+  // ?preview=1 (Studio's link): a checkerboard shows the page is transparent, and a note says it is waiting for
+  // graphics. The plain URL, for OBS / vMix, stays fully transparent.
+  const preview = params.get("preview") === "1";
   const scale = useStageScale();
   const [active, setActive] = useState<Live[]>([]);
   const timers = useRef(new Map<string, number[]>());
@@ -148,7 +151,13 @@ export function Overlay() {
   );
 
   return (
-    <div className="overlay-root" aria-live="polite">
+    <div className={preview ? "overlay-root overlay-preview" : "overlay-root"} aria-live="polite">
+      {preview && !active.length ? (
+        <div className="overlay-idle" role="status">
+          <strong>Overlay connected · waiting for graphics</strong>
+          <span>Put a graphic on air in Studio and it appears here. In OBS or vMix, use this URL without <code>?preview=1</code>.</span>
+        </div>
+      ) : null}
       <div className="overlay-stage" style={{ transform: `scale(${scale})` }}>
         <div className="safe">
           {active.map((item) => {

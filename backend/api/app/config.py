@@ -79,6 +79,9 @@ class Settings:
     content_safety_shield_path: str = field(default_factory=lambda: _env("AZURE_CONTENT_SAFETY_SHIELD_PATH", "/contentsafety/text:shieldPrompt"))
     content_safety_max_chars: int = field(default_factory=lambda: _env_int("AZURE_CONTENT_SAFETY_MAX_CHARS", 9000))
     content_safety_block_severity: int = field(default_factory=lambda: _env_int("AZURE_CONTENT_SAFETY_BLOCK_SEVERITY", 4))
+    # Shared live broadcast (Web PubSub): how often the viewer count is refreshed, and where counting stops ("10,000+")
+    broadcast_viewer_count_interval_s: float = field(default_factory=lambda: _env_float("BROADCAST_VIEWER_COUNT_INTERVAL_S", 5))
+    broadcast_viewer_count_max: int = field(default_factory=lambda: _env_int("BROADCAST_VIEWER_COUNT_MAX", 10000))
     # Microsoft Fabric OneLake (ADLS Gen2 DFS endpoint)
     onelake_dfs_endpoint: str = field(default_factory=lambda: _env("ONELAKE_DFS_ENDPOINT", "https://onelake.dfs.fabric.microsoft.com"))
 

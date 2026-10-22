@@ -404,7 +404,7 @@ function StudioConsole({ match }: { match: MatchMeta }) {
           <Link to={`/match/${id}`} className="btn sm">
             ← {t("nav.matchday")}
           </Link>
-          <a href={`/overlay/${id}`} target="_blank" rel="noreferrer" className="btn sm" title="Open as an OBS / vMix browser source (1920×1080)">
+          <a href={`/overlay/${id}?preview=1`} target="_blank" rel="noreferrer" className="btn sm" title="Preview the overlay; in OBS / vMix use /overlay/{id} as a 1920×1080 browser source">
             ↗ Overlay URL
           </a>
         </div>

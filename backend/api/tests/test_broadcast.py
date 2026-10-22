@@ -267,3 +267,51 @@ def test_settings_flag():
     from app.config import Settings
     assert Settings(webpubsub_endpoint="https://x.webpubsub.azure.com", force_offline=False).webpubsub
     assert not Settings(webpubsub_endpoint="", force_offline=False).webpubsub
+
+
+def test_viewer_count_comes_from_web_pubsub_and_is_capped(loaded_store, monkeypatch):
+    """The Studio shows how many are watching: connections in the match group, counted in the background, capped."""
+    from app import config
+    listed = []
+
+    class Members:
+        def __init__(self, n):
+            self.n = n
+
+        def list_connections(self, group, top=None):
+            listed.append((group, top))
+
+            async def gen():
+                for _ in range(min(self.n, top or self.n)):
+                    yield object()
+            return gen()
+
+    settings = dataclasses.replace(config.settings, webpubsub_endpoint="https://wps.example", force_offline=False,
+                                   broadcast_viewer_count_max=3, broadcast_viewer_count_interval_s=60)
+    monkeypatch.setattr(broadcast, "settings", settings)
+    b = Broadcast(match_id=HERO, source="replay")
+
+    monkeypatch.setattr(broadcast, "client", lambda: Members(2))
+    asyncio.run(b.count_viewers())
+    assert (b.viewers, b.viewers_more) == (2, False) and listed[-1] == (f"match.{HERO}", 4)   # asks for one past the cap
+    monkeypatch.setattr(broadcast, "client", lambda: Members(50))
+    asyncio.run(b.count_viewers())
+    assert (b.viewers, b.viewers_more) == (3, True) and b.status()["viewers"] == 3 and b.status()["viewers_more"]
+
+    def broken():
+        raise RuntimeError("service unavailable")
+
+    monkeypatch.setattr(broadcast, "client", broken)
+    asyncio.run(b.count_viewers())
+    assert b.viewers == 3                                        # a failed count keeps the last value
+
+    async def scenario():                                        # refreshed at most once per interval
+        monkeypatch.setattr(broadcast, "client", lambda: Members(1))
+        b.counted_at = 0.0
+        b.refresh_viewers()
+        first = b.counter
+        b.refresh_viewers()
+        assert b.counter is first
+        await first
+    asyncio.run(scenario())
+    assert b.viewers == 1

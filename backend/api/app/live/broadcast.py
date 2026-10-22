@@ -112,11 +112,35 @@ class Broadcast:
     sent_moments: set[str] = field(default_factory=set)
     sent_insights: set[str] = field(default_factory=set)
     narration: set[asyncio.Task] = field(default_factory=set)
+    viewers: int = 0                  # connections in the match group (Web PubSub), refreshed in the background
+    viewers_more: bool = False        # more than settings.broadcast_viewer_count_max: shown as "N+"
+    counter: asyncio.Task | None = None
+    counted_at: float = 0.0
 
     def status(self) -> dict:
         return {"match_id": self.match_id, "live": self.live, "source": self.source, "speed": self.speed, "t": self.t,
                 "minute": self.minute, "started_at": self.started_at, "ticks_published": self.ticks_published,
-                "bytes_published": self.bytes_published, "languages": self.languages}
+                "bytes_published": self.bytes_published, "languages": self.languages,
+                "viewers": self.viewers, "viewers_more": self.viewers_more}
+
+    def refresh_viewers(self) -> None:
+        """Count who is watching every few seconds, in the background so a slow count never delays a tick."""
+        now = time.monotonic()
+        if not enabled() or (self.counter and not self.counter.done()) or now - self.counted_at < settings.broadcast_viewer_count_interval_s:
+            return
+        self.counted_at = now
+        self.counter = asyncio.create_task(self.count_viewers())
+
+    async def count_viewers(self) -> None:
+        """Web PubSub lists the connections in the match group; stop one past the cap, so 100,000 viewers stay cheap."""
+        cap = settings.broadcast_viewer_count_max
+        try:
+            n = 0
+            async for _ in client().list_connections(group=match_group(self.match_id), top=cap + 1):
+                n += 1
+            self.viewers, self.viewers_more = min(n, cap), n > cap
+        except Exception as exc:  # the count is informative only: keep the last value
+            log.warning("Viewer count for %s failed: %s", self.match_id, exc)
 
     async def _send(self, group: str, payload: dict) -> None:
         sent = await publish(group, payload)
@@ -165,6 +189,7 @@ class Broadcast:
             self.sent_insights.add(ins["id"])
             producer.proposals_for_insight(self.match_id, ins)
             self._narrate("insight", ins, t)
+        self.refresh_viewers()
         self.seq += 1
         payload = {"type": "tick", "match_id": self.match_id, "seq": self.seq, "sent_at": int(time.time() * 1000), "t": t,
                    "minute": self.minute, "score": snap["score"], "events": [_slim_event(e) for e in events],

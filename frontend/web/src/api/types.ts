@@ -838,6 +838,10 @@ export type BroadcastStatus = {
   ticks_published: number;
   bytes_published: number;
   languages: string[];
+  /** Connections in the match's Web PubSub group, refreshed every few seconds while live. */
+  viewers: number;
+  /** True when the count stopped at the configured cap: shown as "N+". */
+  viewers_more: boolean;
 };
 
 export type RealtimeNegotiate =

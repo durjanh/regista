@@ -63,7 +63,7 @@ describe("Studio control room", () => {
     expect(screen.getByText("41% → 63%")).toBeInTheDocument();
     expect(await screen.findByRole("option", { name: "UK + Europe (EN / FR / ES)" })).toBeInTheDocument();
     expect(await screen.findByText("Win probability swing", { selector: ".audit-row .muted" })).toBeInTheDocument();
-    expect(screen.getByTitle(/OBS \/ vMix/)).toHaveAttribute("href", `/overlay/${HERO}`);
+    expect(screen.getByTitle(/OBS \/ vMix/)).toHaveAttribute("href", `/overlay/${HERO}?preview=1`);   // Studio opens the preview
   });
 
   it("streams moments, whispers and insights with their Verifier strip", async () => {

@@ -251,27 +251,28 @@ Fabric items (workspace, Lakehouse, Eventhouse, Eventstream) are not Azure Resou
    - Eventhouse `regista_eventhouse`, KQL database `regista_live`, table `match_events` with JSON mapping `match_events_json`
    - Contributor on the workspace for the API's managed identity, so Data Forge can export to OneLake
    - the **workspace identity**, granted *Azure Event Hubs Data Receiver* on the namespace. The Event Hubs namespace has local (SAS) auth disabled; workspace identity is the keyless option Fabric documents for this source.
+   - the **Event Hubs connection** `regista-eventhubs-<namespace>` (Connections API: type `EventHub`, endpoint = the
+     namespace *name*, hub `match-events`, credential **WorkspaceIdentity**, so no key anywhere). Fabric tests it on
+     create, so the hook retries for a few minutes while the role assignment above propagates.
+   - the **Eventstream** `regista_live_stream`: source `AzureEventHubExtended` (the portal's *Extended features*; the
+     basic Event Hubs source accepts only shared keys) on consumer group `fabric`, starting at `Earliest`, into
+     `match_events` with processed ingestion (JSON fields map to columns by name).
 
    It then stores `ONELAKE_WORKSPACE` and `ONELAKE_LAKEHOUSE` in the azd environment; run `azd provision` (Container Apps) or `azd deploy` (AKS) once more to give them to the API.
 
-3. **The one portal step: the Event Hubs connection.** Fabric's Connections API doesn't document creating an Event Hubs connection with workspace identity, so create it once by hand:
-   1. Fabric portal → *Settings* (gear) → **Manage connections and gateways** → *+ New* → **Cloud**.
-   2. Connection type **Azure Event Hubs**; namespace `<evh-…>` (the `EVENTHUB_FQDN` output without `.servicebus.windows.net`), event hub `match-events`; authentication **Workspace identity**.
-   3. Copy the connection's **ID**, then:
-
-      ```bash
-      azd env set FABRIC_EVENTHUB_CONNECTION_ID <connection-id>
-      azd provision        # the hook now creates the Eventstream regista_live_stream
-      ```
-
-   The Eventstream reads consumer group `fabric` and writes to `match_events` with processed ingestion (JSON fields map to columns by name). If the API refuses the definition, the hook prints the error and you can create it in the portal instead: new Eventstream → source Azure Event Hubs (Extended features, the connection above, consumer group `fabric`, JSON) → destination Eventhouse, *Event processing before ingestion*, database `regista_live`, table `match_events` → *Publish*.
+3. **Idempotent.** Every item is found by name before it is created; a re-run prints `exists` and changes nothing
+   (`scripts/preview-all.sh` includes a read-only Fabric dry run). Nothing to do by hand. Only if Fabric refuses the
+   connection (a tenant setting, or the private enterprise namespace failing Fabric's connection test) does the hook
+   print a portal fallback: create it under *Settings → Manage connections and gateways* (Azure Event Hubs, namespace
+   name, hub `match-events`, *Workspace identity*), then `azd env set FABRIC_EVENTHUB_CONNECTION_ID <id>` and
+   `azd hooks run postprovision`.
 
    Enterprise profile: the Event Hubs namespace has no public access, so the hook also creates a workspace **managed
    private endpoint** `mpe-regista-eventhubs` to it (Fabric REST API, subresource `namespace`) and approves the request
    on the namespace (`az network private-endpoint-connection approve`); Fabric supports this on trial and F capacities,
    UK South included. Fabric takes a few minutes to provision it; if it is still pending, `azd hooks run postprovision`
-   approves it. When you create the connection in step 3, untick *Test connection*: the portal tests from the public
-   internet, which the namespace refuses. Data preview in the Eventstream editor may also be unavailable.
+   approves it. Fabric tests a new connection from its shared service, which the private namespace may refuse; then
+   the hook prints the portal fallback from step 3. Data preview in the Eventstream editor may also be unavailable.
 
    Inbound private access to the Eventhouse (a workspace-level private link, `Microsoft.Fabric/privateLinkServicesForFabric`)
    is a separate feature and is not set up: it needs a paid F capacity (not the trial), and Fabric documents that a
@@ -279,13 +280,17 @@ Fabric items (workspace, Lakehouse, Eventhouse, Eventstream) are not Azure Resou
 
 4. **Feed it.** Run the feeder so events flow (`az containerapp job start -n regista-feeder -g rg-regista`, or `kubectl -n regista create job feeder-$(date +%s) --from=cronjob/regista-feeder` on AKS).
 
-5. **Untested here.** The workspace-identity provisioning, the role grant and the Eventstream definition follow Microsoft Learn but have not run against a live Fabric tenant yet. A Fabric failure never fails `azd provision`: the hook reports it and you re-run it with `azd hooks run postprovision`.
+5. **Tested.** On 2026-10-22 the hook created the connection and the Eventstream against the live `PremierLeague`
+   workspace (trial capacity, UK South); the Eventstream topology reports source, stream and Eventhouse destination
+   *Running*, and a third run changed nothing. A Fabric failure never fails `azd provision`: the hook reports it and
+   you re-run it with `azd hooks run postprovision`.
 
 6. **From Azure Pipelines.** The hook runs as the pipeline's service principal. Add `FABRIC_WORKSPACE_NAME` (and, once
-   created, `FABRIC_EVENTHUB_CONNECTION_ID`) to the variable group, enable the Fabric tenant setting *Service principals
+   you created the connection by hand, `FABRIC_EVENTHUB_CONNECTION_ID`) to the variable group, enable the Fabric tenant setting *Service principals
    can call Fabric public APIs*, and add the service principal `regista-pipeline-<profile>` as **Admin** of the workspace
    (Workspace → Manage access). It can't see your personal trial capacity, so it reuses the capacity the workspace is
-   already on.
+   already on. Connections belong to whoever creates them: once the Eventstream exists the hook skips the connection
+   step, so a pipeline run never needs to see the one your account created.
 
 7. **Query.** Open the KQL queryset on `regista_live` and paste the queries from `docs/kql/`:
    - `live-momentum.kql`: xT added per minute per team

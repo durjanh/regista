@@ -23,6 +23,8 @@ func apiServiceSettingsDefaults() object => ({
   AZURE_CONTENT_SAFETY_SHIELD_PATH: '/contentsafety/text:shieldPrompt'   // Prompt Shields
   AZURE_CONTENT_SAFETY_MAX_CHARS: '9000'   // text sent to Content Safety / Prompt Shields is cut to this length
   AZURE_CONTENT_SAFETY_BLOCK_SEVERITY: '4'   // a category at or above this severity flags the text
+  BROADCAST_VIEWER_COUNT_INTERVAL_S: '5'   // how often the live broadcast's viewer count is refreshed
+  BROADCAST_VIEWER_COUNT_MAX: '10000'   // the viewer count stops here and shows N+ (keeps 100,000 viewers cheap)
   ONELAKE_DFS_ENDPOINT: 'https://onelake.dfs.fabric.microsoft.com'   // Microsoft Fabric OneLake (ADLS Gen2 DFS)
 })
 

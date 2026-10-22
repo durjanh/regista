@@ -197,7 +197,7 @@ azd env set FABRIC_WORKSPACE_NAME Regista
 azd provision          # workspace, Lakehouse + real CC0 data, Eventhouse/KQL table, keyless workspace identity
 ```
 
-The Eventstream (Event Hubs → Eventhouse) needs one portal step first, creating the Event Hubs connection with *Workspace identity*; then `azd env set FABRIC_EVENTHUB_CONNECTION_ID <id>` and `azd provision` again. Exact steps: [docs/DEPLOYMENT.md §5](docs/DEPLOYMENT.md#5-microsoft-fabric-lakehouse--real-time-intelligence).
+The same hook creates the Event Hubs connection (workspace identity, no keys) and the Eventstream (Event Hubs → Eventhouse), so there are no portal steps; every item is find-or-create, so re-runs change nothing. Details: [docs/DEPLOYMENT.md §5](docs/DEPLOYMENT.md#5-microsoft-fabric-lakehouse--real-time-intelligence).
 
 ### 3b. AKS standard
 

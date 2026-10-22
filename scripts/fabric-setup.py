@@ -13,9 +13,10 @@ Creates (or reuses):
     local auth disabled, and workspace identity is the keyless option Fabric documents for this source)
   * with --eventhub-private (enterprise profile: the namespace has no public access), a workspace **managed private
     endpoint** to the namespace, approved on the Azure side, so the Eventstream reaches it over Private Link
-  * the Eventstream ``regista_live`` (Event Hubs ``match-events`` / consumer group ``fabric`` -> ``match_events``),
-    once a Fabric connection to the namespace exists (--eventhub-connection-id). The Connections API doesn't
-    document Event Hubs + workspace identity, so that connection is the one portal step (docs/DEPLOYMENT.md).
+  * a shareable cloud **connection** ``regista-eventhubs-<namespace>`` to the namespace's ``match-events`` hub,
+    authenticated by the workspace identity (Connections API: type EventHub, credential WorkspaceIdentity), unless
+    --eventhub-connection-id names one you made yourself
+  * the Eventstream ``regista_live_stream`` (Event Hubs ``match-events`` / consumer group ``fabric`` -> ``match_events``)
 
 Without --capacity-name/--capacity-id it uses your active Fabric **trial** capacity (start it once at
 https://app.fabric.microsoft.com). Every step is find-or-create, so re-running changes nothing.
@@ -56,6 +57,10 @@ KQL_DATABASE_NAME = "regista_live"
 EVENTSTREAM_NAME = "regista_live_stream"
 MANAGED_PRIVATE_ENDPOINT_NAME = "mpe-regista-eventhubs"
 EVENT_HUBS_RECEIVER_ROLE = "Azure Event Hubs Data Receiver"
+EVENT_HUB_NAME = "match-events"
+CONNECTION_PREFIX = "regista-eventhubs-"
+# A new role assignment takes a few minutes to reach Event Hubs; Fabric tests the connection when it creates it.
+CONNECTION_ATTEMPTS, CONNECTION_RETRY_S = 8, 30
 
 # Table + mapping for the contract `Event` JSON (plus match_id and the feeder's emitted_at timestamp).
 MATCH_EVENTS_SCHEMA = r"""
@@ -123,9 +128,17 @@ class Fabric:
             print(f"⚠ {err}")
             return None
 
+    def list_all(self, path: str) -> list[dict]:
+        """Every page of a Fabric list API (they page with continuationUri)."""
+        items, url = [], path
+        while url:
+            _, _, payload = self.request("GET", url)
+            items += payload.get("value", [])
+            url = payload.get("continuationUri")
+        return items
+
     def find(self, path: str, display_name: str) -> dict | None:
-        _, _, payload = self.request("GET", path)
-        return next((i for i in payload.get("value", []) if i.get("displayName") == display_name), None)
+        return next((i for i in self.list_all(path) if i.get("displayName") == display_name), None)
 
 
 def upload_reference_files(credential: DefaultAzureCredential, workspace_id: str, lakehouse_id: str) -> None:
@@ -206,17 +219,55 @@ def ensure_managed_private_endpoint(fabric: Fabric, ws: str, namespace_id: str, 
     print("⚠ The managed private endpoint is still provisioning. Re-run to approve it: azd hooks run postprovision")
 
 
+def eventhub_connection_body(name: str, namespace: str) -> dict:
+    """Connections API body: Event Hubs (creation method EventHub.Contents) with the workspace identity, no secret.
+    Parameters as GET /v1/connections/supportedConnectionTypes lists them for type EventHub. ``endpoint`` is the
+    namespace *name*, as in the portal: an FQDN is refused with DMTS_UntrustedEndpointForWorkspaceIdentity."""
+    return {
+        "connectivityType": "ShareableCloud", "displayName": name, "privacyLevel": "Organizational",
+        "connectionDetails": {"type": "EventHub", "creationMethod": "EventHub.Contents", "parameters": [
+            {"dataType": "Text", "name": "endpoint", "value": namespace},
+            {"dataType": "Text", "name": "entityPath", "value": EVENT_HUB_NAME}]},
+        "credentialDetails": {"singleSignOnType": "None", "connectionEncryption": "NotEncrypted", "skipTestConnection": False,
+                              "credentials": {"credentialType": "WorkspaceIdentity"}},
+    }
+
+
+def ensure_eventhub_connection(fabric: Fabric, namespace: str, private: bool) -> str | None:
+    """Find-or-create the Event Hubs connection; its id, or None if Fabric refused it (the caller prints the portal step)."""
+    name = f"{CONNECTION_PREFIX}{namespace}"
+    found = fabric.find("/connections", name)
+    if found:
+        print(f"Connection {name} exists ({found['id']})")
+        return found["id"]
+    # Fabric tests the connection on create, so retry while the Data Receiver role propagates. A private namespace
+    # can fail the test from Fabric's shared service, which retrying doesn't change: one attempt.
+    for attempt in range(1 if private else CONNECTION_ATTEMPTS):
+        try:
+            _, _, created = fabric.request("POST", "/connections", eventhub_connection_body(name, namespace))
+            print(f"Created connection {name} ({created['id']}): {namespace}/{EVENT_HUB_NAME}, workspace identity")
+            return created["id"]
+        except SystemExit as err:
+            if "IncorrectCredentials" not in str(err) or attempt == (0 if private else CONNECTION_ATTEMPTS - 1):
+                print(f"⚠ Connection {name} not created: {err}")
+                return None
+            print(f"  connection test failed (the role assignment may still be propagating); retrying in {CONNECTION_RETRY_S} s")
+            time.sleep(CONNECTION_RETRY_S)
+    return None
+
+
 def eventstream_definition(connection_id: str, workspace_id: str, database: dict) -> dict:
     """Event Hubs (consumer group fabric) -> default stream -> Eventhouse table match_events (processed ingestion:
-    JSON fields map to columns by name). Shapes from Microsoft Learn: Eventstream item definition + REST API."""
+    JSON fields map to columns by name). Shapes from Microsoft Learn: Eventstream item definition + REST API.
+    The source is ``AzureEventHubExtended`` (the portal's "Extended features"): the basic ``AzureEventHub`` source
+    accepts only shared-key (Basic) connections, and Event Hubs here has local auth disabled."""
     spec = {
         "sources": [{
-            "name": "match-events", "type": "AzureEventHub",
-            "properties": {"dataConnectionId": connection_id, "consumerGroupName": "fabric",
-                           "inputSerialization": {"type": "Json", "properties": {"encoding": "UTF8"}}},
+            "name": EVENT_HUB_NAME, "type": "AzureEventHubExtended",
+            "properties": {"dataConnectionId": connection_id, "consumerGroupName": "fabric", "startPosition": "Earliest"},
         }],
         "streams": [{"name": f"{EVENTSTREAM_NAME}-stream", "type": "DefaultStream", "properties": {},
-                     "inputNodes": [{"name": "match-events"}]}],
+                     "inputNodes": [{"name": EVENT_HUB_NAME}]}],
         "destinations": [{
             "name": "regista-eventhouse", "type": "Eventhouse",
             "properties": {"dataIngestionMode": "ProcessedIngestion", "workspaceId": workspace_id, "itemId": database["id"],
@@ -255,11 +306,19 @@ def dry_run(fabric: Fabric, args: argparse.Namespace, capacity_id: str) -> int:
               + (f"exists ({state})" if mpe else "would be created and approved"))
     elif args.eventhub_private:
         print(f"  managed private endpoint {MANAGED_PRIVATE_ENDPOINT_NAME} -> Event Hubs: would be created and approved")
+    streaming = not args.skip_eventstream and (args.eventhub_connection_id or args.eventhub_namespace)
+    if args.eventhub_connection_id:
+        print(f"  Event Hubs connection: {args.eventhub_connection_id} (given)")
+    elif streaming and not any(kind == "Eventstream" and found for kind, _, found in items):
+        name = f"{CONNECTION_PREFIX}{args.eventhub_namespace}"
+        found = fabric.find("/connections", name)
+        print(f"  connection {name}: " + (f"exists ({found['id']})" if found else
+                                          f"would be created ({args.eventhub_namespace}/{EVENT_HUB_NAME}, workspace identity)"))
     for kind, name, found in items:
         if found:
             print(f"  {kind} {name}: exists")
-        elif kind == "Eventstream" and not args.eventhub_connection_id:
-            print(f"  {kind} {name}: waits for the Event Hubs connection (FABRIC_EVENTHUB_CONNECTION_ID; docs/DEPLOYMENT.md step 5.3)")
+        elif kind == "Eventstream" and not streaming:
+            print(f"  {kind} {name}: skipped (no --eventhub-namespace or --eventhub-connection-id)")
         else:
             print(f"  {kind} {name}: would be created" + ("  (+ table match_events, mapping match_events_json)" if kind == "KQL database" else ""))
     if not args.skip_reference_upload:
@@ -379,7 +438,15 @@ def main() -> int:
         print("Skipped workspace access for the API identity (pass --resource-group and --identity-name).")
 
     # Workspace identity -> Event Hubs Data Receiver (keyless source for the Eventstream) ------------
+    connection_id = args.eventhub_connection_id
+    # The connection only matters while the Eventstream is missing; a pipeline principal can't see your connection.
+    stream = None if args.skip_eventstream else fabric.find(f"/workspaces/{ws}/eventstreams", EVENTSTREAM_NAME)
     if not args.skip_eventstream and args.eventhub_namespace:
+        namespace_id = ""
+        try:
+            namespace_id = az_tsv("eventhubs", "namespace", "list", "--query", f"[?name=='{args.eventhub_namespace}'].id | [0]")
+        except subprocess.CalledProcessError as err:
+            print(f"⚠ Could not look up the Event Hubs namespace {args.eventhub_namespace}: {err.stderr or err}")
         _, _, details = fabric.request("GET", f"/workspaces/{ws}")
         identity = details.get("workspaceIdentity")
         if not identity:
@@ -388,9 +455,8 @@ def main() -> int:
             except SystemExit as err:
                 print(f"⚠ Could not provision the workspace identity: {err}")
         sp_id = (identity or {}).get("servicePrincipalId")
-        if sp_id:
+        if sp_id and namespace_id:
             try:
-                namespace_id = az_tsv("eventhubs", "namespace", "list", "--query", f"[?name=='{args.eventhub_namespace}'].id | [0]")
                 held = az_tsv("role", "assignment", "list", "--assignee", sp_id, "--role", EVENT_HUBS_RECEIVER_ROLE,
                               "--scope", namespace_id, "--query", "length(@)")
                 if held in ("", "0"):   # create only if missing: re-runs never fail
@@ -400,33 +466,32 @@ def main() -> int:
                 print(f"Workspace identity {sp_id} has '{EVENT_HUBS_RECEIVER_ROLE}' on {args.eventhub_namespace}")
             except subprocess.CalledProcessError as err:
                 print(f"⚠ Could not grant '{EVENT_HUBS_RECEIVER_ROLE}' to the workspace identity: {err.stderr or err}")
-        if args.eventhub_private:
-            try:
-                namespace_id = az_tsv("eventhubs", "namespace", "list", "--query", f"[?name=='{args.eventhub_namespace}'].id | [0]")
-                ensure_managed_private_endpoint(fabric, ws, namespace_id, args.workspace)
-            except subprocess.CalledProcessError as err:
-                print(f"⚠ Could not look up the Event Hubs namespace: {err.stderr or err}")
+        if args.eventhub_private and namespace_id:
+            ensure_managed_private_endpoint(fabric, ws, namespace_id, args.workspace)
+        if not connection_id and not stream and sp_id:
+            connection_id = ensure_eventhub_connection(fabric, args.eventhub_namespace, args.eventhub_private)
 
     # Eventstream ----------------------------------------------------------------------------------
     if args.skip_eventstream:
         print("Skipped the Eventstream (--skip-eventstream).")
-    elif fabric.find(f"/workspaces/{ws}/eventstreams", EVENTSTREAM_NAME):
+    elif stream:
         print(f"Eventstream {EVENTSTREAM_NAME} exists")
-    elif args.eventhub_connection_id:
+    elif connection_id:
         try:
             stream = fabric.create_item(f"/workspaces/{ws}/eventstreams", {
                 "displayName": EVENTSTREAM_NAME, "description": "match-events (Event Hubs, consumer group fabric) -> match_events",
-                "definition": eventstream_definition(args.eventhub_connection_id, ws, database)})
+                "definition": eventstream_definition(connection_id, ws, database)})
             print(f"Created Eventstream {EVENTSTREAM_NAME}: {stream.get('id')}")
         except SystemExit as err:
             print(f"⚠ Eventstream not created ({err}).\n  Create it in the portal instead: docs/DEPLOYMENT.md, step 5.")
+    elif not args.eventhub_namespace:
+        print("Skipped the Eventstream (no --eventhub-namespace).")
     else:
-        print("\nEventstream: one portal step, then re-run.\n"
-              f"  1. Fabric portal > workspace '{args.workspace}' > Settings > Manage connections > New: Azure Event Hubs,\n"
-              f"     namespace {args.eventhub_namespace or '<namespace>'}, hub match-events, authentication: Workspace identity.\n"
-              + ("     The namespace is private: untick *Test connection* (it is reached through the managed private endpoint).\n"
-                 if args.eventhub_private else "") +
-              "  2. Copy the connection id, then: azd env set FABRIC_EVENTHUB_CONNECTION_ID <id> && azd provision")
+        # Only when Fabric refused the connection above (tenant setting, private namespace): the portal fallback.
+        print("\nEventstream: the Event Hubs connection couldn't be created automatically (see the warning above).\n"
+              f"  1. Fabric portal > Settings > Manage connections and gateways > New: Azure Event Hubs,\n"
+              f"     namespace {args.eventhub_namespace}, hub {EVENT_HUB_NAME}, authentication: Workspace identity.\n"
+              "  2. Copy the connection id, then: azd env set FABRIC_EVENTHUB_CONNECTION_ID <id> && azd hooks run postprovision")
 
     print(f"\nOneLake for the API: ONELAKE_WORKSPACE={args.workspace}  ONELAKE_LAKEHOUSE={LAKEHOUSE_NAME}")
     return 0

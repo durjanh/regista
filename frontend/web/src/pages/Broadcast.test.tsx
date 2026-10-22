@@ -13,7 +13,7 @@ const NEG = { enabled: true, url: "wss://wps.example/client/hubs/regista?access_
   groups: [`match.${HERO}`, `match.${HERO}.en`, `overlay.${HERO}`] };
 const status = (over: Partial<BroadcastStatus> = {}): BroadcastStatus => ({
   match_id: HERO, live: true, source: "replay", speed: 1, t: 3600, minute: 58, started_at: "2026-10-21T18:00:00Z",
-  ticks_published: 42, bytes_published: 52_000, languages: ["en"], ...over,
+  ticks_published: 42, bytes_published: 52_000, languages: ["en"], viewers: 0, viewers_more: false, ...over,
 });
 const tick = (over: Record<string, unknown> = {}) => ({
   type: "tick", match_id: HERO, seq: 1, sent_at: Date.now(), t: 30, minute: 1, score: { home: 0, away: 0 }, events: [],
@@ -103,7 +103,7 @@ describe("Studio: go live to all viewers", () => {
       { match: /\/events\?/, reply: [] },
       { match: /\/broadcast\/status$/, reply: () => [current] },
       { match: /\/realtime\/negotiate/, reply: { enabled: false } },
-      { method: "POST", match: /\/broadcast\/.+\/start$/, reply: () => (current = status({ speed: 10 })) },
+      { method: "POST", match: /\/broadcast\/.+\/start$/, reply: () => (current = status({ speed: 10, viewers: 10000, viewers_more: true })) },
       { method: "POST", match: /\/broadcast\/.+\/stop$/, reply: () => (current = status({ live: false })) },
     ]);
     renderWithPrefs(<Routes><Route path="/studio/:id" element={<Studio />} /></Routes>, { route: `/studio/${HERO}` });
@@ -116,6 +116,7 @@ describe("Studio: go live to all viewers", () => {
     expect(JSON.parse(String((start[1] as RequestInit).body))).toEqual({ speed: 10, start_t: 0, languages: ["en", "fr", "es"] });
     await waitFor(() => expect(panel).toHaveTextContent("On air"));
     expect(panel).toHaveTextContent("50.8 KB");
+    expect(panel).toHaveTextContent("👁 10,000+ viewers");   // the Web PubSub count, capped
     await userEvent.click(screen.getByRole("button", { name: /Stop broadcast/ }));
     await waitFor(() => expect(panel).toHaveTextContent("Off air"));
   });
@@ -163,5 +164,19 @@ describe("Overlay: cues over Web PubSub", () => {
     expect(FakeEventSource.last.url).toContain(`/api/studio/${HERO}/overlay`);
     await act(async () => FakeEventSource.last.emit("on_air", studioItem({ id: "si-sse", title: "From SSE", kind: "lower_third", duration_s: 30 })));
     expect(screen.getByText("From SSE")).toBeInTheDocument();
+  });
+
+  it("preview mode says it is waiting for graphics; the OBS URL stays fully transparent", async () => {
+    mockApi([{ match: /\/realtime\/negotiate/, reply: { enabled: false } }]);
+    const { unmount } = renderOverlay();
+    await waitFor(() => expect(FakeEventSource.instances.length).toBe(1));
+    expect(screen.queryByText(/waiting for graphics/)).not.toBeInTheDocument();
+    unmount();
+
+    renderWithPrefs(<Routes><Route path="/overlay/:id" element={<Overlay />} /></Routes>, { route: `/overlay/${HERO}?preview=1` });
+    expect(await screen.findByText(/waiting for graphics/)).toBeInTheDocument();
+    await act(async () => FakeEventSource.last.emit("on_air", studioItem({ id: "si-p", title: "Goal", kind: "lower_third", duration_s: 30 })));
+    expect(screen.getByText("Goal")).toBeInTheDocument();
+    expect(screen.queryByText(/waiting for graphics/)).not.toBeInTheDocument();   // the note gives way to the graphic
   });
 });
