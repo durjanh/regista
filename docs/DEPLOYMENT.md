@@ -70,14 +70,14 @@ One pipeline per part, so a change ships only what it touches: a frontend change
 change deploys the Function app. Each runs its tests first; every deployment is a deployment job on the environment
 `regista-<profile>`, so its approval check gates it. Parameter `profile` (default `containerapps`).
 
-| Pipeline | File | Runs on a change to (main) | What it does |
+| Pipeline (folder `\Regista`) | File | Runs on a change to (main) | What it does |
 |---|---|---|---|
 | CI | `ci.yml` | anything, and every PR | Ruff, pytest (90% floor), integration, evaluation gate, Vitest (floor), build, Playwright, Bicep, manifests and hooks. Mirrors `.github/workflows/ci.yml` |
 | Infrastructure | `infra.yml` | `infra/`, the `azure.yaml` files, `deploy/hooks/` | Bicep build + lint → what-if → **Provision** (no application code) |
 | API | `api.yml` | `services/api/`, `data/`, `deploy/k8s/` | API checks → **`azd deploy api`** → deployed integration tests. Enterprise: the deploy runs on the Managed DevOps Pool |
 | Frontend | `frontend.yml` | `apps/web/` | Typecheck, Vitest, build → **`azd deploy web`** (Static Web Apps; `web` is the frontend's azd service name) |
 | Functions | `functions.yml` | `services/functions/` | Dependencies resolve and the app registers its functions → **zip deploy with a remote build** (Flex Consumption) |
-| Jobs | `jobs.yml` | after every successful API run | Container Apps: moves the feeder job onto the API's new image (it runs the API's code) |
+| Container jobs | `jobs.yml` | after every successful API run | Container Apps: moves the feeder job onto the API's new image (it runs the API's code) |
 | Full environment | `azure-dev.yml` | manual | Everything in one run: Preview → Provision → Deploy (all services, Functions, the feeder job). For the first setup or a rebuild |
 
 The test steps are shared templates (`templates/api-tests.yml`, `frontend-tests.yml`, `infra-validate.yml`), so CI and the service pipelines run the same checks; the deploy steps too (`azd-steps.yml`, `functions-deploy.yml`, `jobs-update.yml`).
@@ -90,7 +90,7 @@ scripts/setup-azure-devops.sh --org https://dev.azure.com/<org> --project <proje
   --repo-type github --repo <owner>/<repo> --github-connection <github-service-connection>
 ```
 
-The organisation needs billing set up (Organization settings → Billing → your subscription) for its free Microsoft-hosted parallel job. Add an approval check on the `regista-<profile>` environment, run *regista-azure-dev* once, then let the per-part pipelines take over. For the enterprise profile, pass the pool name (the `AZURE_DEVOPS_POOL_NAME` output) as `managedPool`.
+The organisation needs billing set up (Organization settings → Billing → your subscription) for its free Microsoft-hosted parallel job. Add an approval check on the `regista-<profile>` environment, run *Regista › Full environment* once, then let the per-part pipelines take over. For the enterprise profile, pass the pool name (the `AZURE_DEVOPS_POOL_NAME` output) as `managedPool`.
 
 ## Idempotency: run it again, nothing changes
 

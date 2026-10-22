@@ -152,11 +152,14 @@ if [[ -n "$REPO" ]]; then
     ado devops service-endpoint update --id "$GH_ID" --enable-for-all true -o none
     extra=(--service-connection "$GH_ID")
   fi
-  # CI, the full-environment run, then one pipeline per part (jobs follows api, so api is created first).
-  for p in ci azure-dev infra api frontend functions jobs; do
-    ado pipelines show --name "regista-$p" -o none 2>/dev/null || \
-      ado pipelines create --name "regista-$p" --yml-path ".azuredevops/pipelines/$p.yml" --repository "$REPO" \
-        --repository-type "$REPO_TYPE" --branch main --skip-first-run true ${extra[@]+"${extra[@]}"} -o none
+  # In the \Regista folder: CI, the full-environment run, then one pipeline per part. "Container jobs" follows
+  # "API" by name (jobs.yml: source Regista\API), so API is created first.
+  for entry in "ci:CI" "azure-dev:Full environment" "infra:Infrastructure" "api:API" "frontend:Frontend" \
+               "functions:Functions" "jobs:Container jobs"; do
+    file="${entry%%:*}" name="${entry#*:}"
+    ado pipelines show --name "$name" --folder-path '\Regista' -o none 2>/dev/null || \
+      ado pipelines create --name "$name" --folder-path '\Regista' --yml-path ".azuredevops/pipelines/$file.yml" \
+        --repository "$REPO" --repository-type "$REPO_TYPE" --branch main --skip-first-run true ${extra[@]+"${extra[@]}"} -o none
   done
 else
   echo "  --repo not given: create pipelines from .azuredevops/pipelines/ci.yml and azure-dev.yml in the portal."
@@ -167,7 +170,7 @@ cat <<EOF
 Done. In Azure DevOps:
   1. Pipelines > Environments > regista-$PROFILE > Approvals and checks: add yourself,
      so every Provision and Deploy waits for a person to read the what-if.
-  2. First time: run "regista-azure-dev" with profile=$PROFILE (everything). After that, each part deploys on its own
-     when its code changes on main: regista-infra, regista-api, regista-frontend, regista-functions, regista-jobs.
+  2. First time: run Regista > "Full environment" with profile=$PROFILE (everything). After that, each part deploys
+     on its own when its code changes on main: Infrastructure, API, Frontend, Functions, Container jobs.
 EOF
 [[ "$PROFILE" == "aks-enterprise" ]] && echo "  3. After the first Provision, the pool's name is the AZURE_DEVOPS_POOL_NAME output; pass it as managedPool."

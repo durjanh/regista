@@ -264,7 +264,7 @@ scripts/setup-azure-devops.sh --org https://dev.azure.com/<org> --project <proje
   --repo-type github --repo <owner>/<repo> --github-connection <github-service-connection>
 ```
 
-Then add an approval check on the `regista-<profile>` environment and run **regista-azure-dev** (for enterprise, set `managedPool` to the `AZURE_DEVOPS_POOL_NAME` output).
+Then add an approval check on the `regista-<profile>` environment and run **Regista › Full environment** (for enterprise, set `managedPool` to the `AZURE_DEVOPS_POOL_NAME` output).
 
 ### 5. GitHub Actions (Container Apps)
 

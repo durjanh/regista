@@ -1,5 +1,5 @@
 # Regista Container Apps jobs (the feeder that replays a match into Event Hubs): move the job onto the image the API
-# runs. The job runs the API's code, so it follows the API: this pipeline runs after every successful api.yml run,
+# runs. The job runs the API's code, so it follows the API: this pipeline runs after every successful API run,
 # or by hand. Container Apps only (on AKS the feeder is a CronJob in the API's Kubernetes manifests).
 
 trigger: none
@@ -8,7 +8,7 @@ pr: none
 resources:
   pipelines:
     - pipeline: api
-      source: regista-api
+      source: Regista\API   # the API pipeline, by its folder and name in Azure DevOps
       trigger:
         branches:
           include:

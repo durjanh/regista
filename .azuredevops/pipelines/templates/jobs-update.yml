@@ -18,7 +18,7 @@ steps:
         img=$(az containerapp list -g "$rg" --query "[?tags.\"azd-service-name\"=='api'].properties.template.containers[0].image | [0]" -o tsv)
         job=$(az containerapp job list -g "$rg" --query "[0].name" -o tsv)
         case "$img" in ''|mcr.microsoft.com/k8se/quickstart*)
-          echo "##vso[task.logissue type=warning]The API has no deployed image yet: run regista-api first."; exit 0 ;;
+          echo "##vso[task.logissue type=warning]The API has no deployed image yet: run the API pipeline first."; exit 0 ;;
         esac
         [ -n "$job" ] || { echo "##vso[task.logissue type=warning]No Container Apps job in $rg."; exit 0; }
         current=$(az containerapp job show -n "$job" -g "$rg" --query "properties.template.containers[0].image" -o tsv)
