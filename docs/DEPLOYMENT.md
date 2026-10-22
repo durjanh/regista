@@ -221,11 +221,9 @@ The API replays matches in-process by default. To exercise the full event-driven
 # Make the API consume Event Hubs (one-off; or set liveSource = 'eventhub' in main.bicepparam)
 az containerapp update -g rg-regista -n regista-api --set-env-vars LIVE_SOURCE=eventhub
 
-# Stream a match (default speed 1 = real time). Override the arguments for a faster demo:
-az containerapp job start -g rg-regista -n regista-feeder
-az containerapp job start -g rg-regista -n regista-feeder \
-  --image "$(az containerapp job show -g rg-regista -n regista-feeder --query 'properties.template.containers[0].image' -o tsv)" \
-  --command "python" "-m" "app.live.feeder" --args "--match-id" "<match_id>" "--speed" "30"
+# Stream a match. 30x plays a full match in about 3.5 minutes; --start-t resumes part-way (seconds of match time).
+# (az containerapp job start --args can't pass "--speed": the CLI reads it as its own option, so the script uses the REST API.)
+scripts/run-feeder.sh --rg rg-regista --match-id 2026-07-15-england-argentina --speed 30
 
 az containerapp job execution list -g rg-regista -n regista-feeder -o table
 ```
@@ -285,7 +283,7 @@ Fabric items (workspace, Lakehouse, Eventhouse, Eventstream) are not Azure Resou
    is a separate feature and is not set up: it needs a paid F capacity (not the trial), and Fabric documents that a
    private-link Eventhouse can't consume events from an Eventstream, which would break this live path.
 
-4. **Feed it.** Run the feeder so events flow (`az containerapp job start -n regista-feeder -g rg-regista`, or `kubectl -n regista create job feeder-$(date +%s) --from=cronjob/regista-feeder` on AKS).
+4. **Feed it.** Run the feeder so events flow (`scripts/run-feeder.sh --rg rg-regista --speed 30`, or `kubectl -n regista create job feeder-$(date +%s) --from=cronjob/regista-feeder` on AKS).
 
 5. **Tested.** On 2026-10-22 the hook created the connection and the Eventstream against the live `PremierLeague`
    workspace (trial capacity, UK South); the Eventstream topology reports source, stream and Eventhouse destination
