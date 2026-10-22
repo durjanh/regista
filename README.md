@@ -4,6 +4,8 @@
 
 Built for the Microsoft + Premier League *Inside the Game* Developer Hackathon with Microsoft Foundry, Microsoft Agent Framework, MCP, Azure AI Services, Microsoft Fabric, Cosmos DB, Event Hubs, Azure Functions, Azure Container Apps, Azure Static Web Apps, Azure Web PubSub and GitHub Copilot. Category: **Best Enterprise Solution**.
 
+**Try it live:** https://black-beach-0613e390f.4.azurestaticapps.net (no login; [judge mode](#judge-mode) below). The API scales to zero between sessions, so the very first request can take up to 30 seconds.
+
 ![Control room at 68': Argentina's planted press switch detected, the Verifier drill catching an overstated number (1.76 struck through, evidence says 0.82), and the truth panel scoring the detection in 286 seconds](docs/screenshots/studio-hero.png)
 
 > A *regista* is the deep-lying playmaker who sees the whole pitch and dictates the tempo. Regista does that for every viewer, producer and manager: what happened, **why it mattered**, with the evidence.
@@ -33,25 +35,34 @@ Built for the Microsoft + Premier League *Inside the Game* Developer Hackathon w
 
 | Surface | What you get |
 |---|---|
-| **Control room** (`/studio/:id`) | Ranked insight cards with approve / edit / kill; auto-approve above a producer-set confidence; editorial rules (no betting or loaded language); Content Safety; a full audit log; broadcaster profiles (languages, tone, brand, threshold); versioned JSON cues with translated strings; truth panel and Verifier drill; a half-time pack (talking points plus graphics that go into the approval queue) |
-| **Air-ready overlays** (`/overlay/:id`) | Transparent 1920×1080 browser source for OBS / vMix driven by the cue contract (timecode, duration, priority, template, data, strings); data-only graphics fire even if AI text is slow |
+| **Control room** (`/studio/:id`) | Ranked insight cards with approve / edit / kill; auto-approve above a producer-set confidence; editorial rules (no betting or loaded language); Content Safety; a full audit log; broadcaster profiles (languages, tone, brand, threshold); versioned JSON cues with translated strings; truth panel and Verifier drill; a half-time pack (talking points plus graphics that go into the approval queue); **go live to all viewers** with the real viewer count from Web PubSub (the producer's own Studio connection isn't counted) |
+| **Air-ready overlays** (`/overlay/:id`) | Transparent 1920×1080 browser source for OBS / vMix driven by the cue contract (timecode, duration, priority, template, data, strings); data-only graphics fire even if AI text is slow. Add `?preview=1` to check it in a browser (checkerboard background and a "waiting for graphics" note) |
 | **Matchday** (`/match/:id`) | **Live broadcast** (one shared timeline for every viewer, fanned out by Azure Web PubSub) or a personal **replay** (own speed and seek). Five views that differ in layout and pace, not just wording: **Analyst** (dense: pitch, pulse, insight cards, event feed with pass difficulty / ball and shot speed / sprint tags, key battle), **Casual** (big moments only, unhurried), **Player focus** (one player's touches, distance, sprints, top speed), **Club focus** (one side's story) and **Single metric** (one huge live number for a second screen). Plus control vs chaos, freeze frames, seven personas, 12 languages, neural voice and audio description |
 | **Dugout** (`/match/:id/dugout`) | For the manager: form vs a player's own baseline, fatigue vs team-mates (altitude-aware), "replace X with Y" with predicted win-probability impact, chase/protect changes, danger men, opponent patterns, spoken assistant-coach briefing |
-| **Scouting** (`/scouting`) | Player DNA (REAL record + MODEL tendencies: favourite side, foot, penalty placement, keeper dives, distance, sprints), strengths and weaknesses vs peers, "how to stop him"; team reports with real home/away records and "how to play against them" |
+| **Scouting** (`/scouting`) | Player DNA (REAL record + MODEL tendencies: favourite side, foot, penalty placement, keeper dives, distance, sprints), strengths and weaknesses vs peers, "how to stop him"; a team report for every scouted national team, with real home/away records and "how to play against them" |
 | **Tactics, Ask, Recap** | Pass networks and profiles, shape changes, xG waterfalls; "Ask the match" via an agent using MCP tools; multi-agent recaps with run-sheets and social packs in every persona and language |
 | **Data Forge** (`/forge`) | Natural-language what-if matches, calibration report, truth score history; a full synthetic **season** generator with planted changes and a realism report for the Fabric Lakehouse |
 | **Ops** (`/ops`) | Narrative latency SLO (p50 / p95 vs target) and cost per match (model calls, tokens, estimated cost) |
 
 <table>
-<tr><td><img src="docs/screenshots/matchday-casual.png" alt="Matchday, Casual view: big moments only, win probability bar"></td>
-<td><img src="docs/screenshots/matchday-analyst.png" alt="Matchday, Analyst view: insight card with its working beside the truth panel"></td></tr>
-<tr><td align="center">Casual view: big moments, unhurried</td><td align="center">Analyst view: every working shown</td></tr>
+<tr><td><img src="docs/screenshots/matchday-casual.png" alt="Matchday, Casual view: chance-to-win bar and the latest goal explained in plain words"></td>
+<td><img src="docs/screenshots/matchday-analyst.png" alt="Matchday, Analyst view: a detected press switch with its working and citations"></td></tr>
+<tr><td align="center">Casual view: big moments, plain words</td><td align="center">Analyst view: every working shown</td></tr>
+<tr><td><img src="docs/screenshots/studio-azure.png" alt="Studio on Azure AI: detected changes with evidence charts beside the truth panel (recall 100%, 0 false alarms, median 248 s)"></td>
+<td><img src="docs/screenshots/overlay.png" alt="Broadcast overlay: an approved lower third, Argentina pressing higher from 64', on the transparent page"></td></tr>
+<tr><td align="center">Studio on Azure AI: detections graded by the truth panel</td><td align="center">Overlay: the approved lower third on air</td></tr>
+<tr><td><img src="docs/screenshots/ask.png" alt="Ask Regista: an answer to why England lost, every number tagged with a fact ID, fact-checked against 50 facts"></td>
+<td><img src="docs/screenshots/recap.png" alt="Automated recap: headline, report, player of the match and a 60-second audio script, fact-checked against 139 facts"></td></tr>
+<tr><td align="center">Ask Regista: MCP tools, every number cited</td><td align="center">Multi-agent recap, fact-checked</td></tr>
+<tr><td><img src="docs/screenshots/matchday-player.png" alt="Matchday, Player focus: one player's touches, passes, distance, sprints and top speed"></td>
+<td><img src="docs/screenshots/tactics.png" alt="Tactics: shape, xG, PPDA, field tilt and the pass network"></td></tr>
+<tr><td align="center">Player focus: one player all match</td><td align="center">Tactics: shape, pressing and pass network</td></tr>
 <tr><td><img src="docs/screenshots/dugout.png" alt="Dugout: substitution recommendation with predicted win-probability impact"></td>
-<td><img src="docs/screenshots/scouting.png" alt="Scouting: player list ranked by shrunk average rating"></td></tr>
-<tr><td align="center">Dugout: "replace X with Y" and what it is worth</td><td align="center">Scouting: Player DNA and opposition reports</td></tr>
+<td><img src="docs/screenshots/scouting.png" alt="Scouting: Player DNA with the real international goal record by period and venue"></td></tr>
+<tr><td align="center">Dugout: "replace X with Y" and what it is worth</td><td align="center">Scouting: Player DNA (REAL record + MODEL tendencies)</td></tr>
 </table>
 
-Screenshots are from the offline engine with `REGISTA_VIDEO_SAFE=1` (competition names replaced with generic labels).
+Screenshots are from the running app with `REGISTA_VIDEO_SAFE=1` (competition names replaced with generic labels): the gallery on Azure AI (Microsoft Foundry); the control-room image at the top on the offline engine, to show the Verifier drill catching a planted error.
 
 ## Evidence
 
@@ -65,7 +76,7 @@ Every push runs `python -m app.evals.run --mode offline` as a gate:
 | Real-result fidelity (score, scorers, minutes) | **100%** |
 | Calibration vs real fixtures and event benchmarks | **16/16** |
 | Win-probability Brier score on real outcomes | **0.469** (coin flip: 0.667) |
-| Tests | **API:** 144 unit tests, 96% statement coverage (CI floor 90%); 9 live-server integration tests over real HTTP, SSE and MCP (30 concurrent viewers, first event p95 320 ms); 6 deployed-environment tests incl. a Web PubSub round trip. **Web:** 131 Vitest tests (CI coverage floor); **16 Playwright end-to-end tests** in a real browser against the real API, incl. the hero moment, the overlay, axe accessibility scans and RTL Arabic |
+| Tests | **API:** 155 unit tests, 96% statement coverage (CI floor 90%); 9 live-server integration tests over real HTTP, SSE and MCP (30 concurrent viewers, first event p95 320 ms); 6 deployed-environment tests incl. a Web PubSub round trip. **Web:** 145 Vitest tests (CI coverage floor); **17 Playwright end-to-end tests** in a real browser against the real API, incl. the hero moment, the overlay, axe accessibility scans and RTL Arabic |
 | Shape changes vs ground truth | 67% precision |
 | Scouting rediscovers player tendencies | foot 100%, penalty side 82%, keeper dive 100% |
 
@@ -89,13 +100,14 @@ Diagrams (open in diagrams.net or the Draw.io VS Code extension): [Container App
   - **Container Apps** (`infra/main.bicep`): API and feeder job. The cheapest; runs the live demo.
   - **AKS standard** (`infra/aks`): Entra-only AKS with workload identity, Cilium, app routing and Kubernetes manifests in `deploy/k8s`.
   - **AKS enterprise** (`infra/aks-enterprise`): API Management Standard v2 (the only public endpoint) → VNet integration → internal NGINX → private AKS; every PaaS service behind a private endpoint; deploys from a Managed DevOps Pool inside the VNet.
+- **Microsoft Fabric as code** (`scripts/fabric-setup.py`, run by the azd postprovision hook): workspace, Lakehouse with the CC0 results, Eventhouse and KQL table, workspace identity, the keyless Event Hubs connection and the Eventstream into the Eventhouse. Every item is find-or-create, so re-runs change nothing; on the enterprise profile it adds a managed private endpoint to the private Event Hubs.
 - **CI/CD**: **azd** for every profile (`azure.yaml`, `deploy/aks`, `deploy/aks-enterprise`); **GitHub Actions** (`.github/workflows`) and **Azure Pipelines** (`.azuredevops/pipelines`) with lint, coverage floors, evaluation gates with the truth score in the job summary, Bicep what-if, approvals and smoke tests. GitHub OIDC; bootstrap with the GitHub CLI. GitHub Copilot agent mode: `.github/copilot-instructions.md`, custom agents and `.vscode/mcp.json` (Regista MCP, Azure MCP, Fabric Eventhouse MCP).
 
 ## Judge mode
 
-No login. Open the web URL and:
+No login. Open https://black-beach-0613e390f.4.azurestaticapps.net and:
 1. **Hub → England v Argentina → Studio.** Turn on **Truth mode** and the **Verifier drill**, pick **Jump to → 58:00** and play at 10×, watch Argentina's press switch (planted at 63') get detected, the Verifier catch the overstated number, approve the lower-third, see the truth panel light up, then press **What did it change?**
-2. **Matchday** views: switch Analyst → Casual → Player focus to see the same match told at different pace and depth.
+2. **Matchday** views: switch Analyst → Casual → Player focus to see the same match told at different pace and depth. Back in the Studio, **Start broadcast** and open the match on a second device: the viewer count goes up.
 3. **Dugout** on Argentina v Saudi Arabia at 70' for live manager advice; **Scouting** for Player DNA.
 4. **Forge** for calibration and the truth-score history; **Ops** for SLO and cost.
 5. Point GitHub Copilot agent mode (or any MCP client) at `<api>/mcp`.
