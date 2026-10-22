@@ -13,7 +13,6 @@ beforeEach(() => {
 });
 afterEach(() => {
   vi.useRealTimers();
-  vi.unstubAllGlobals();
 });
 
 describe("connectRealtime (Azure Web PubSub client)", () => {

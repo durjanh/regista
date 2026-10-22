@@ -21,7 +21,6 @@ beforeEach(() => {
   mockApi([HEALTH, { match: /\/players/, reply: PLAYERS }, { match: /\/physical/, reply: PHYSICAL }, { match: /\/analysis/, reply: analysis() }]);
 });
 afterEach(() => {
-  vi.unstubAllGlobals();
   vi.useRealTimers();
 });
 

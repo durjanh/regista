@@ -1,6 +1,6 @@
 import { act, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { TruthPanel } from "./TruthPanel";
 import { HERO, insight, plant, truthReport } from "../test/fixtures";
 import { HEALTH, mockApi, renderWithPrefs } from "../test/utils";
@@ -11,8 +11,6 @@ const CF = {
   with_change: { median: 12.5, p10: 8, p90: 18 }, without_change: { median: 7, p10: 4, p90: 10 }, effect: { median: 5.5, p10: 1, p90: 11 },
   explanation: "Across 16 paired re-runs of this match, the press produced more regains.",
 };
-
-afterEach(() => vi.unstubAllGlobals());
 
 describe("TruthPanel", () => {
   it("shows a skeleton while loading and the error when the truth call fails", () => {

@@ -1,6 +1,6 @@
 import { act, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { speak, speakable, stopSpeaking } from "./speech";
 import { ListenButton } from "../components/ListenButton";
 import { HEALTH, mockApi, renderWithPrefs } from "../test/utils";
@@ -43,7 +43,6 @@ beforeEach(() => {
   URL.revokeObjectURL = vi.fn();
   synth.speak.mockClear();
 });
-afterEach(() => vi.unstubAllGlobals());
 
 describe("speech", () => {
   it("strips citations and markdown before speaking", () => {

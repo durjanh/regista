@@ -12,7 +12,6 @@ const lastCall = (fn: ReturnType<typeof vi.fn>) => {
 };
 
 describe("API services", () => {
-  afterEach(() => vi.unstubAllGlobals());
 
   it("builds GET paths with encoded ids and only the query params that are set", async () => {
     const fetch = mockApi([{ match: /./, reply: [] }]);
@@ -127,7 +126,6 @@ describe("API services", () => {
 describe("api base URL (Azure Static Web Apps build)", () => {
   afterEach(() => {
     vi.unstubAllEnvs();
-    vi.unstubAllGlobals();
     vi.resetModules();
   });
 

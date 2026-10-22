@@ -1,6 +1,6 @@
 import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { LiveControls } from "./LiveControls";
 import { liveState } from "../test/fixtures";
 import { HEALTH, mockApi, renderWithPrefs } from "../test/utils";
@@ -9,7 +9,6 @@ import type { LiveState } from "../hooks/useLiveMatch";
 beforeEach(() => {
   mockApi([HEALTH]);
 });
-afterEach(() => vi.unstubAllGlobals());
 
 const handlers = () => ({ play: vi.fn(), pause: vi.fn(), restart: vi.fn(), setSpeed: vi.fn(), jumpToEnd: vi.fn(), seekMinute: vi.fn() });
 

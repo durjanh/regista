@@ -1,7 +1,7 @@
 import { act, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Route, Routes } from "react-router-dom";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Studio } from "./Studio";
 import { HERO, drillCaught, event, insight, match, moment, narrative, snapshot, studioItem, truthReport } from "../test/fixtures";
 import { FakeEventSource, HEALTH, mockApi, renderWithPrefs } from "../test/utils";
@@ -37,7 +37,6 @@ beforeEach(() => {
     { match: /\/events\?types=kick_off/, reply: [event({ type: "kick_off", period: 2, t: 2880, minute: 46 })] },
   ]);
 });
-afterEach(() => vi.unstubAllGlobals());
 
 const renderStudio = () =>
   renderWithPrefs(

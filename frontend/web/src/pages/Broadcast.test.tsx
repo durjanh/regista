@@ -1,7 +1,7 @@
 import { act, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Outlet, Route, Routes } from "react-router-dom";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { BroadcastStatus } from "../api/types";
 import { Matchday } from "./Matchday";
 import { Overlay } from "./Overlay";
@@ -27,7 +27,6 @@ beforeEach(() => {
   vi.stubGlobal("WebSocket", FakeWebSocket);
   vi.stubGlobal("ResizeObserver", class { observe() {} disconnect() {} });
 });
-afterEach(() => vi.unstubAllGlobals());
 
 const joinLive = async () => {
   await waitFor(() => expect(FakeWebSocket.instances.length).toBe(1));

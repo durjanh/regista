@@ -1,10 +1,8 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { ApiError } from "./ApiError";
 import { AxiosHttpClient } from "./AxiosHttpClient";
 import { getActivity, quietly } from "../../lib/activity";
 import { mockApi } from "../../test/utils";
-
-afterEach(() => vi.unstubAllGlobals());
 
 describe("AxiosHttpClient", () => {
   it("sends GETs without a body or Content-Type and POSTs JSON, under the API base path", async () => {

@@ -11,9 +11,10 @@ import os
 from dataclasses import dataclass, field
 from pathlib import Path
 
-try:  # local development convenience; in Azure the values are app settings
+try:  # local development convenience; in Azure the values are app settings. The tests switch it off (REGISTA_DOTENV=0).
     from dotenv import load_dotenv
-    load_dotenv(Path(__file__).resolve().parents[1] / ".env", override=False)
+    if os.environ.get("REGISTA_DOTENV", "1") != "0":
+        load_dotenv(Path(__file__).resolve().parents[1] / ".env", override=False)
 except ImportError:  # pragma: no cover
     pass
 

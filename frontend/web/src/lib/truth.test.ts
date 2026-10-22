@@ -1,5 +1,5 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { DETECTION_WINDOW_S, mechanismIcon, mechanismLabel, plantStatus, usePoll, useTruthMode, useVerifierDrill } from "./truth";
 import { plant } from "../test/fixtures";
 
@@ -26,7 +26,6 @@ describe("plantStatus", () => {
 });
 
 describe("persisted flags", () => {
-  afterEach(() => vi.unstubAllGlobals());
 
   it("truth mode and the Verifier drill start off and persist", () => {
     const truth = renderHook(() => useTruthMode());

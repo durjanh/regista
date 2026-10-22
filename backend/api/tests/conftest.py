@@ -2,14 +2,22 @@
 
 from __future__ import annotations
 
-import os
-
-os.environ.setdefault("REGISTA_OFFLINE", "1")
-
 import dataclasses
+import os
+import pathlib
+import re
 import sys
 
 import pytest
+
+# Hermetic tests: neither a developer's .env nor a pipeline's variable group (exported as environment variables) may
+# reach the app. Clear every variable the settings read (app/config.py is the list) before anything imports the app;
+# none of the imports above loads it.
+_CONFIG = pathlib.Path(__file__).resolve().parents[1] / "app" / "config.py"
+for _name in set(re.findall(r'_env(?:_int|_float)?\("([A-Z0-9_]+)"', _CONFIG.read_text())) - {"REGISTA_OFFLINE"}:
+    os.environ.pop(_name, None)
+os.environ["REGISTA_DOTENV"] = "0"
+os.environ.setdefault("REGISTA_OFFLINE", "1")
 
 HERO = "2026-07-15-england-argentina"
 

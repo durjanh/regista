@@ -23,9 +23,6 @@ parameters:
     type: string
     default: regista-mdp
 
-variables:
-  - group: regista-${{ parameters.profile }}
-
 stages:
   - stage: Test
     displayName: Lint, tests, evaluation gate
@@ -39,6 +36,9 @@ stages:
   - stage: Deploy
     displayName: Build and deploy the API
     dependsOn: Test
+    # Deployment settings only where something deploys: the test stage must not see them.
+    variables:
+      - group: regista-${{ parameters.profile }}
     jobs:
       - deployment: deploy
         environment: regista-${{ parameters.profile }}

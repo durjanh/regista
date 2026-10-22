@@ -1,7 +1,7 @@
 import { act, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Outlet, Route, Routes } from "react-router-dom";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Matchday } from "./Matchday";
 import { HERO, analysis, event, insight, match, moment, narrative, snapshot, truthReport } from "../test/fixtures";
 import { FakeEventSource, HEALTH, mockApi, renderWithPrefs } from "../test/utils";
@@ -20,7 +20,6 @@ beforeEach(() => {
     { method: "POST", match: /\/api\/narrate$/, reply: narrative({ text: "Gordon scores on the break [f1]." }) },
   ]);
 });
-afterEach(() => vi.unstubAllGlobals());
 
 const renderMatchday = (search = "") =>
   renderWithPrefs(

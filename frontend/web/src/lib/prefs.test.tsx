@@ -1,6 +1,6 @@
 import { render, renderHook, screen, act } from "@testing-library/react";
 import type { ReactNode } from "react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { PrefsProvider, usePrefs } from "./prefs";
 import { goalsFromEvents, currentChain, playerMaps, teamColors } from "./match";
 import { CitedText, Markdown } from "../components/Markdown";
@@ -9,8 +9,6 @@ import { event, match } from "../test/fixtures";
 import { HEALTH, mockApi } from "../test/utils";
 
 const wrapper = ({ children }: { children: ReactNode }) => <PrefsProvider>{children}</PrefsProvider>;
-
-afterEach(() => vi.unstubAllGlobals());
 
 describe("PrefsProvider", () => {
   it("persists choices, links the Accessible persona to the accessible UI and sets document direction", async () => {

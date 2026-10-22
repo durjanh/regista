@@ -1,6 +1,6 @@
 import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { HalftimePack, queuedId } from "./HalftimePack";
 import { analysis, event, match, narrative, studioItem } from "../test/fixtures";
 import { HEALTH, mockApi, renderWithPrefs } from "../test/utils";
@@ -29,8 +29,6 @@ function setup(over: { minute?: number; ended?: boolean; events?: typeof HT_EVEN
   );
   return { onQueued, ...utils };
 }
-
-afterEach(() => vi.unstubAllGlobals());
 
 describe("HalftimePack", () => {
   it("stays locked during the first half", () => {

@@ -8,6 +8,9 @@ export default defineConfig({
     setupFiles: ["./src/test/setup.ts"],
     include: ["src/**/*.test.{ts,tsx}"],
     restoreMocks: true,
+    // Restore stubbed globals (fetch, EventSource, ...) before each test, not in afterEach: an afterEach hook runs before
+    // React Testing Library unmounts the page, so a late effect could call a global that was already removed.
+    unstubGlobals: true,
     coverage: {
       provider: "v8",
       include: ["src/**/*.{ts,tsx}"],

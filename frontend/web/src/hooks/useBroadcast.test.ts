@@ -1,5 +1,5 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { BroadcastTick } from "../api/types";
 import { HERO, event, insight, moment, studioItem } from "../test/fixtures";
 import { FakeWebSocket, mockApi } from "../test/utils";
@@ -27,7 +27,6 @@ beforeEach(() => {
     { match: /\/events\?/, reply: [event({ id: "old-1", t: 10, minute: 1 }), event({ id: "dup", t: 20, minute: 1 })] },
   ]);
 });
-afterEach(() => vi.unstubAllGlobals());
 
 async function joined(hook = () => useBroadcast(HERO, { language: "en", homeId: "england", awayId: "argentina" })) {
   const r = renderHook(hook);

@@ -1,5 +1,5 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { useLiveMatch } from "./useLiveMatch";
 import { HERO, event, insight, moment, narrative, snapshot, studioItem } from "../test/fixtures";
 import { FakeEventSource, mockApi } from "../test/utils";
@@ -12,7 +12,6 @@ beforeEach(() => {
   FakeEventSource.instances = [];
   vi.stubGlobal("EventSource", FakeEventSource);
 });
-afterEach(() => vi.unstubAllGlobals());
 
 describe("useLiveMatch", () => {
   it("does nothing without a match id, and autoplay can be turned off", () => {

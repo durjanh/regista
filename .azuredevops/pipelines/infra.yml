@@ -20,9 +20,6 @@ parameters:
     type: string
     default: regista-azure
 
-variables:
-  - group: regista-${{ parameters.profile }}
-
 stages:
   - stage: Validate
     displayName: Bicep build and lint
@@ -36,6 +33,9 @@ stages:
   - stage: Preview
     displayName: What-if
     dependsOn: Validate
+    # Deployment settings only where something deploys: the test stage must not see them.
+    variables:
+      - group: regista-${{ parameters.profile }}
     jobs:
       - job: preview
         pool:
@@ -50,6 +50,9 @@ stages:
   - stage: Provision
     displayName: Provision (Bicep)
     dependsOn: Preview
+    # Deployment settings only where something deploys: the test stage must not see them.
+    variables:
+      - group: regista-${{ parameters.profile }}
     jobs:
       - deployment: provision
         environment: regista-${{ parameters.profile }}

@@ -9,7 +9,6 @@ describe("ActivityIndicator", () => {
   beforeEach(() => vi.useFakeTimers());
   afterEach(() => {
     vi.useRealTimers();
-    vi.unstubAllGlobals();
   });
 
   it("appears for slow calls, explains a cold start, and goes away when the call ends", async () => {

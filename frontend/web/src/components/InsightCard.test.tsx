@@ -1,6 +1,6 @@
 import { screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { FeatureChart, InsightCard, VerifierStrip } from "./InsightCard";
 import { drillCaught, insight, narrative } from "../test/fixtures";
 import { HEALTH, mockApi, renderWithPrefs } from "../test/utils";
@@ -8,7 +8,6 @@ import { HEALTH, mockApi, renderWithPrefs } from "../test/utils";
 beforeEach(() => {
   mockApi([HEALTH]);
 });
-afterEach(() => vi.unstubAllGlobals());
 
 const svgTexts = (container: HTMLElement) => [...container.querySelectorAll("svg text")].map((t) => t.textContent);
 

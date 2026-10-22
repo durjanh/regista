@@ -17,9 +17,6 @@ parameters:
     type: string
     default: regista-azure
 
-variables:
-  - group: regista-${{ parameters.profile }}
-
 stages:
   - stage: Test
     displayName: Install and compile
@@ -43,6 +40,9 @@ stages:
   - stage: Deploy
     displayName: Deploy the Function app
     dependsOn: Test
+    # Deployment settings only where something deploys: the test stage must not see them.
+    variables:
+      - group: regista-${{ parameters.profile }}
     jobs:
       - deployment: deploy
         environment: regista-${{ parameters.profile }}
