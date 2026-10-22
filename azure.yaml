@@ -42,6 +42,9 @@ services:
           # azd up packages before it provisions; rebuild if this bundle was built without the API's address.
           if [ -d dist ] && ! grep -rqs "${API_URL#https://}" dist/assets; then npm run build; fi
 hooks:
+  preprovision:
+    shell: sh
+    run: deploy/hooks/preprovision.sh    # forget an image that azd down removed with its registry
   postprovision:
     shell: sh
     run: deploy/hooks/fabric.sh          # optional: only when FABRIC_WORKSPACE_NAME is set

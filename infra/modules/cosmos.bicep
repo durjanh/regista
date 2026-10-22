@@ -38,6 +38,8 @@ resource account 'Microsoft.DocumentDB/databaseAccounts@2025-04-15' = {
     disableLocalAuth: true
     minimalTlsVersion: 'Tls12'
     publicNetworkAccess: publicNetworkAccess
+    // Azure turns this on for new accounts; declaring it keeps re-runs from flipping it (single region: no effect).
+    enableAutomaticFailover: true
     consistencyPolicy: {
       defaultConsistencyLevel: 'Session'
     }

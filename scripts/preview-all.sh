@@ -9,10 +9,11 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-PROFILE="containerapps"
+PROFILE="containerapps" CHECK=""
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --profile) PROFILE="$2"; shift 2 ;;
+    --check) CHECK=1; shift ;;   # idempotency: exit 1 on real drift (scripts/check-idempotency.sh)
     -h|--help) sed -n '2,8p' "$0"; exit 0 ;;
     *) echo "Unknown argument: $1" >&2; exit 2 ;;
   esac
@@ -55,22 +56,45 @@ fi
 
 echo "▶ Azure what-if ($PROFILE): $AZURE_RESOURCE_GROUP"
 az deployment group what-if -g "$AZURE_RESOURCE_GROUP" --template-file "$template" --parameters "$params" \
-  --no-pretty-print -o json | python3 -c '
-import sys, json, collections
+  --no-pretty-print -o json | CHECK="$CHECK" python3 -c '
+import os, sys, json, collections
 d = json.load(sys.stdin)
 rows = collections.Counter()
+drift = []
+def leaves(delta, pre=""):
+    for x in delta or []:
+        key = x["path"]
+        p = f"{pre}.{key}" if pre else key
+        yield from (leaves(x["children"], p) if x.get("children") else [(p, x)])
 for c in d["changes"]:
+    ct = c["changeType"]
     if "oleAssignments" in c["resourceId"]:  # ARM roleAssignments and Cosmos sqlRoleAssignments
-        rows[(c["changeType"], "role assignments (ARM + Cosmos data plane)")] += 1
-        continue
-    p = c["resourceId"].split("/providers/")[-1].split("/")
-    rows[(c["changeType"], p[0] + "/" + "/".join(p[1::2][: (len(p) - 1) // 2]))] += 1
+        t = "role assignments (ARM + Cosmos data plane)"
+    else:
+        p = c["resourceId"].split("/providers/")[-1].split("/")
+        t = p[0] + "/" + "/".join(p[1::2][: (len(p) - 1) // 2])
+    rows[(ct, t)] += 1
+    if ct in ("Create", "Delete"):
+        drift.append(f"{ct} {t}")
+    # What-if noise, not drift: "Delete" = a server-side default the template does not set (incremental mode keeps
+    # it); an "after" that is still an expression ("[reference(...)]") resolves at deploy time to the same value;
+    # "Create" from null = a write-only or defaulted property the service does not echo back.
+    for path, x in leaves(c.get("delta")) if ct == "Modify" else []:
+        after = x.get("after")
+        if x["propertyChangeType"] == "Modify" and not (isinstance(after, str) and after.startswith("[")):
+            before = json.dumps(x.get("before"))
+            drift.append(f"Modify {t}: {path} {before} -> {json.dumps(after)}")
 for (ct, t), n in sorted(rows.items(), key=lambda x: x[0][1]):
     print(f"  {ct:<11} {n:>3} x {t}")
 status = d["status"]
-print(f"  status {status}, {sum(rows.values())} changes (Unsupported = role assignments named from the new identity, resolved at deploy time)")'
+print(f"  status {status}, {sum(rows.values())} changes (Unsupported = role assignments named from the new identity, resolved at deploy time)")
+if os.environ.get("CHECK"):
+    if drift:
+        print("✖ Not idempotent: a re-run would change", *drift, sep="\n  ", file=sys.stderr)
+        sys.exit(1)
+    print("✔ Idempotent: a re-run changes nothing (Modify rows above are what-if noise: server defaults, deploy-time expressions)")'
 
-if [ -n "${FABRIC_WORKSPACE_NAME:-}" ]; then
+if [ -n "${FABRIC_WORKSPACE_NAME:-}" ] && [ -z "$CHECK" ]; then
   echo
   echo "▶ Microsoft Fabric dry run: workspace '$FABRIC_WORKSPACE_NAME' (nothing is created)"
   py=services/api/.venv/bin/python; [ -x "$py" ] || py=python3

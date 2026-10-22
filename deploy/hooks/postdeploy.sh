@@ -9,6 +9,11 @@ api="${API_URL:-}"
 web="${WEB_URL:-}"
 [ -n "$api" ] || { echo "⚠ API_URL not set; skipping the smoke test."; exit 0; }
 
+# Container Apps: the first deploy still has the placeholder image's port and probes; switch them over first.
+if [ "${DEPLOYMENT_PROFILE:-}" = "containerapps" ]; then
+  "$(dirname "$0")/containerapps-rollout.sh"
+fi
+
 echo "▶ Smoke test $api/api/health"
 ok=""
 for _ in $(seq 1 30); do

@@ -68,7 +68,7 @@ steps:
             ;;
           provision)
             azd provision --no-prompt
-            # Idempotency: a second preview right after provisioning must show no creates, modifies or deletes.
+            # Idempotency: a what-if right after provisioning must show no real change (what-if noise ignored).
             "$(Build.SourcesDirectory)/scripts/check-idempotency.sh" \
               || echo "##vso[task.logissue type=warning]Re-running the provision would still change resources (see the log)."
             ;;

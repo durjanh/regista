@@ -12,6 +12,8 @@ log = logging.getLogger("regista.telemetry")
 def configure() -> bool:
     if not settings.appinsights:
         return False
+    # Azure SDK request/response header dumps (Live Metrics posts every second) would flood the 1 GB/day log cap.
+    logging.getLogger("azure.core.pipeline.policies.http_logging_policy").setLevel(logging.WARNING)
     try:
         from azure.monitor.opentelemetry import configure_azure_monitor
         configure_azure_monitor(connection_string=settings.appinsights, logger_name="regista")

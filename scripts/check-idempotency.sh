@@ -1,16 +1,17 @@
 #!/usr/bin/env bash
-# Proves the infrastructure is idempotent: right after a successful `azd provision`, a preview (what-if) of the same
-# template must show nothing to create, modify or delete. Run it from an azd project directory: the repo root
-# (Container Apps), deploy/aks or deploy/aks-enterprise.
+# Proves the infrastructure is idempotent: right after a successful `azd provision`, a what-if of the same template
+# must show no real change. `azd provision --preview` can't be used for this: it lists every resource with what-if
+# noise (server-side defaults, values only known at deploy time) as "Modify". Run it from an azd project directory:
+# the repo root (Container Apps), deploy/aks or deploy/aks-enterprise.
 #   scripts/check-idempotency.sh      (or ../../scripts/check-idempotency.sh from deploy/<profile>)
 set -euo pipefail
 
-out=$(azd provision --preview --no-prompt 2>&1) || { echo "$out"; echo "✖ preview failed" >&2; exit 1; }
-echo "$out"
-changes=$(printf '%s\n' "$out" | grep -E '^[[:space:]]*(Create|Modify|Delete)[[:space:]]*:' || true)
-if [ -n "$changes" ]; then
-  echo "✖ Not idempotent: a re-run would still change:" >&2
-  printf '%s\n' "$changes" >&2
-  exit 1
-fi
-echo "✔ Idempotent: re-running the provision changes nothing."
+here=$(pwd)
+root=$(cd "$(dirname "$0")/.." && pwd)
+case "$here" in
+  "$root") profile=containerapps ;;
+  "$root/deploy/aks") profile=aks ;;
+  "$root/deploy/aks-enterprise") profile=aks-enterprise ;;
+  *) echo "Run from the repo root, deploy/aks or deploy/aks-enterprise" >&2; exit 2 ;;
+esac
+exec "$root/scripts/preview-all.sh" --profile "$profile" --check
