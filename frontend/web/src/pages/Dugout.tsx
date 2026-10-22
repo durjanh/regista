@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { dugoutService } from "../api";
-import type { Dugout as DugoutT, DugoutPlayer, DugoutRecommendation, Evidence, Narrative, WinProb } from "../api/types";
+import type { Dugout as DugoutT, DugoutPlayer, DugoutRecommendation, Evidence, Narrative, TeamRef, WinProb } from "../api/types";
 import { EngineBadge, FactCheckBadge } from "../components/FactCheck";
 import { InsightCard } from "../components/InsightCard";
 import { useMatch } from "../components/Layout";
@@ -18,6 +18,7 @@ import { clock, cx, readableOn } from "../lib/format";
 import { teamColors } from "../lib/match";
 import { playerIndex, teamReportPath } from "../lib/players";
 import { usePrefs } from "../lib/prefs";
+import { PlayerAvatar } from "../components/PlayerAvatar";
 import { IconApprove, IconBrief, IconReject } from "../components/icons";
 import { quietly } from "../lib/activity";
 
@@ -218,6 +219,7 @@ export function Dugout() {
                     rec={r}
                     side={side}
                     teamName={team.short}
+                    kit={team.colors}
                     state={handled[r.id]}
                     onAccept={() => setHandled((h) => ({ ...h, [r.id]: "accepted" }))}
                     onDismiss={() => setHandled((h) => ({ ...h, [r.id]: "dismissed" }))}
@@ -449,11 +451,12 @@ function evidenceChips(ev: Evidence[]) {
 }
 
 function RecommendationCard({
-  rec, side, teamName, state, onAccept, onDismiss,
+  rec, side, teamName, kit, state, onAccept, onDismiss,
 }: {
   rec: DugoutRecommendation;
   side: Side;
   teamName: string;
+  kit?: TeamRef["colors"];
   state?: "accepted" | "dismissed";
   onAccept: () => void;
   onDismiss: () => void;
@@ -476,14 +479,18 @@ function RecommendationCard({
         <div className="subswap">
           <div className="who off">
             <small>Off</small>
-            {sub.off.name}
+            <span className="player-cell">
+              <PlayerAvatar name={sub.off.name} colors={kit} size={28} /> {sub.off.name}
+            </span>
           </div>
           <span className="arrow faint" aria-hidden="true">
             →
           </span>
           <div className="who on">
             <small>On</small>
-            {sub.on.name}
+            <span className="player-cell">
+              <PlayerAvatar name={sub.on.name} colors={kit} size={28} /> {sub.on.name}
+            </span>
           </div>
         </div>
       ) : null}

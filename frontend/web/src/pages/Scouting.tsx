@@ -9,6 +9,7 @@ import { useAsync } from "../hooks/useAsync";
 import { teamReportPath } from "../lib/players";
 import { usePrefs } from "../lib/prefs";
 import { IconNext } from "../components/icons";
+import { PlayerAvatar } from "../components/PlayerAvatar";
 
 const INDEX_NOTE =
   "Profiles combine a REAL record from the international results dataset (goals, penalties, assists, venues) with MODEL tendencies " +
@@ -32,6 +33,8 @@ export function Scouting() {
     for (const p of players.data ?? []) map.set(p.team_id, p.team_name);
     return [...map.entries()].sort((a, b) => a[1].localeCompare(b[1]));
   }, [players.data]);
+
+  const kit = useMemo(() => new Map((allTeams.data ?? []).map((tm) => [tm.team_id, tm.colors])), [allTeams.data]);
 
   const rows = useMemo(() => {
     const needle = q.trim().toLowerCase();
@@ -121,7 +124,10 @@ export function Scouting() {
                 {rows.slice(0, 200).map((p) => (
                   <tr key={p.player_key}>
                     <td>
-                      <PlayerLink name={p.name} playerKey={p.player_key} placeholder={p.name_source === "placeholder"} />
+                      <span className="player-cell">
+                        <PlayerAvatar name={p.name} colors={kit.get(p.team_id)} size={28} />
+                        <PlayerLink name={p.name} playerKey={p.player_key} placeholder={p.name_source === "placeholder"} />
+                      </span>
                     </td>
                     <td>
                       <Link to={teamReportPath(p.team_id)} className="team-link">

@@ -5,22 +5,12 @@ import { AdviceCards, ChannelArrows, GoalMouth, HalfPitchShots, PercentileBar, S
 import { InfoPop, ModelTag, RealTag } from "../components/SourceBadge";
 import { ErrorState, Skeleton, SkeletonCard } from "../components/States";
 import { useAsync } from "../hooks/useAsync";
-import { readableOn } from "../lib/format";
 import { teamReportPath } from "../lib/players";
 import { usePrefs } from "../lib/prefs";
 import { IconBack } from "../components/icons";
+import { PlayerAvatar } from "../components/PlayerAvatar";
 
 const pct = (v: number) => `${Math.round(v * 100)}%`;
-
-function initials(name: string): string {
-  if (/ No\. \d+$/.test(name)) return name.split("No. ")[1] ?? "?";
-  return name
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((w) => w[0]?.toUpperCase())
-    .join("");
-}
 
 export function PlayerDNA() {
   const { key = "" } = useParams();
@@ -44,7 +34,6 @@ export function PlayerDNA() {
     );
 
   const color = team.data?.colors.primary ?? "var(--accent)";
-  const ink = team.data ? readableOn(team.data.colors.primary) : "var(--accent-ink)";
   const placeholder = data.name_source === "placeholder";
   const real = data.real;
   const m = data.model;
@@ -54,9 +43,7 @@ export function PlayerDNA() {
   return (
     <div className="stack">
       <div className="scout-head">
-        <div className="scout-avatar" style={{ background: color, color: ink }} aria-hidden="true">
-          {initials(data.name)}
-        </div>
+        <PlayerAvatar name={data.name} colors={team.data?.colors} size={64} square />
         <div style={{ minWidth: 0 }}>
           <h1 className="page-title" style={{ fontSize: "clamp(26px, 4vw, 38px)" }}>
             <span className={placeholder ? "placeholder-name" : undefined}>{data.name}</span>

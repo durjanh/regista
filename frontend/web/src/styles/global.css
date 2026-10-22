@@ -676,7 +676,9 @@ html.overlay-mode body { overflow: hidden; }
 .leaders-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
 
 .scout-head { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
-.scout-avatar { width: 64px; height: 64px; border-radius: 18px; display: grid; place-items: center; font-family: var(--font-display); font-weight: 800; font-size: 28px; flex-shrink: 0; }
+/* Generated player avatar (initials on kit colours); size and colours come from the component. */
+.player-avatar { display: inline-grid; place-items: center; flex: none; font-family: var(--font-display); font-weight: 800; line-height: 1; letter-spacing: 0.02em; user-select: none; }
+.player-cell { display: inline-flex; align-items: center; gap: 10px; min-width: 0; }
 .section-band { display: flex; align-items: center; gap: 10px; margin: 6px 0 -2px; }
 .section-band h2 { font-family: var(--font-display); font-size: 22px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.02em; margin: 0; }
 .section-band .line { flex: 1; height: 1px; background: var(--border); }

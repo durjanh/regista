@@ -18,6 +18,7 @@ import { PlayerLink } from "./ScoutViz";
 import { ModelTag } from "./SourceBadge";
 import { EmptyState, Skeleton } from "./States";
 import { TeamSwatch } from "./TeamSwatch";
+import { PlayerAvatar } from "./PlayerAvatar";
 
 // ---------------------------------------------------------------- view state (URL first, then this browser's last choice)
 
@@ -267,7 +268,7 @@ export function PlayerFocusView({ match, state, colors, playerId, onPlayer }: {
       <section className="card player-focus" style={{ "--team": colors[side] } as CSSProperties}>
         <div className="row" style={{ justifyContent: "space-between" }}>
           <div className="row" style={{ gap: 10 }}>
-            <TeamSwatch team={match[side]} size="lg" />
+            <PlayerAvatar name={player.name} colors={match[side].colors} size={44} />
             <div>
               <div className="pf-name">
                 <span className="tnum faint">#{player.shirt}</span>{" "}
