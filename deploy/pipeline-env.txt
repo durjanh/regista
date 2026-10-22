@@ -1,0 +1,37 @@
+# Infrastructure inputs the Azure DevOps pipeline passes from its variable group (regista-<profile>) to azd, one per
+# line. They are every value infra/main.bicepparam and infra/*/main.parameters.json read, plus the hooks' inputs, except
+# those the pipeline sets itself (AZURE_ENV_NAME, AZURE_LOCATION, AZURE_PRINCIPAL_ID/TYPE, SERVICE_API_IMAGE_NAME).
+# scripts/setup-azure-devops.sh fills the variable group from your local azd environment, so the pipeline provisions
+# exactly what `azd up` did (same models, same OneLake settings): without that, it would fall back to the defaults.
+CHAT_MODEL_NAME
+CHAT_MODEL_VERSION
+REASONING_MODEL_NAME
+REASONING_MODEL_VERSION
+MODEL_SKU
+STATIC_WEB_APP_LOCATION
+STATIC_WEB_APP_SKU
+API_MIN_REPLICAS
+LOG_DAILY_CAP_GB
+WEBPUBSUB_SKU
+WEBPUBSUB_UNITS
+API_SERVICE_SETTINGS
+ONELAKE_WORKSPACE
+ONELAKE_LAKEHOUSE
+BUDGET_EMAIL
+BUDGET_AMOUNT
+LETSENCRYPT_EMAIL
+APIM_PUBLISHER_EMAIL
+AZURE_DEVOPS_ORG_URL
+DEVOPS_INFRASTRUCTURE_PRINCIPAL_ID
+AKS_AUTHORIZED_IP_RANGES
+AKS_NODE_VM_SIZE
+AKS_NODE_MIN_COUNT
+AKS_NODE_MAX_COUNT
+AKS_PRIVATE_CLUSTER
+AKS_TIER
+FABRIC_ADMIN_EMAIL
+# Fabric setup in the postprovision hook. Not copied from your machine (the pipeline's service principal needs its own
+# Fabric access first, docs/DEPLOYMENT.md §5.6); add them to the variable group when it has.
+FABRIC_WORKSPACE_NAME
+FABRIC_CAPACITY_NAME
+FABRIC_EVENTHUB_CONNECTION_ID

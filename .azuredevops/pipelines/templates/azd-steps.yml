@@ -56,11 +56,21 @@ steps:
         azd env set AZURE_PRINCIPAL_ID "$oid"
         azd env set AZURE_PRINCIPAL_TYPE ServicePrincipal
 
-        for v in APIM_PUBLISHER_EMAIL BUDGET_EMAIL BUDGET_AMOUNT AZURE_DEVOPS_ORG_URL DEVOPS_INFRASTRUCTURE_PRINCIPAL_ID AKS_AUTHORIZED_IP_RANGES LETSENCRYPT_EMAIL WEBPUBSUB_SKU WEBPUBSUB_UNITS API_MIN_REPLICAS \
-                 FABRIC_WORKSPACE_NAME FABRIC_CAPACITY_NAME FABRIC_EVENTHUB_CONNECTION_ID API_SERVICE_SETTINGS; do
+        # Every infrastructure input from the variable group (the list: deploy/pipeline-env.txt).
+        while read -r v <&3; do
+          case "$v" in ''|'#'*) continue ;; esac
           val="${!v:-}"
           if [ -n "$val" ]; then azd env set "$v" "$val"; fi
-        done
+        done 3< "$(Build.SourcesDirectory)/deploy/pipeline-env.txt"
+
+        # Container Apps: provision with the image that is running, so a re-provision never swaps the API back to the
+        # placeholder between the Provision and Deploy stages (the agent's azd environment starts empty).
+        if [ "$profile" = "containerapps" ]; then
+          export AZURE_EXTENSION_USE_DYNAMIC_INSTALL=yes_without_prompt
+          img=$(az containerapp list -g "$AZURE_RESOURCE_GROUP" \
+                  --query "[?tags.\"azd-service-name\"=='api'].properties.template.containers[0].image | [0]" -o tsv 2>/dev/null || true)
+          case "$img" in ''|mcr.microsoft.com/k8se/quickstart*) ;; *) azd env set SERVICE_API_IMAGE_NAME "$img" ;; esac
+        fi
 
         case "${{ parameters.command }}" in
           preview)
