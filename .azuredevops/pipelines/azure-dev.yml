@@ -62,6 +62,7 @@ stages:
           runOnce:
             deploy:
               steps:
+                - download: none   # nothing to download: deployment jobs would fetch every artifact by default
                 - template: templates/azd-steps.yml
                   parameters:
                     serviceConnection: ${{ parameters.serviceConnection }}
@@ -85,6 +86,7 @@ stages:
           runOnce:
             deploy:
               steps:
+                - download: none   # nothing to download: deployment jobs would fetch every artifact by default
                 - template: templates/azd-steps.yml
                   parameters:
                     serviceConnection: ${{ parameters.serviceConnection }}

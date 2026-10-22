@@ -60,6 +60,7 @@ stages:
           runOnce:
             deploy:
               steps:
+                - download: none   # nothing to download: deployment jobs would fetch every artifact by default
                 - checkout: self
                   fetchDepth: 1
                 - template: templates/functions-deploy.yml

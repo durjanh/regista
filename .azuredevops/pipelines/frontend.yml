@@ -52,6 +52,7 @@ stages:
           runOnce:
             deploy:
               steps:
+                - download: none   # nothing to download: deployment jobs would fetch every artifact by default
                 - task: UseNode@1
                   inputs:
                     version: "24.x"
