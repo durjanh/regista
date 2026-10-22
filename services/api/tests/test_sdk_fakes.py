@@ -449,6 +449,11 @@ def test_openai_tool_loop(loaded_store, azure, monkeypatch):
 class FakeAgent:
     runs: list = []
 
+    # Subscriptable like the real generic Agent: on Python 3.12 the orchestrations module evaluates `Agent[Any]`
+    # annotations at import time, after this fake has replaced agent_framework.Agent.
+    def __class_getitem__(cls, item):
+        return cls
+
     def __init__(self, client=None, name="", instructions="", tools=None):
         self.name, self.tools = name, tools
 

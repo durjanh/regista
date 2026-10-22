@@ -84,9 +84,17 @@ add_federated_credential() {
   echo "Added federated credential '$name' → $subject"
 }
 
+# GitHub's token subject names the repository either as owner/repo or, for newer repositories, with immutable ids
+# (repo:owner@<owner id>/repo@<repo id>:...). Register both forms so either one signs in.
+OWNER_ID=$(gh api "repos/${REPO}" --jq .owner.id)
+REPO_ID=$(gh api "repos/${REPO}" --jq .id)
+IMMUTABLE="${REPO%%/*}@${OWNER_ID}/${REPO#*/}@${REPO_ID}"
 add_federated_credential "main" "repo:${REPO}:ref:refs/heads/main"
 add_federated_credential "pull-request" "repo:${REPO}:pull_request"
 add_federated_credential "env-production" "repo:${REPO}:environment:production"
+add_federated_credential "main-ids" "repo:${IMMUTABLE}:ref:refs/heads/main"
+add_federated_credential "pull-request-ids" "repo:${IMMUTABLE}:pull_request"
+add_federated_credential "env-production-ids" "repo:${IMMUTABLE}:environment:production"
 
 # 4. Role assignments (scoped to the resource group) --------------------------------------------
 assign_role() {

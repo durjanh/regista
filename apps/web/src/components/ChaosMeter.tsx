@@ -17,8 +17,11 @@ export function ChaosMeter({ value }: { value: number | undefined }) {
   const nx = cx + R * Math.cos(ang);
   const ny = cy - R * Math.sin(ang);
   return (
-    <div className="chaos-meter" role="meter" aria-valuemin={0} aria-valuemax={1} aria-valuenow={known ? Number(v.toFixed(2)) : undefined}
-      aria-label={`${t("chaos.title")}: ${label}`}>
+    // A meter needs a current value (aria-valuenow); until the data arrives it's a labelled, busy image instead.
+    <div className="chaos-meter" aria-label={`${t("chaos.title")}: ${label}`}
+      {...(known
+        ? { role: "meter", "aria-valuemin": 0, "aria-valuemax": 1, "aria-valuenow": Number(v.toFixed(2)) }
+        : { role: "img", "aria-busy": true })}>
       <svg viewBox="0 0 112 62" width="112" height="62" aria-hidden="true">
         <defs>
           <linearGradient id={gid} x1="0" x2="1" y1="0" y2="0">

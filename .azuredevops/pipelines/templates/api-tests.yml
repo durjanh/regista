@@ -7,6 +7,8 @@ steps:
   - bash: |
       set -euo pipefail
       cd services/api
+      # Exists even when a test fails first, so publishing the evaluation results never fails on top of it.
+      mkdir -p eval-results
       python -m pip install --upgrade pip
       pip install -r requirements-dev.txt
       ruff check .

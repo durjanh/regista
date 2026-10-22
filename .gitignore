@@ -32,3 +32,8 @@ data/matches/whatif-*.json
 
 # Static Web Apps build: API URL written by the azd hooks
 apps/web/.env*.local
+
+# Test coverage data
+.coverage
+.coverage.*
+coverage.xml
