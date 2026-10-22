@@ -22,7 +22,7 @@ from .integrations import telemetry
 from .integrations.http import http_client
 from .live import broadcast
 from .mcp_server import mcp
-from .services.forge import calibration_report
+from .services.forge import calibration_report, restore_generated_matches
 from .store import store
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
@@ -34,6 +34,12 @@ async def lifespan(app: FastAPI):
     telemetry.configure()
     await asyncio.to_thread(reference)
     await asyncio.to_thread(store.load)
+    try:  # what-ifs generated before the last restart (bounded: Storage must never hold up start-up)
+        restored = await asyncio.wait_for(restore_generated_matches(store), timeout=20)
+        if restored:
+            log.info("Restored %d generated matches from Blob", restored)
+    except TimeoutError:
+        log.warning("Restoring generated matches timed out; they reappear on the next start")
     consumer = None
     if settings.live_source == "eventhub" and settings.eventhub_fqdn:
         from .live.eventhub import consume_forever

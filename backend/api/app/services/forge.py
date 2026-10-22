@@ -14,6 +14,14 @@ from .memo import Memo
 _calibration: Memo[dict] = Memo()
 
 
+async def restore_generated_matches(matches: MatchStore) -> int:
+    """Put back every what-if generated before the API last stopped (saved to Blob by generate_match)."""
+    docs = await persistence.load_generated_matches()
+    for doc in docs:
+        matches.add_generated(doc, persist=False)
+    return len(docs)
+
+
 async def calibration_report(n: int = 100) -> dict:
     """Synthetic vs real result distributions over `n` matches (computed once per n)."""
     return await _calibration.get(n, lambda: asyncio.to_thread(run_calibration, n))

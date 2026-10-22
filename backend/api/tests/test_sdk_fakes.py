@@ -244,8 +244,9 @@ def test_persistence_writes_cosmos_blob_onelake(azure, monkeypatch, tmp_path):
 
     asyncio.run(go())
     kinds = [x[0] for x in log]
-    assert ("cosmos", "narratives", "n1") in log and kinds.count("blob") == 2 and kinds.count("onelake") == 2
+    assert ("cosmos", "narratives", "n1") in log and kinds.count("blob") == 3 and kinds.count("onelake") == 2
     assert ("blob", "datasets", "m1/events.jsonl", "application/x-ndjson") in log
+    assert ("blob", "datasets", "m1/match.json", "application/json") in log   # the full document, for the restore
     assert persistence.status() == {"cosmos": True, "blob": True, "onelake": True}
 
 
@@ -563,3 +564,59 @@ def test_run_concurrent_workflow_and_fallback(af, monkeypatch):
     assert agents._workflow_texts(object(), ["a"]) == []
     obj = types.SimpleNamespace(get_outputs=lambda: [types.SimpleNamespace(messages=[msg("assistant", "x"), msg("assistant", "y")])])
     assert agents._workflow_texts(obj, ["only"]) == ["y"]
+
+
+def test_generated_matches_survive_a_restart(azure, monkeypatch):
+    """What-ifs saved to Blob come back into the store when the API starts (Container Apps scale to zero)."""
+    import json as _json
+
+    from app.integrations import persistence
+    from app.services import forge
+    azure(storage_account_url="https://blob.example")
+    doc = {"meta": {"match_id": "whatif-test-1", "home": {"name": "Spain"}}, "events": []}
+
+    class Container:
+        async def list_blobs(self):
+            for name in ("whatif-test-1/meta.json", "whatif-test-1/events.jsonl", "whatif-test-1/match.json"):
+                yield types.SimpleNamespace(name=name)
+
+        async def download_blob(self, name):
+            assert name == "whatif-test-1/match.json"          # only the full documents are read back
+            async def readall():
+                return _json.dumps(doc).encode()
+            return types.SimpleNamespace(readall=readall)
+
+    class Blob:
+        def __init__(self, *a, **k):
+            pass
+
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, *a):
+            return False
+
+        def get_container_client(self, name):
+            assert name == "datasets"
+            return Container()
+
+    import azure.storage.blob.aio as blob_aio
+    monkeypatch.setattr(blob_aio, "BlobServiceClient", Blob)
+    monkeypatch.setattr("app.ai.clients.credential", lambda: object())
+
+    restored = []
+
+    class Store:
+        def add_generated(self, d, persist=True):
+            restored.append((d["meta"]["match_id"], persist))
+
+    assert asyncio.run(forge.restore_generated_matches(Store())) == 1
+    assert restored == [("whatif-test-1", False)]                # registered, not written back to local disk
+
+    def broken(*a, **k):
+        raise RuntimeError("storage unreachable")
+
+    monkeypatch.setattr(blob_aio, "BlobServiceClient", broken)
+    assert asyncio.run(persistence.load_generated_matches()) == []  # a Storage problem never blocks start-up
+    azure(storage_account_url="")
+    assert asyncio.run(persistence.load_generated_matches()) == []  # Blob not configured
