@@ -72,7 +72,7 @@ change deploys the Function app. Each runs its tests first; every deployment is 
 
 | Pipeline (folder `\Regista`) | File | Runs on a change to (main) | What it does |
 |---|---|---|---|
-| CI | `ci.yml` | anything, and every PR | Ruff, pytest (90% floor), integration, evaluation gate, Vitest (floor), build, Playwright, Bicep, manifests and hooks. Mirrors `.github/workflows/ci.yml` |
+| Test everything | `ci.yml` | anything, and every PR | Ruff, pytest (90% floor), integration, evaluation gate, Vitest (floor), build, Playwright, Bicep, manifests and hooks. Mirrors `.github/workflows/ci.yml` |
 | Infrastructure | `infra.yml` | `infra/`, the `azure.yaml` files, `deploy/hooks/` | Bicep build + lint → what-if → **Provision** (no application code) |
 | API | `api.yml` | `services/api/`, `data/`, `deploy/k8s/` | API checks → **`azd deploy api`** → deployed integration tests. Enterprise: the deploy runs on the Managed DevOps Pool |
 | Frontend | `frontend.yml` | `apps/web/` | Typecheck, Vitest, build → **`azd deploy web`** (Static Web Apps; `web` is the frontend's azd service name) |

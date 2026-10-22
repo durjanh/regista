@@ -152,9 +152,9 @@ if [[ -n "$REPO" ]]; then
     ado devops service-endpoint update --id "$GH_ID" --enable-for-all true -o none
     extra=(--service-connection "$GH_ID")
   fi
-  # In the \Regista folder: CI, the full-environment run, then one pipeline per part. "Container jobs" follows
+  # In the \Regista folder: the test run, the full-environment run, then one pipeline per part. "Container jobs" follows
   # "API" by name (jobs.yml: source Regista\API), so API is created first.
-  for entry in "ci:CI" "azure-dev:Full environment" "infra:Infrastructure" "api:API" "frontend:Frontend" \
+  for entry in "ci:Test everything" "azure-dev:Full environment" "infra:Infrastructure" "api:API" "frontend:Frontend" \
                "functions:Functions" "jobs:Container jobs"; do
     file="${entry%%:*}" name="${entry#*:}"
     ado pipelines show --name "$name" --folder-path '\Regista' -o none 2>/dev/null || \
