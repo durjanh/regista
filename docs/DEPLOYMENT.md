@@ -261,7 +261,14 @@ Fabric items (workspace, Lakehouse, Eventhouse, Eventstream) are not Azure Resou
    It then stores `ONELAKE_WORKSPACE` and `ONELAKE_LAKEHOUSE` in the azd environment; run `azd provision` (Container Apps) or `azd deploy` (AKS) once more to give them to the API.
 
 3. **Idempotent.** Every item is found by name before it is created; a re-run prints `exists` and changes nothing
-   (`scripts/preview-all.sh` includes a read-only Fabric dry run). Nothing to do by hand. Only if Fabric refuses the
+   (`scripts/preview-all.sh` includes a read-only Fabric dry run). Nothing to do by hand.
+
+   **Rebuilding the resource group.** Fabric items live in the Fabric workspace, not in the resource group, so deleting
+   the group leaves them. The next `azd up` recreates the Azure resources (same names for the same group and
+   environment name) and the hook re-grants the workspace identity on the new namespace and the new API identity on the
+   workspace. If the namespace name changed (another group or environment name), the hook sees that the existing
+   Eventstream's connection points at the old namespace, creates a connection to the new one and re-points the
+   Eventstream. Deleting the workspace as well is fine: the hook recreates it, with every item, on your trial capacity. Only if Fabric refuses the
    connection (a tenant setting, or the private enterprise namespace failing Fabric's connection test) does the hook
    print a portal fallback: create it under *Settings → Manage connections and gateways* (Azure Event Hubs, namespace
    name, hub `match-events`, *Workspace identity*), then `azd env set FABRIC_EVENTHUB_CONNECTION_ID <id>` and

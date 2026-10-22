@@ -102,8 +102,9 @@ class Fabric:
             detail = err.read().decode(errors="replace")
             raise SystemExit(f"Fabric API {method} {path} failed: HTTP {err.code}\n{detail}") from None
 
-    def create_item(self, path: str, body: dict) -> dict:
-        """POST an item and follow the long-running operation if the API returns 202."""
+    def create_item(self, path: str, body: dict, result: bool = True) -> dict:
+        """POST an item and follow the long-running operation if the API returns 202. ``result=False`` for operations
+        that return nothing (updateDefinition): the finished operation itself is returned."""
         status, headers, payload = self.request("POST", path, body)
         if status in (200, 201):
             return payload
@@ -115,8 +116,7 @@ class Fabric:
             _, headers, op = self.request("GET", location)
             state = op.get("status")
             if state == "Succeeded":
-                _, _, result = self.request("GET", f"{location}/result")
-                return result
+                return self.request("GET", f"{location}/result")[2] if result else op
             if state in ("Failed", "Cancelled"):
                 raise SystemExit(f"Operation on {path} {state}: {json.dumps(op.get('error'), indent=2)}")
 
@@ -256,6 +256,51 @@ def ensure_eventhub_connection(fabric: Fabric, namespace: str, private: bool) ->
     return None
 
 
+def connection_namespace(fabric: Fabric, connection_id: str) -> str | None:
+    """The Event Hubs namespace a connection points at, or None if the caller can't read it (connections belong to
+    whoever created them: a pipeline principal can't see yours)."""
+    try:
+        _, _, conn = fabric.request("GET", f"/connections/{connection_id}")
+        return json.loads((conn.get("connectionDetails") or {}).get("path") or "{}").get("endpoint")
+    except (SystemExit, ValueError):
+        return None
+
+
+def eventstream_source(fabric: Fabric, ws: str, stream: dict) -> tuple[list[dict], dict, dict | None]:
+    """The Eventstream's definition parts, its decoded eventstream.json, and the Event Hubs source node in it."""
+    parts = fabric.create_item(f"/workspaces/{ws}/eventstreams/{stream['id']}/getDefinition", {})["definition"]["parts"]
+    spec = json.loads(base64.b64decode(next(p for p in parts if p["path"] == "eventstream.json")["payload"]))
+    return parts, spec, next((s for s in spec.get("sources", []) if s.get("name") == EVENT_HUB_NAME), None)
+
+
+def ensure_eventstream_reads(fabric: Fabric, ws: str, stream: dict, namespace: str, private: bool) -> None:
+    """The Eventstream exists: make sure its source reads *this* deployment's namespace. A resource group rebuilt under
+    another name gets another namespace, and the old connection would point at one that no longer exists."""
+    parts, spec, source = eventstream_source(fabric, ws, stream)
+    current = ((source or {}).get("properties") or {}).get("dataConnectionId")
+    reads = connection_namespace(fabric, current) if current else None
+    if reads == namespace:
+        print(f"Eventstream {EVENTSTREAM_NAME} exists (reads {namespace})")
+        return
+    if source and current and reads is None:
+        print(f"Eventstream {EVENTSTREAM_NAME} exists (its connection belongs to another account; not checked)")
+        return
+    print(f"Eventstream {EVENTSTREAM_NAME} reads {reads or 'nothing'}, not {namespace}: re-pointing it")
+    connection_id = ensure_eventhub_connection(fabric, namespace, private)
+    if not connection_id or not source:
+        print(f"⚠ Eventstream {EVENTSTREAM_NAME} not re-pointed; fix its source in the portal or delete it and re-run.")
+        return
+    source["properties"]["dataConnectionId"] = connection_id
+    keep = [dict(p, payload=b64(json.dumps(spec))) if p["path"] == "eventstream.json" else p
+            for p in parts if p["path"] != ".platform"]   # .platform is item metadata, not part of the topology
+    try:
+        fabric.create_item(f"/workspaces/{ws}/eventstreams/{stream['id']}/updateDefinition", {"definition": {"parts": keep}},
+                           result=False)
+        print(f"Eventstream {EVENTSTREAM_NAME} now reads {namespace}")
+    except SystemExit as err:
+        print(f"⚠ Eventstream {EVENTSTREAM_NAME} not re-pointed: {err}")
+
+
 def eventstream_definition(connection_id: str, workspace_id: str, database: dict) -> dict:
     """Event Hubs (consumer group fabric) -> default stream -> Eventhouse table match_events (processed ingestion:
     JSON fields map to columns by name). Shapes from Microsoft Learn: Eventstream item definition + REST API.
@@ -315,7 +360,14 @@ def dry_run(fabric: Fabric, args: argparse.Namespace, capacity_id: str) -> int:
         print(f"  connection {name}: " + (f"exists ({found['id']})" if found else
                                           f"would be created ({args.eventhub_namespace}/{EVENT_HUB_NAME}, workspace identity)"))
     for kind, name, found in items:
-        if found:
+        if found and kind == "Eventstream" and args.eventhub_namespace and not args.skip_eventstream:
+            _, _, source = eventstream_source(fabric, workspace["id"], found)
+            current = ((source or {}).get("properties") or {}).get("dataConnectionId")
+            reads = connection_namespace(fabric, current) if current else None
+            print(f"  {kind} {name}: exists, " + ("reads " + reads if reads == args.eventhub_namespace else
+                  "connection not readable by this account" if current and reads is None else
+                  f"reads {reads or 'nothing'}: would be re-pointed to {args.eventhub_namespace}"))
+        elif found:
             print(f"  {kind} {name}: exists")
         elif kind == "Eventstream" and not streaming:
             print(f"  {kind} {name}: skipped (no --eventhub-namespace or --eventhub-connection-id)")
@@ -474,6 +526,8 @@ def main() -> int:
     # Eventstream ----------------------------------------------------------------------------------
     if args.skip_eventstream:
         print("Skipped the Eventstream (--skip-eventstream).")
+    elif stream and args.eventhub_namespace and not args.eventhub_connection_id:
+        ensure_eventstream_reads(fabric, ws, stream, args.eventhub_namespace, args.eventhub_private)
     elif stream:
         print(f"Eventstream {EVENTSTREAM_NAME} exists")
     elif connection_id:
