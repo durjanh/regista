@@ -66,21 +66,31 @@ Known limits: the AKS application routing add-on's NGINX is supported by Microso
 
 ### Azure DevOps pipelines
 
-| Pipeline | File | What it does |
-|---|---|---|
-| CI | `.azuredevops/pipelines/ci.yml` | Ruff, pytest with the 90% coverage floor, the offline evaluation gate, Vitest with its coverage floor, web build, Bicep build + lint for all three profiles, manifest and hook checks. Mirrors `.github/workflows/ci.yml` |
-| Deploy | `.azuredevops/pipelines/azure-dev.yml` | Parameter `profile`. Preview (`azd provision --preview`) → Provision → Deploy, the last two as deployment jobs on the environment `regista-<profile>` so an approval check gates them. Enterprise Deploy runs on the Managed DevOps Pool |
+One pipeline per part, so a change ships only what it touches: a frontend change deploys the frontend, a Function
+change deploys the Function app. Each runs its tests first; every deployment is a deployment job on the environment
+`regista-<profile>`, so its approval check gates it. Parameter `profile` (default `containerapps`).
 
-One-time setup (service connection with workload identity federation and no secret, the variable group `regista-<profile>`, both pipelines):
+| Pipeline | File | Runs on a change to (main) | What it does |
+|---|---|---|---|
+| CI | `ci.yml` | anything, and every PR | Ruff, pytest (90% floor), integration, evaluation gate, Vitest (floor), build, Playwright, Bicep, manifests and hooks. Mirrors `.github/workflows/ci.yml` |
+| Infrastructure | `infra.yml` | `infra/`, the `azure.yaml` files, `deploy/hooks/` | Bicep build + lint → what-if → **Provision** (no application code) |
+| API | `api.yml` | `services/api/`, `data/`, `deploy/k8s/` | API checks → **`azd deploy api`** → deployed integration tests. Enterprise: the deploy runs on the Managed DevOps Pool |
+| Frontend | `frontend.yml` | `apps/web/` | Typecheck, Vitest, build → **`azd deploy web`** (Static Web Apps; `web` is the frontend's azd service name) |
+| Functions | `functions.yml` | `services/functions/` | Dependencies resolve and the app registers its functions → **zip deploy with a remote build** (Flex Consumption) |
+| Jobs | `jobs.yml` | after every successful API run | Container Apps: moves the feeder job onto the API's new image (it runs the API's code) |
+| Full environment | `azure-dev.yml` | manual | Everything in one run: Preview → Provision → Deploy (all services, Functions, the feeder job). For the first setup or a rebuild |
+
+The test steps are shared templates (`templates/api-tests.yml`, `frontend-tests.yml`, `infra-validate.yml`), so CI and the service pipelines run the same checks; the deploy steps too (`azd-steps.yml`, `functions-deploy.yml`, `jobs-update.yml`).
+
+One-time setup (keyless service connection with workload identity federation, the variable group `regista-<profile>` filled from your local azd environment, the environment, all seven pipelines). It signs in with your `az login` when the Azure DevOps organisation uses the same Entra tenant; otherwise export `AZURE_DEVOPS_EXT_PAT`:
 
 ```bash
-export AZURE_DEVOPS_EXT_PAT=<PAT>
-scripts/setup-azure-devops.sh --org https://dev.azure.com/<org> --project <project> --profile aks-enterprise \
-  --rg rg-regista-ent --location uksouth --env regent --apim-email you@example.com \
+scripts/setup-azure-devops.sh --org https://dev.azure.com/<org> --project <project> --profile containerapps \
+  --rg rg-regista --location uksouth --env regista \
   --repo-type github --repo <owner>/<repo> --github-connection <github-service-connection>
 ```
 
-Then add an approval check on the `regista-<profile>` environment and run *regista-azure-dev*. For the enterprise profile, pass the pool name (the `AZURE_DEVOPS_POOL_NAME` output) as `managedPool`.
+The organisation needs billing set up (Organization settings → Billing → your subscription) for its free Microsoft-hosted parallel job. Add an approval check on the `regista-<profile>` environment, run *regista-azure-dev* once, then let the per-part pipelines take over. For the enterprise profile, pass the pool name (the `AZURE_DEVOPS_POOL_NAME` output) as `managedPool`.
 
 ## Idempotency: run it again, nothing changes
 

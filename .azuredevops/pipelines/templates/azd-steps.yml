@@ -13,6 +13,10 @@ parameters:
       - preview
       - provision
       - deploy
+  # deploy only: one azd service (api, web); empty = every service in the azd project
+  - name: service
+    type: string
+    default: ''
 
 steps:
   - checkout: self
@@ -31,7 +35,7 @@ steps:
           inlineScript: sudo az aks install-cli --only-show-errors
 
   - task: AzureCLI@2
-    displayName: azd ${{ parameters.command }} (${{ parameters.profile }})
+    displayName: azd ${{ parameters.command }} ${{ parameters.service }} (${{ parameters.profile }})
     inputs:
       azureSubscription: ${{ parameters.serviceConnection }}
       scriptType: bash
@@ -83,12 +87,16 @@ steps:
               || echo "##vso[task.logissue type=warning]Re-running the provision would still change resources (see the log)."
             ;;
           deploy)
+            service="${{ parameters.service }}"
             azd env refresh --no-prompt
-            azd deploy --no-prompt
-            # Deployed integration tests: health, CORS, SSE, MCP, the Web PubSub broadcast and the Static Web App.
-            api=$(azd env get-value API_URL); web=$(azd env get-value WEB_URL)
-            cd "$(Build.SourcesDirectory)/services/api"
-            python3 -m venv .it && .it/bin/pip install --quiet -r requirements-dev.txt
-            REGISTA_IT_API_URL="$api" REGISTA_IT_WEB_URL="$web" .it/bin/pytest -m deployed --no-cov
+            if [ -n "$service" ]; then azd deploy "$service" --no-prompt; else azd deploy --no-prompt; fi
+            # The postdeploy hook has smoke-tested the API, its CORS and the site. After an API deploy, also run the
+            # deployed integration tests: health, CORS, SSE, MCP, the Web PubSub broadcast and the Static Web App.
+            if [ -z "$service" ] || [ "$service" = "api" ]; then
+              api=$(azd env get-value API_URL); web=$(azd env get-value WEB_URL)
+              cd "$(Build.SourcesDirectory)/services/api"
+              python3 -m venv .it && .it/bin/pip install --quiet -r requirements-dev.txt
+              REGISTA_IT_API_URL="$api" REGISTA_IT_WEB_URL="$web" .it/bin/pytest -m deployed --no-cov
+            fi
             ;;
         esac

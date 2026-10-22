@@ -1,0 +1,40 @@
+# Regista Container Apps jobs (the feeder that replays a match into Event Hubs): move the job onto the image the API
+# runs. The job runs the API's code, so it follows the API: this pipeline runs after every successful api.yml run,
+# or by hand. Container Apps only (on AKS the feeder is a CronJob in the API's Kubernetes manifests).
+
+trigger: none
+pr: none
+
+resources:
+  pipelines:
+    - pipeline: api
+      source: regista-api
+      trigger:
+        branches:
+          include:
+            - main
+
+parameters:
+  - name: serviceConnection
+    displayName: Azure service connection (workload identity federation)
+    type: string
+    default: regista-azure
+
+variables:
+  - group: regista-containerapps
+
+stages:
+  - stage: Deploy
+    displayName: Update the feeder job
+    jobs:
+      - deployment: deploy
+        environment: regista-containerapps
+        pool:
+          vmImage: ubuntu-latest
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - template: templates/jobs-update.yml
+                  parameters:
+                    serviceConnection: ${{ parameters.serviceConnection }}

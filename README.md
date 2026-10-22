@@ -253,7 +253,7 @@ parallelism has been purchased or granted*. Either request the free grant (https
 set *MS Hosted CI/CD* to 1 (about $40/month; set it back to 0 afterwards). The enterprise Deploy stage runs on the
 Managed DevOps Pool, which uses the organisation's free self-hosted parallel job; its VMs bill to your subscription.
 
-`.azuredevops/pipelines/ci.yml` mirrors GitHub CI. `.azuredevops/pipelines/azure-dev.yml` runs what-if → provision → deploy for the profile you pick, with approvals on the `regista-<profile>` environment. One-time setup (keyless service connection, variable group, both pipelines):
+`.azuredevops/pipelines/ci.yml` mirrors GitHub CI. Each part then has its own pipeline, triggered only by its own changes on `main`: `infra.yml` (what-if → provision), `api.yml`, `frontend.yml`, `functions.yml` and `jobs.yml` (the feeder job follows each API deploy). `azure-dev.yml` deploys everything in one run, for the first setup. Every deployment waits for approval on the `regista-<profile>` environment ([details](docs/DEPLOYMENT.md#azure-devops-pipelines)). One-time setup (keyless service connection, variable group, all pipelines):
 
 ```bash
 az extension add --name azure-devops

@@ -1,0 +1,30 @@
+# Container Apps: point the feeder job at the image the API runs (the job replays matches with the API's code).
+# `azd deploy api` updates the API only, so without this the job would keep the image of the last provision.
+parameters:
+  - name: serviceConnection
+    type: string
+
+steps:
+  - task: AzureCLI@2
+    displayName: Update the feeder job to the API image
+    inputs:
+      azureSubscription: ${{ parameters.serviceConnection }}
+      scriptType: bash
+      scriptLocation: inlineScript
+      inlineScript: |
+        set -euo pipefail
+        export AZURE_EXTENSION_USE_DYNAMIC_INSTALL=yes_without_prompt
+        rg="$AZURE_RESOURCE_GROUP"
+        img=$(az containerapp list -g "$rg" --query "[?tags.\"azd-service-name\"=='api'].properties.template.containers[0].image | [0]" -o tsv)
+        job=$(az containerapp job list -g "$rg" --query "[0].name" -o tsv)
+        case "$img" in ''|mcr.microsoft.com/k8se/quickstart*)
+          echo "##vso[task.logissue type=warning]The API has no deployed image yet: run regista-api first."; exit 0 ;;
+        esac
+        [ -n "$job" ] || { echo "##vso[task.logissue type=warning]No Container Apps job in $rg."; exit 0; }
+        current=$(az containerapp job show -n "$job" -g "$rg" --query "properties.template.containers[0].image" -o tsv)
+        if [ "$current" = "$img" ]; then
+          echo "$job already runs $img"
+        else
+          az containerapp job update -n "$job" -g "$rg" --image "$img" -o none
+          echo "$job: $current -> $img"
+        fi

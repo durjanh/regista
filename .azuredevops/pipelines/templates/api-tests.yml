@@ -1,0 +1,29 @@
+# API checks shared by ci.yml and api.yml: Ruff, unit tests (coverage >= 90%), integration tests against a live
+# server, and the offline evaluation gate (truth score, Verifier drill, grounding, fidelity, calibration, scouting).
+steps:
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: "3.12"
+  - bash: |
+      set -euo pipefail
+      cd services/api
+      python -m pip install --upgrade pip
+      pip install -r requirements-dev.txt
+      ruff check .
+      pytest --cov=app --cov-report=term --cov-report=xml:coverage.xml --junitxml=test-results.xml
+      pytest -m integration --no-cov --junitxml=integration-results.xml
+      python -m app.evals.run --mode offline --threshold 0.95 --output eval-results/results.json
+    displayName: Ruff, pytest with coverage, integration, evaluation gate
+  - task: PublishTestResults@2
+    condition: always()
+    inputs:
+      testResultsFiles: services/api/*-results.xml
+  - task: PublishCodeCoverageResults@2
+    condition: always()
+    inputs:
+      summaryFileLocation: services/api/coverage.xml
+  - task: PublishPipelineArtifact@1
+    condition: always()
+    inputs:
+      targetPath: services/api/eval-results
+      artifact: eval-results-$(System.JobAttempt)

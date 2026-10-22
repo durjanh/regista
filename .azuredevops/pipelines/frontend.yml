@@ -1,0 +1,63 @@
+# Regista frontend (the React SPA on Azure Static Web Apps): test, then build with the API's URL and deploy only the
+# site with `azd deploy web` ("web" is the frontend's service name in azure.yaml). The postdeploy hook checks the
+# site answers and the API accepts its origin (CORS).
+
+trigger:
+  branches:
+    include:
+      - main
+  paths:
+    include:
+      - apps/web
+      - .azuredevops/pipelines/frontend.yml
+      - .azuredevops/pipelines/templates/frontend-tests.yml
+pr: none
+
+parameters:
+  - name: profile
+    displayName: Deployment profile
+    type: string
+    default: containerapps
+    values:
+      - containerapps
+      - aks
+      - aks-enterprise
+  - name: serviceConnection
+    displayName: Azure service connection (workload identity federation)
+    type: string
+    default: regista-azure
+
+variables:
+  - group: regista-${{ parameters.profile }}
+
+stages:
+  - stage: Test
+    displayName: Typecheck, tests, build
+    jobs:
+      - job: test
+        pool:
+          vmImage: ubuntu-latest
+        steps:
+          - template: templates/frontend-tests.yml
+
+  - stage: Deploy
+    displayName: Deploy the frontend
+    dependsOn: Test
+    jobs:
+      - deployment: deploy
+        environment: regista-${{ parameters.profile }}
+        pool:
+          vmImage: ubuntu-latest
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - task: UseNode@1
+                  inputs:
+                    version: "24.x"
+                - template: templates/azd-steps.yml
+                  parameters:
+                    serviceConnection: ${{ parameters.serviceConnection }}
+                    profile: ${{ parameters.profile }}
+                    command: deploy
+                    service: web

@@ -1,4 +1,5 @@
-# Regista: provision and deploy any profile with azd from Azure DevOps.
+# Regista full environment: provision and deploy everything for a profile in one run (first setup, or a rebuild).
+# Day to day, each part has its own pipeline: infra.yml, api.yml, frontend.yml, functions.yml, jobs.yml.
 #
 #   containerapps   Azure Container Apps (default; the live judge demo)
 #   aks             AKS standard: public ingress, keyless PaaS
@@ -89,3 +90,10 @@ stages:
                     serviceConnection: ${{ parameters.serviceConnection }}
                     profile: ${{ parameters.profile }}
                     command: deploy
+                - template: templates/functions-deploy.yml
+                  parameters:
+                    serviceConnection: ${{ parameters.serviceConnection }}
+                - ${{ if eq(parameters.profile, 'containerapps') }}:
+                    - template: templates/jobs-update.yml
+                      parameters:
+                        serviceConnection: ${{ parameters.serviceConnection }}

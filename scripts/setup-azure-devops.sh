@@ -152,7 +152,8 @@ if [[ -n "$REPO" ]]; then
     ado devops service-endpoint update --id "$GH_ID" --enable-for-all true -o none
     extra=(--service-connection "$GH_ID")
   fi
-  for p in ci azure-dev; do
+  # CI, the full-environment run, then one pipeline per part (jobs follows api, so api is created first).
+  for p in ci azure-dev infra api frontend functions jobs; do
     ado pipelines show --name "regista-$p" -o none 2>/dev/null || \
       ado pipelines create --name "regista-$p" --yml-path ".azuredevops/pipelines/$p.yml" --repository "$REPO" \
         --repository-type "$REPO_TYPE" --branch main --skip-first-run true ${extra[@]+"${extra[@]}"} -o none
@@ -166,6 +167,7 @@ cat <<EOF
 Done. In Azure DevOps:
   1. Pipelines > Environments > regista-$PROFILE > Approvals and checks: add yourself,
      so every Provision and Deploy waits for a person to read the what-if.
-  2. Run "regista-azure-dev" with profile=$PROFILE.
+  2. First time: run "regista-azure-dev" with profile=$PROFILE (everything). After that, each part deploys on its own
+     when its code changes on main: regista-infra, regista-api, regista-frontend, regista-functions, regista-jobs.
 EOF
 [[ "$PROFILE" == "aks-enterprise" ]] && echo "  3. After the first Provision, the pool's name is the AZURE_DEVOPS_POOL_NAME output; pass it as managedPool."

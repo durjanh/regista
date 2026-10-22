@@ -1,0 +1,14 @@
+# Bicep checks shared by ci.yml and infra.yml: build and lint every profile and module, with zero diagnostics.
+steps:
+  - bash: |
+      set -euo pipefail
+      az bicep install
+      for f in infra/main.bicep infra/aks/main.bicep infra/aks-enterprise/main.bicep; do az bicep build --file "$f" --stdout > /dev/null; done
+      az bicep build-params --file infra/main.bicepparam --stdout > /dev/null
+      out=""
+      for f in infra/main.bicep infra/aks/main.bicep infra/aks-enterprise/main.bicep infra/modules/*.bicep; do
+        out="$out$(az bicep lint --file "$f" 2>&1 || true)"
+      done
+      echo "$out"
+      if echo "$out" | grep -Eq "(Warning|Error) "; then echo "##vso[task.logissue type=error]Bicep lint diagnostics"; exit 1; fi
+    displayName: Bicep build and lint

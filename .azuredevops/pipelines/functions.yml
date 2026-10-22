@@ -1,0 +1,67 @@
+# Regista Azure Functions (recap automation, Flex Consumption): check the code, then zip-deploy it with a remote build.
+
+trigger:
+  branches:
+    include:
+      - main
+  paths:
+    include:
+      - services/functions
+      - .azuredevops/pipelines/functions.yml
+      - .azuredevops/pipelines/templates/functions-deploy.yml
+pr: none
+
+parameters:
+  - name: profile
+    displayName: Deployment profile
+    type: string
+    default: containerapps
+    values:
+      - containerapps
+      - aks
+      - aks-enterprise
+  - name: serviceConnection
+    displayName: Azure service connection (workload identity federation)
+    type: string
+    default: regista-azure
+
+variables:
+  - group: regista-${{ parameters.profile }}
+
+stages:
+  - stage: Test
+    displayName: Install and compile
+    jobs:
+      - job: test
+        pool:
+          vmImage: ubuntu-latest
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: "3.12"
+          - bash: |
+              set -euo pipefail
+              cd services/functions
+              python -m venv .venv
+              .venv/bin/pip install --quiet -r requirements.txt
+              .venv/bin/python -m py_compile function_app.py
+              .venv/bin/python -c "import function_app; print('functions:', [f.get_function_name() for f in function_app.app.get_functions()])"
+            displayName: Dependencies resolve, the app imports and registers its functions
+
+  - stage: Deploy
+    displayName: Deploy the Function app
+    dependsOn: Test
+    jobs:
+      - deployment: deploy
+        environment: regista-${{ parameters.profile }}
+        pool:
+          vmImage: ubuntu-latest
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: self
+                  fetchDepth: 1
+                - template: templates/functions-deploy.yml
+                  parameters:
+                    serviceConnection: ${{ parameters.serviceConnection }}

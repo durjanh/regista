@@ -1,0 +1,71 @@
+# Regista API (FastAPI backend: analytics, agents, MCP, live streams): test, then build the image and deploy only the
+# API with `azd deploy api` (Container Apps, or AKS through the Kubernetes manifests). The API image bundles data/.
+# A successful run triggers jobs.yml, which moves the feeder job onto the new image.
+
+trigger:
+  branches:
+    include:
+      - main
+  paths:
+    include:
+      - services/api
+      - data
+      - deploy/k8s
+      - .azuredevops/pipelines/api.yml
+      - .azuredevops/pipelines/templates/api-tests.yml
+pr: none
+
+parameters:
+  - name: profile
+    displayName: Deployment profile
+    type: string
+    default: containerapps
+    values:
+      - containerapps
+      - aks
+      - aks-enterprise
+  - name: serviceConnection
+    displayName: Azure service connection (workload identity federation)
+    type: string
+    default: regista-azure
+  - name: managedPool
+    displayName: Managed DevOps Pool for enterprise deploys (AZURE_DEVOPS_POOL_NAME output)
+    type: string
+    default: regista-mdp
+
+variables:
+  - group: regista-${{ parameters.profile }}
+
+stages:
+  - stage: Test
+    displayName: Lint, tests, evaluation gate
+    jobs:
+      - job: test
+        pool:
+          vmImage: ubuntu-latest
+        steps:
+          - template: templates/api-tests.yml
+
+  - stage: Deploy
+    displayName: Build and deploy the API
+    dependsOn: Test
+    jobs:
+      - deployment: deploy
+        environment: regista-${{ parameters.profile }}
+        # The enterprise API server and registry are private: only an agent inside the VNet can reach them.
+        ${{ if eq(parameters.profile, 'aks-enterprise') }}:
+          pool:
+            name: ${{ parameters.managedPool }}
+        ${{ else }}:
+          pool:
+            vmImage: ubuntu-latest
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - template: templates/azd-steps.yml
+                  parameters:
+                    serviceConnection: ${{ parameters.serviceConnection }}
+                    profile: ${{ parameters.profile }}
+                    command: deploy
+                    service: api

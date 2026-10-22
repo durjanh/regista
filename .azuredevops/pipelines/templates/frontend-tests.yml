@@ -1,0 +1,13 @@
+# Frontend checks shared by ci.yml and frontend.yml: typecheck, Vitest with the coverage floor, production build.
+steps:
+  - task: UseNode@1
+    inputs:
+      version: "24.x"
+  - bash: |
+      set -euo pipefail
+      cd apps/web
+      npm ci
+      npm run typecheck
+      npm run test:coverage
+      npm run build
+    displayName: npm ci, typecheck, Vitest with coverage, build

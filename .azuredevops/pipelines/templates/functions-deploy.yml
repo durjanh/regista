@@ -1,0 +1,25 @@
+# Deploy services/functions to the Flex Consumption Function app in the resource group: zip deploy with a remote
+# build (the platform installs requirements.txt on Linux). No Function app (deployFunctions=false) = nothing to do.
+parameters:
+  - name: serviceConnection
+    type: string
+
+steps:
+  - task: AzureCLI@2
+    displayName: Deploy Azure Functions (zip, remote build)
+    inputs:
+      azureSubscription: ${{ parameters.serviceConnection }}
+      scriptType: bash
+      scriptLocation: inlineScript
+      inlineScript: |
+        set -euo pipefail
+        app=$(az functionapp list -g "$AZURE_RESOURCE_GROUP" --query "[0].name" -o tsv)
+        if [ -z "$app" ]; then
+          echo "##vso[task.logissue type=warning]No Function app in $AZURE_RESOURCE_GROUP: nothing to deploy."
+          exit 0
+        fi
+        pkg="$(Agent.TempDirectory)/functions.zip"
+        (cd services/functions && zip -qr "$pkg" . -x "local.settings*" "__pycache__/*" ".venv/*")
+        az functionapp deployment source config-zip -g "$AZURE_RESOURCE_GROUP" -n "$app" --src "$pkg" --build-remote true -o none
+        echo "Deployed to $app. Functions:"
+        az functionapp function list -g "$AZURE_RESOURCE_GROUP" -n "$app" --query "[].name" -o tsv

@@ -1,0 +1,78 @@
+# Regista infrastructure as code: what-if, then provision (Bicep through azd). No application code is deployed here;
+# each service has its own pipeline (api.yml, web.yml, functions.yml, jobs.yml).
+# Runs when the templates, the azd projects or the hooks change on main; Provision waits for approval on the
+# "regista-<profile>" environment after you have read the what-if.
+
+trigger:
+  branches:
+    include:
+      - main
+  paths:
+    include:
+      - infra
+      - azure.yaml
+      - deploy/aks/azure.yaml
+      - deploy/aks-enterprise/azure.yaml
+      - deploy/hooks
+      - deploy/pipeline-env.txt
+      - .azuredevops/pipelines/infra.yml
+pr: none
+
+parameters:
+  - name: profile
+    displayName: Deployment profile
+    type: string
+    default: containerapps
+    values:
+      - containerapps
+      - aks
+      - aks-enterprise
+  - name: serviceConnection
+    displayName: Azure service connection (workload identity federation)
+    type: string
+    default: regista-azure
+
+variables:
+  - group: regista-${{ parameters.profile }}
+
+stages:
+  - stage: Validate
+    displayName: Bicep build and lint
+    jobs:
+      - job: validate
+        pool:
+          vmImage: ubuntu-latest
+        steps:
+          - template: templates/infra-validate.yml
+
+  - stage: Preview
+    displayName: What-if
+    dependsOn: Validate
+    jobs:
+      - job: preview
+        pool:
+          vmImage: ubuntu-latest
+        steps:
+          - template: templates/azd-steps.yml
+            parameters:
+              serviceConnection: ${{ parameters.serviceConnection }}
+              profile: ${{ parameters.profile }}
+              command: preview
+
+  - stage: Provision
+    displayName: Provision (Bicep)
+    dependsOn: Preview
+    jobs:
+      - deployment: provision
+        environment: regista-${{ parameters.profile }}
+        pool:
+          vmImage: ubuntu-latest
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - template: templates/azd-steps.yml
+                  parameters:
+                    serviceConnection: ${{ parameters.serviceConnection }}
+                    profile: ${{ parameters.profile }}
+                    command: provision
