@@ -182,22 +182,33 @@ The format is `KEY=value` pairs separated by `;`. It's plain text because azd pa
 
 ## 3. Build and deploy the apps
 
+GitHub Actions mirrors the Azure DevOps pipelines: infrastructure and each part deploy separately, each after the same
+checks CI runs, and every deployment waits for the `production` environment's required reviewer.
+
+| Workflow | Runs on a change to (main) | What it does |
+|---|---|---|
+| `ci.yml` | anything, and every PR | API and frontend tests (reusable `_api-tests.yml`, `_frontend-tests.yml`), Playwright, Bicep, manifests and hooks |
+| `infra.yml` | `infra/`, `deploy/pipeline-env.txt` | What-if (summary on the run page) → **Provision** (Bicep only, keeps the running API image) |
+| `deploy-api.yml` | `services/api/`, `data/` | API tests → image built by **ACR Tasks** → new revision → deployed integration tests |
+| `deploy-frontend.yml` | `apps/web/` | Frontend tests → build with the API's address → **Static Web Apps** upload (token read through OIDC, never stored) → site and CORS check |
+| `deploy-functions.yml` | `services/functions/` | The app imports and registers its functions → **zip deploy with a remote build** (Flex Consumption) |
+| `deploy-jobs.yml` | after every successful *Deploy API* | Points the feeder Container Apps Job at the API's new image |
+| `deploy.yml` | manual | All of the above in one run, for the first deployment or a rebuild |
+
 ```bash
-gh workflow run deploy.yml
-gh run watch
+gh workflow run infra.yml          # first: the infrastructure
+gh workflow run deploy.yml         # then everything once; afterwards each part deploys on its own
+gh run watch                       # approve each deployment in the Actions tab (production environment)
 ```
 
-1. **ACR Tasks** builds `regista-api` from the repo root (the image bundles `data/`). No Docker daemon or registry password is needed on the runner. The web app is built with `VITE_API_BASE_URL` set to the API's URL and uploaded to **Azure Static Web Apps** with the SWA CLI; the deployment token is read at run time through OIDC and never stored.
-2. **First rollout:** the workflow detects the placeholder image and runs the full Bicep template with the new images. That switches the ports, health probes and the feeder command to the real configuration.
-3. **Later rollouts:** the workflow uses `az containerapp update --image`, which creates new revisions.
-4. The Function App is deployed with `Azure/functions-action` (Flex Consumption remote build).
-5. A smoke test checks `/api/health`, that the Static Web App serves the SPA, and that the API's CORS allows the Static Web App's origin.
+Every workflow signs in with OIDC and finds its resources by tag and type (`.github/actions/azure-context`,
+`scripts/ci/find-azure-resources.sh`), not by a deployment name, so it works on an environment provisioned by azd,
+Azure Pipelines or `infra.yml`. Infrastructure inputs come from repository variables (`deploy/pipeline-env.txt` lists
+them; `scripts/bootstrap-github-oidc.sh` copies them from your azd environment).
 
-The run summary lists the URLs. You can also read them from the deployment outputs:
-
-```bash
-az deployment group show -g rg-regista -n main --query "properties.outputs.{web:WEB_URL.value, api:API_URL.value, mcp:MCP_URL.value}"
-```
+**First rollout:** if the API still has the placeholder's port, `deploy-api.yml` applies the template with the new
+image so the ports, probes and feeder command switch over; later rollouts create a new revision with
+`az containerapp update --image`.
 
 ## 4. Run a live match through Event Hubs
 

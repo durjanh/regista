@@ -119,16 +119,31 @@ gh secret set AZURE_SUBSCRIPTION_ID --repo "$REPO" --body "$SUBSCRIPTION_ID"
 gh variable set AZURE_RESOURCE_GROUP --repo "$REPO" --body "$RG"
 gh variable set AZURE_LOCATION --repo "$REPO" --body "$LOCATION"
 gh variable set AZURE_ENV_NAME --repo "$REPO" --body "$ENV_NAME"
+# Everything else `azd up` used (models, OneLake, SKUs, settings overrides) from the local azd environment, so the
+# workflows provision exactly the same thing (deploy/pipeline-env.txt lists the keys; Fabric keys are left out).
+if azd -C "$(dirname "$0")/.." env list --output json 2>/dev/null | grep -q "\"Name\": \"$ENV_NAME\""; then
+  while read -r key <&3; do
+    case "$key" in ''|'#'*|FABRIC_WORKSPACE_NAME|FABRIC_CAPACITY_NAME|FABRIC_EVENTHUB_CONNECTION_ID) continue ;; esac
+    val=$(azd -C "$(dirname "$0")/.." env get-value "$key" --environment "$ENV_NAME" 2>/dev/null </dev/null) || continue
+    [ -n "$val" ] && gh variable set "$key" --repo "$REPO" --body "$val" </dev/null && echo "Variable $key from azd env '$ENV_NAME'"
+  done 3< "$(dirname "$0")/../deploy/pipeline-env.txt"
+fi
 
 # 6. GitHub environment -------------------------------------------------------------------------
-gh api --method PUT "repos/${REPO}/environments/production" >/dev/null
-echo "Ensured GitHub environment 'production'"
+# Every deployment waits for a person: you are the required reviewer (public repos and paid plans).
+ME=$(gh api user --jq .id)
+gh api --method PUT "repos/${REPO}/environments/production" --input - >/dev/null <<JSON
+{"reviewers": [{"type": "User", "id": $ME}], "deployment_branch_policy": null}
+JSON
+echo "Ensured GitHub environment 'production' (required reviewer: $(gh api user --jq .login))"
 
 cat <<EOF
 
 Done. Next steps:
-  1. Run the Infrastructure workflow:   gh workflow run infra.yml --repo $REPO
-  2. Then the Deploy workflow:          gh workflow run deploy.yml --repo $REPO
+  1. Infrastructure (Bicep only):       gh workflow run infra.yml --repo $REPO
+  2. Everything else, once:             gh workflow run deploy.yml --repo $REPO
+     After that each part deploys on its own when its code changes: deploy-api, deploy-frontend,
+     deploy-functions, and deploy-jobs (after each API deploy). Approve each run in the Actions tab.
   3. Watch progress:                    gh run watch --repo $REPO
   4. (Optional) Fabric:                 python scripts/fabric-setup.py --help
 

@@ -1,12 +1,16 @@
 name: Infrastructure
 
+# Infrastructure as code only (Bicep): what-if, then deploy behind the `production` environment. No application code;
+# each service has its own workflow (deploy-api, deploy-frontend, deploy-functions, deploy-jobs).
 on:
   workflow_dispatch:
   push:
     branches: [main]
     paths:
       - "infra/**"
+      - "deploy/pipeline-env.txt"
       - ".github/workflows/infra.yml"
+      - ".github/actions/azure-context/**"
 
 permissions:
   id-token: write
@@ -17,110 +21,67 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  AZURE_RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP }}
-  # Let az install the containerapp extension on first use without prompting.
-  AZURE_EXTENSION_USE_DYNAMIC_INSTALL: yes_without_prompt
-  AZURE_LOCATION: ${{ vars.AZURE_LOCATION }}
-  AZURE_ENV_NAME: ${{ vars.AZURE_ENV_NAME }}
-  BUDGET_EMAIL: ${{ vars.BUDGET_EMAIL }}
-  BUDGET_AMOUNT: ${{ vars.BUDGET_AMOUNT || '150' }}
-  # Overrides of the API's service-contract settings, KEY=value;KEY=value (infra/modules/api-settings.bicep)
-  API_SERVICE_SETTINGS: ${{ vars.API_SERVICE_SETTINGS }}
-  DEPLOYER_PRINCIPAL_TYPE: ServicePrincipal
   DEPLOYMENT_NAME: main
 
 jobs:
   what-if:
     name: What-if
     runs-on: ubuntu-latest
-    outputs:
-      api_image: ${{ steps.images.outputs.api_image }}
-      deployer: ${{ steps.principal.outputs.oid }}
     steps:
       - uses: actions/checkout@v4
-
-      - uses: azure/login@v2
+      - id: azure
+        uses: ./.github/actions/azure-context
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          vars-json: ${{ toJSON(vars) }}
 
-      - name: Resolve the pipeline principal object id (from the token, no Graph permission needed)
-        id: principal
-        run: |
-          token=$(az account get-access-token --query accessToken -o tsv)
-          oid=$(python3 -c "import base64,json,sys; p=sys.argv[1].split('.')[1]; p+='='*(-len(p)%4); print(json.loads(base64.urlsafe_b64decode(p))['oid'])" "$token")
-          echo "oid=$oid" >> "$GITHUB_OUTPUT"
-
-      # Re-running infra must never revert a rolled-out image to the placeholder. (The web app is on Static Web Apps.)
-      - name: Read currently deployed image
-        id: images
-        run: |
-          api=$(az containerapp show -g "$AZURE_RESOURCE_GROUP" -n "${AZURE_ENV_NAME}-api" --query "properties.template.containers[0].image" -o tsv 2>/dev/null || true)
-          echo "api_image=${api}" >> "$GITHUB_OUTPUT"
-          echo "Current API image: ${api:-<none — placeholder will be used>}"
-
+      # Re-running infra keeps the running API image (never reverts it to the placeholder).
       - name: What-if
         env:
-          DEPLOYER_PRINCIPAL_ID: ${{ steps.principal.outputs.oid }}
+          DEPLOYER_PRINCIPAL_ID: ${{ steps.azure.outputs.deployer }}
+          SERVICE_API_IMAGE_NAME: ${{ steps.azure.outputs.api_image }}
         run: |
-          extra=()
-          [ -n "${{ steps.images.outputs.api_image }}" ] && extra+=(--parameters "apiImage=${{ steps.images.outputs.api_image }}")
-          az deployment group what-if \
-            --resource-group "$AZURE_RESOURCE_GROUP" \
-            --name "$DEPLOYMENT_NAME" \
-            --template-file infra/main.bicep \
-            --parameters infra/main.bicepparam \
-            "${extra[@]}" \
-            --no-pretty-print > whatif.json
+          az deployment group what-if -g "$AZURE_RESOURCE_GROUP" -n "$DEPLOYMENT_NAME" \
+            --template-file infra/main.bicep --parameters infra/main.bicepparam --no-pretty-print > whatif.json
           python3 - <<'PY' >> "$GITHUB_STEP_SUMMARY"
           import json
           changes = json.load(open("whatif.json")).get("changes", [])
           counts = {}
-          print("## What-if\n")
-          print("| Change | Resource |\n|---|---|")
+          print("## What-if\n\n| Change | Resource |\n|---|---|")
           for c in changes:
-              kind = c["changeType"]
-              counts[kind] = counts.get(kind, 0) + 1
-              if kind != "Ignore":
-                  print(f"| {kind} | `{c['resourceId'].split('/providers/')[-1]}` |")
+              counts[c["changeType"]] = counts.get(c["changeType"], 0) + 1
+              if c["changeType"] not in ("Ignore", "NoChange"):
+                  print(f"| {c['changeType']} | `{c['resourceId'].split('/providers/')[-1]}` |")
           print("\n" + ", ".join(f"**{k}**: {v}" for k, v in sorted(counts.items())))
           PY
 
   deploy:
-    name: Deploy
+    name: Provision
     needs: what-if
     runs-on: ubuntu-latest
     environment: production
     steps:
       - uses: actions/checkout@v4
-
-      - uses: azure/login@v2
+      - id: azure
+        uses: ./.github/actions/azure-context
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          vars-json: ${{ toJSON(vars) }}
 
       - name: Deploy Bicep
         env:
-          DEPLOYER_PRINCIPAL_ID: ${{ needs.what-if.outputs.deployer }}
+          DEPLOYER_PRINCIPAL_ID: ${{ steps.azure.outputs.deployer }}
+          SERVICE_API_IMAGE_NAME: ${{ steps.azure.outputs.api_image }}
         run: |
-          extra=()
-          [ -n "${{ needs.what-if.outputs.api_image }}" ] && extra+=(--parameters "apiImage=${{ needs.what-if.outputs.api_image }}")
-          az deployment group create \
-            --resource-group "$AZURE_RESOURCE_GROUP" \
-            --name "$DEPLOYMENT_NAME" \
-            --template-file infra/main.bicep \
-            --parameters infra/main.bicepparam \
-            "${extra[@]}" \
-            --query properties.outputs -o json > outputs.json
-
-      - name: Publish outputs
-        run: |
+          az deployment group create -g "$AZURE_RESOURCE_GROUP" -n "$DEPLOYMENT_NAME" \
+            --template-file infra/main.bicep --parameters infra/main.bicepparam --query properties.outputs -o json > outputs.json
           python3 - <<'PY' >> "$GITHUB_STEP_SUMMARY"
           import json
-          outputs = json.load(open("outputs.json"))
           print("## Deployment outputs\n\n| Name | Value |\n|---|---|")
-          for k, v in outputs.items():
+          for k, v in json.load(open("outputs.json")).items():
               print(f"| `{k}` | {v['value']} |")
           PY

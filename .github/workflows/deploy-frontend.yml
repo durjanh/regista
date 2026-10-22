@@ -1,0 +1,69 @@
+name: Deploy frontend
+
+# The frontend (React SPA on Azure Static Web Apps): the same checks as CI, then build with the API's address (the SPA
+# calls it directly) and upload. The deployment token is read at run time through OIDC; it is never stored.
+on:
+  workflow_dispatch:
+  workflow_call:
+  push:
+    branches: [main]
+    paths:
+      - "apps/web/**"
+      - ".github/workflows/deploy-frontend.yml"
+      - ".github/workflows/_frontend-tests.yml"
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: deploy-frontend-${{ vars.AZURE_RESOURCE_GROUP }}
+  cancel-in-progress: false
+
+jobs:
+  test:
+    name: Test
+    uses: ./.github/workflows/_frontend-tests.yml
+
+  deploy:
+    name: Build and upload
+    needs: test
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - id: azure
+        uses: ./.github/actions/azure-context
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          vars-json: ${{ toJSON(vars) }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: apps/web/package-lock.json
+
+      - name: Build with the API's address
+        working-directory: apps/web
+        env:
+          VITE_API_BASE_URL: ${{ steps.azure.outputs.api_url }}
+        run: npm ci && npm run build
+
+      - name: Upload to Static Web Apps
+        run: |
+          token=$(az staticwebapp secrets list -n "${{ steps.azure.outputs.static_web_app }}" -g "$AZURE_RESOURCE_GROUP" --query properties.apiKey -o tsv)
+          echo "::add-mask::$token"
+          npx --yes @azure/static-web-apps-cli@2.0.10 deploy apps/web/dist --deployment-token "$token" --env production
+
+      - name: The site answers and the API accepts its origin (CORS)
+        env:
+          WEB: ${{ steps.azure.outputs.web_url }}
+          API: ${{ steps.azure.outputs.api_url }}
+        run: |
+          for i in $(seq 1 30); do curl -fsS "$WEB/" -o /dev/null && break; echo "waiting ($i/30)"; sleep 10; done
+          allowed=$(curl -fsS -H "Origin: $WEB" -D - -o /dev/null "$API/api/health" | tr -d '\r' | awk -F': ' 'tolower($1)=="access-control-allow-origin"{print $2}')
+          [ "$allowed" = "$WEB" ] || { echo "::error::CORS: the API allows '${allowed:-none}', not $WEB"; exit 1; }
+          printf '## Frontend deployed\n- %s\n' "$WEB" >> "$GITHUB_STEP_SUMMARY"

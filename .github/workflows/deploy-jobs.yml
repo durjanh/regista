@@ -1,0 +1,40 @@
+name: Deploy jobs
+
+# Container Apps jobs: the feeder replays a match into Event Hubs with the API's code, so it follows the API. Runs
+# after every successful "Deploy API" on main (or by hand) and points the job at the image the API runs.
+on:
+  workflow_dispatch:
+  workflow_call:
+  workflow_run:
+    workflows: ["Deploy API"]
+    types: [completed]
+    branches: [main]
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  update:
+    name: Update the feeder job
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - id: azure
+        uses: ./.github/actions/azure-context
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          vars-json: ${{ toJSON(vars) }}
+
+      - name: Point the job at the API image
+        run: |
+          img="${{ steps.azure.outputs.api_image }}"; job="${{ steps.azure.outputs.feeder_job }}"
+          case "$img" in ''|mcr.microsoft.com/k8se/quickstart*) echo "::warning::The API has no deployed image yet"; exit 0 ;; esac
+          [ -n "$job" ] || { echo "::warning::No Container Apps job in $AZURE_RESOURCE_GROUP"; exit 0; }
+          current=$(az containerapp job show -g "$AZURE_RESOURCE_GROUP" -n "$job" --query "properties.template.containers[0].image" -o tsv)
+          if [ "$current" = "$img" ]; then echo "$job already runs $img"; else
+            az containerapp job update -g "$AZURE_RESOURCE_GROUP" -n "$job" --image "$img" -o none; echo "$job: $current -> $img"; fi

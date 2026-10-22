@@ -1,0 +1,59 @@
+name: Deploy functions
+
+# Azure Functions (recap automation, Flex Consumption): check the app imports and registers its functions, then zip
+# deploy with a remote build (the platform installs requirements.txt on Linux).
+on:
+  workflow_dispatch:
+  workflow_call:
+  push:
+    branches: [main]
+    paths:
+      - "services/functions/**"
+      - ".github/workflows/deploy-functions.yml"
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: deploy-functions-${{ vars.AZURE_RESOURCE_GROUP }}
+  cancel-in-progress: false
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Dependencies resolve, the app imports and registers its functions
+        working-directory: services/functions
+        run: |
+          pip install -q -r requirements.txt
+          python -c "import function_app; print('functions:', [f.get_function_name() for f in function_app.app.get_functions()])"
+
+  deploy:
+    name: Zip deploy
+    needs: test
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - id: azure
+        uses: ./.github/actions/azure-context
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          vars-json: ${{ toJSON(vars) }}
+
+      - name: Deploy
+        run: |
+          app="${{ steps.azure.outputs.function_app }}"
+          [ -n "$app" ] || { echo "::warning::No Function app in $AZURE_RESOURCE_GROUP"; exit 0; }
+          (cd services/functions && zip -qr "$RUNNER_TEMP/functions.zip" . -x "local.settings*" "__pycache__/*" ".venv/*")
+          az functionapp deployment source config-zip -g "$AZURE_RESOURCE_GROUP" -n "$app" --src "$RUNNER_TEMP/functions.zip" --build-remote true -o none
+          echo "## Functions deployed to $app" >> "$GITHUB_STEP_SUMMARY"
+          az functionapp function list -g "$AZURE_RESOURCE_GROUP" -n "$app" --query "[].name" -o tsv >> "$GITHUB_STEP_SUMMARY"

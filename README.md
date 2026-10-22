@@ -266,12 +266,18 @@ scripts/setup-azure-devops.sh --org https://dev.azure.com/<org> --project <proje
 
 Then add an approval check on the `regista-<profile>` environment and run **regista-azure-dev** (for enterprise, set `managedPool` to the `AZURE_DEVOPS_POOL_NAME` output).
 
-### 5. GitHub Actions (optional, Container Apps)
+### 5. GitHub Actions (Container Apps)
+
+The same split as Azure DevOps: `infra.yml` (Bicep only), then `deploy-api.yml`, `deploy-frontend.yml`,
+`deploy-functions.yml` and `deploy-jobs.yml`, each triggered only by its own changes on `main`, each running CI's
+checks first and waiting for approval on the `production` environment. `deploy.yml` deploys everything once
+([details](docs/DEPLOYMENT.md#3-build-and-deploy-the-apps)).
 
 ```bash
 gh auth login
-scripts/bootstrap-github-oidc.sh --rg rg-regista --location uksouth --env regista
-gh workflow run infra.yml && gh workflow run deploy.yml
+scripts/bootstrap-github-oidc.sh --rg rg-regista --location uksouth --env regista   # keyless login, secrets, variables, approvals
+gh workflow run infra.yml                                                          # infrastructure
+gh workflow run deploy.yml                                                         # everything once
 ```
 
 ### Tear down

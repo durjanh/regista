@@ -1,0 +1,31 @@
+# Reusable: frontend typecheck, Vitest (coverage floor), production build.
+# Called by ci.yml and by the matching deploy workflow, so a deploy runs exactly the checks CI runs.
+name: Frontend tests
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  frontend:
+    name: Frontend — typecheck, tests (coverage floor), build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/web
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"   # jsdom needs Node >= 22.22
+          cache: npm
+          cache-dependency-path: apps/web/package-lock.json
+
+      - run: npm ci
+      - run: npm run typecheck
+      - name: Vitest with coverage (thresholds in vitest.config.ts)
+        run: npm run test:coverage
+      - run: npm run build

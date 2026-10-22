@@ -1,0 +1,71 @@
+name: Azure context
+description: >
+  Sign in to Azure with OIDC (no secret), export the infrastructure inputs from the repository variables
+  (deploy/pipeline-env.txt lists them) and find the deployed resources by tag and type, so a workflow works whether
+  the environment was provisioned by azd, Azure Pipelines or the Infrastructure workflow.
+
+inputs:
+  client-id:
+    required: true
+  tenant-id:
+    required: true
+  subscription-id:
+    required: true
+  vars-json:
+    description: toJSON(vars) from the calling workflow (composite actions can't read the vars context themselves)
+    required: true
+
+outputs:
+  acr:
+    value: ${{ steps.find.outputs.acr }}
+  login_server:
+    value: ${{ steps.find.outputs.login_server }}
+  api_app:
+    value: ${{ steps.find.outputs.api_app }}
+  api_url:
+    value: ${{ steps.find.outputs.api_url }}
+  api_image:
+    value: ${{ steps.find.outputs.api_image }}
+  feeder_job:
+    value: ${{ steps.find.outputs.feeder_job }}
+  static_web_app:
+    value: ${{ steps.find.outputs.static_web_app }}
+  web_url:
+    value: ${{ steps.find.outputs.web_url }}
+  function_app:
+    value: ${{ steps.find.outputs.function_app }}
+  deployer:
+    value: ${{ steps.find.outputs.deployer }}
+
+runs:
+  using: composite
+  steps:
+    - uses: azure/login@v2
+      with:
+        client-id: ${{ inputs.client-id }}
+        tenant-id: ${{ inputs.tenant-id }}
+        subscription-id: ${{ inputs.subscription-id }}
+
+    - name: Infrastructure inputs from repository variables
+      shell: bash
+      env:
+        VARS_JSON: ${{ inputs.vars-json }}
+      run: |
+        python3 - <<'PY'
+        import json, os
+        values = json.loads(os.environ.get("VARS_JSON") or "{}")
+        keys = ["AZURE_RESOURCE_GROUP", "AZURE_LOCATION", "AZURE_ENV_NAME"]
+        keys += [l.strip() for l in open("deploy/pipeline-env.txt") if l.strip() and not l.startswith("#")]
+        with open(os.environ["GITHUB_ENV"], "a") as env:
+            for k in keys:
+                if values.get(k):
+                    env.write(f"{k}={values[k]}\n")
+                    print(f"{k} set")
+        PY
+        echo "AZURE_EXTENSION_USE_DYNAMIC_INSTALL=yes_without_prompt" >> "$GITHUB_ENV"
+        echo "DEPLOYER_PRINCIPAL_TYPE=ServicePrincipal" >> "$GITHUB_ENV"
+
+    - name: Find the deployed resources
+      id: find
+      shell: bash
+      run: scripts/ci/find-azure-resources.sh "$AZURE_RESOURCE_GROUP" >> "$GITHUB_OUTPUT"

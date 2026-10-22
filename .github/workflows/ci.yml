@@ -15,104 +15,15 @@ concurrency:
 
 jobs:
   api:
-    name: API — lint, tests (coverage floor 90%), offline eval gate
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: services/api
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-          cache: pip
-          cache-dependency-path: |
-            services/api/requirements*.txt
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          if [ -f requirements-dev.txt ]; then
-            pip install -r requirements-dev.txt
-          else
-            pip install -r requirements.txt pytest ruff
-          fi
-
-      - name: Ruff
-        run: ruff check .
-
-      - name: Pytest with coverage (fails below the 90% floor in pyproject.toml)
-        run: pytest --cov=app --cov-report=term --cov-report=xml:coverage.xml
-
-      - name: Integration tests (real uvicorn server over HTTP, SSE and MCP; offline)
-        run: pytest -m integration --no-cov
-
-      - name: Coverage summary
-        if: always()
-        run: |
-          python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
-          import pathlib, xml.etree.ElementTree as ET
-          p = pathlib.Path("coverage.xml")
-          if p.exists():
-              print(f"## API test coverage: **{float(ET.parse(p).getroot().get('line-rate')) * 100:.1f}%** (floor 90%)")
-          PY
-
-      - name: Evaluation gate (grounding, fidelity, calibration, scouting, truth score)
-        run: python -m app.evals.run --mode offline --threshold 0.95 --record --output eval-results/results.json
-
-      - name: Truth score summary
-        if: always()
-        run: |
-          python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
-          import json, pathlib
-          p = pathlib.Path("../../data/reference/truth-latest.json")
-          if p.exists():
-              t = json.loads(p.read_text())
-              print("## Truth score (planted changes vs agent detections, fresh seeds)")
-              print(f"- Recall on observable plants: **{t['recall']}** over {t['plants']} plants in {t['matches']} matches")
-              print(f"- False alarms per match: **{t['false_alarms_per_match']}** (controls: {t['control_false_alarms_per_match']})")
-              print(f"- Median seconds to detect: **{t['median_seconds_to_detect']}**; explanation accuracy: **{t['explanation_accuracy']}**")
-              print("| Difficulty | Recall | Plants |\n|---|---|---|")
-              for d in t["by_difficulty"]:
-                  print(f"| {d['difficulty']} | {d['recall']} | {d['plants']} |")
-          PY
-
-      - name: Upload evaluation results
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: eval-results
-          path: |
-            services/api/eval-results/
-            services/api/coverage.xml
-            data/reference/truth-latest.json
-            data/reference/truth-score-history.json
-            docs/truth-score.svg
+    name: API
+    uses: ./.github/workflows/_api-tests.yml
 
   web:
-    name: Web — typecheck, tests (coverage floor), build
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: apps/web
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "24"   # jsdom needs Node >= 22.22
-          cache: npm
-          cache-dependency-path: apps/web/package-lock.json
-
-      - run: npm ci
-      - run: npm run typecheck
-      - name: Vitest with coverage (thresholds in vitest.config.ts)
-        run: npm run test:coverage
-      - run: npm run build
+    name: Frontend
+    uses: ./.github/workflows/_frontend-tests.yml
 
   e2e:
-    name: Web — Playwright end-to-end (real browser, real API)
+    name: Frontend — Playwright end-to-end (real browser, real API)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

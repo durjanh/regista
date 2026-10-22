@@ -1,0 +1,79 @@
+name: Deploy API
+
+# The API (FastAPI backend: analytics, agents, MCP, live streams): the same checks as CI, then build the image with
+# ACR Tasks (no Docker on the runner) and roll out a new revision. The image bundles data/. "Deploy jobs" follows.
+on:
+  workflow_dispatch:
+  workflow_call:
+  push:
+    branches: [main]
+    paths:
+      - "services/api/**"
+      - "data/**"
+      - ".github/workflows/deploy-api.yml"
+      - ".github/workflows/_api-tests.yml"
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: deploy-api-${{ vars.AZURE_RESOURCE_GROUP }}
+  cancel-in-progress: false
+
+jobs:
+  test:
+    name: Test
+    uses: ./.github/workflows/_api-tests.yml
+
+  deploy:
+    name: Build and roll out
+    needs: test
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - id: azure
+        uses: ./.github/actions/azure-context
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          vars-json: ${{ toJSON(vars) }}
+
+      - name: Build the image (ACR Tasks)
+        run: |
+          az acr build -r "${{ steps.azure.outputs.acr }}" -t "regista-api:${{ github.sha }}" -t "regista-api:latest" \
+            -f services/api/Dockerfile .
+
+      - name: Roll out
+        env:
+          IMAGE: ${{ steps.azure.outputs.login_server }}/regista-api:${{ github.sha }}
+          DEPLOYER_PRINCIPAL_ID: ${{ steps.azure.outputs.deployer }}
+        run: |
+          app="${{ steps.azure.outputs.api_app }}"
+          port=$(az containerapp show -g "$AZURE_RESOURCE_GROUP" -n "$app" --query properties.configuration.ingress.targetPort -o tsv)
+          if [ "$port" != "8000" ]; then
+            # First real rollout: the app still has the placeholder's port and probes. Apply the template with the
+            # image so ports, probes and the feeder command switch over. Same template, same names: idempotent.
+            echo "First rollout: applying the template with $IMAGE"
+            SERVICE_API_IMAGE_NAME="$IMAGE" az deployment group create -g "$AZURE_RESOURCE_GROUP" -n main \
+              --template-file infra/main.bicep --parameters infra/main.bicepparam -o none
+          else
+            az containerapp update -g "$AZURE_RESOURCE_GROUP" -n "$app" --image "$IMAGE" -o none
+          fi
+          printf "## API deployed\n- Image: \`%s\`\n- %s\n" "$IMAGE" "${{ steps.azure.outputs.api_url }}" >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Health, then the deployed integration tests (CORS, SSE, MCP, Web PubSub, the site)
+        working-directory: services/api
+        env:
+          REGISTA_IT_API_URL: ${{ steps.azure.outputs.api_url }}
+          REGISTA_IT_WEB_URL: ${{ steps.azure.outputs.web_url }}
+        run: |
+          for i in $(seq 1 30); do curl -fsS "$REGISTA_IT_API_URL/api/health" -o /dev/null && break; echo "waiting ($i/30)"; sleep 10; done
+          pip install -q -r requirements-dev.txt
+          pytest -m deployed --no-cov
