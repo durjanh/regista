@@ -177,6 +177,10 @@ button, input, select, textarea { font: inherit; color: inherit; }
   white-space: nowrap;
 }
 .pill.accent { color: var(--accent); background: var(--accent-soft); border-color: transparent; }
+/* Label–value pairs on one wrapping row (broadcast stats). */
+.kv { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 6px; margin: 0; }
+.kv dt { color: var(--text-dim); }
+.kv dd { margin: 0 14px 0 0; color: var(--text); font-weight: 650; font-variant-numeric: tabular-nums; }
 .pill.signal { color: var(--signal); background: var(--signal-soft); border-color: transparent; }
 .pill.warn { color: var(--warn); background: var(--warn-soft); border-color: transparent; }
 .pill.danger { color: var(--danger); background: var(--danger-soft); border-color: transparent; }

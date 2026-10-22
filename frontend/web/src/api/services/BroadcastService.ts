@@ -8,9 +8,10 @@ export type BroadcastStart = { speed?: number; start_t?: number; languages?: str
 export class BroadcastService {
   constructor(private readonly http: HttpClient) {}
 
-  /** A Web PubSub client URL for one match, or `enabled: false` (the app falls back to its own replay). */
-  negotiate(matchId: string, language: string) {
-    return this.http.get<RealtimeNegotiate>(`/realtime/negotiate${qs({ match_id: matchId, language })}`);
+  /** A Web PubSub client URL for one match, or `enabled: false` (the app falls back to its own replay).
+   *  `monitor`: the producer's Studio, which watches the broadcast without counting as a viewer. */
+  negotiate(matchId: string, language: string, monitor = false) {
+    return this.http.get<RealtimeNegotiate>(`/realtime/negotiate${qs({ match_id: matchId, language, monitor: monitor ? "true" : undefined })}`);
   }
 
   start(matchId: string, body: BroadcastStart = {}) {

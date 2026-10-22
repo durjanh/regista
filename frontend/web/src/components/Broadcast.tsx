@@ -81,8 +81,8 @@ export function GoLivePanel({ matchId, currentT, homeId, awayId }: { matchId: st
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const live = Boolean(status?.live);
-  // The producer joins too, to see what viewers see and how quickly.
-  const bc = useBroadcast(matchId, { language, active: live, homeId, awayId });
+  // The producer joins too, to see what viewers see and how quickly, as a monitor: not counted as a viewer.
+  const bc = useBroadcast(matchId, { language, active: live, homeId, awayId, monitor: true });
 
   useEffect(() => {
     let cancelled = false;

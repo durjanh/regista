@@ -5,10 +5,14 @@ import { useSyncExternalStore } from "react";
  * that is still connecting counts; a background refresh of data already on screen (a poll) is wrapped in `quietly`
  * and doesn't, so live views don't flash the indicator every few seconds.
  */
-export type Activity = { busy: boolean; since: number };
+export type Activity = { busy: boolean; since: number; warm: boolean };
 
-const IDLE: Activity = { busy: false, since: 0 };
+/** Container Apps scales the API to zero after about 5 idle minutes: an answer within this window means it is up. */
+export const WARM_FOR_MS = 5 * 60_000;
+
+const IDLE: Activity = { busy: false, since: 0, warm: false };
 let pending = 0;
+let lastAnswerAt = 0;
 let quietDepth = 0;
 let snapshot = IDLE;
 const listeners = new Set<() => void>();
@@ -28,10 +32,18 @@ export function quietly<T>(fn: () => T): T {
   }
 }
 
+/** The API answered (any status, background refreshes included): it is running, not cold. */
+export function noteAnswer(): void {
+  lastAnswerAt = Date.now();
+}
+
 /** Marks one backend call as started; returns the function that marks it finished (safe to call twice). */
 export function beginActivity(): () => void {
   if (quietDepth > 0) return () => undefined;
-  if (pending++ === 0) publish({ busy: true, since: Date.now() });
+  if (pending++ === 0) {
+    const now = Date.now();
+    publish({ busy: true, since: now, warm: lastAnswerAt > 0 && now - lastAnswerAt < WARM_FOR_MS });
+  }
   let done = false;
   return () => {
     if (done) return;

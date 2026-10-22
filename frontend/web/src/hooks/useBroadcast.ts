@@ -21,6 +21,8 @@ type Options = {
   awayId?: string;
   /** Overlay cues (on_air / kill) as they arrive, for the broadcast overlay. */
   onCue?: (cue: BroadcastCue) => void;
+  /** The producer's Studio: watches the broadcast but isn't counted as a viewer. */
+  monitor?: boolean;
 };
 
 /** A broadcast narrative in the shape the moment and insight cards render. */
@@ -47,7 +49,7 @@ function toNarrative(n: BroadcastNarrative): Narrative {
  * message into the same LiveState the replay (SSE) hook produces, so every view renders either source.
  * `available` is null while negotiating, false when the deployment has no Web PubSub (fall back to SSE).
  */
-export function useBroadcast(matchId: string | undefined, { language, active = true, homeId, awayId, onCue }: Options) {
+export function useBroadcast(matchId: string | undefined, { language, active = true, homeId, awayId, onCue, monitor = false }: Options) {
   const [state, setState] = useState<LiveState>(EMPTY);
   const [connection, setConnection] = useState<RealtimeStatus>("idle");
   const [available, setAvailable] = useState<boolean | null>(null);
@@ -143,7 +145,7 @@ export function useBroadcast(matchId: string | undefined, { language, active = t
     setLatencyMs(null);
     setAvailable(null);
     const conn = connectRealtime({
-      negotiate: () => broadcastService.negotiate(matchId, language),
+      negotiate: () => broadcastService.negotiate(matchId, language, monitor),
       onStatus: (st) => {
         setConnection(st);
         if (st === "disabled") setAvailable(false);
@@ -163,7 +165,7 @@ export function useBroadcast(matchId: string | undefined, { language, active = t
       },
     });
     return () => conn.close();
-  }, [matchId, language, active, nonce, applyTick, applyNarrative, applyCue, catchUp]);
+  }, [matchId, language, active, monitor, nonce, applyTick, applyNarrative, applyCue, catchUp]);
 
   const reconnect = useCallback(() => setNonce((n) => n + 1), []);
 

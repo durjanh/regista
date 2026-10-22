@@ -9,7 +9,7 @@ describe("activity", () => {
     expect(getActivity().busy).toBe(true);
     const b = beginActivity();
     a();
-    expect(getActivity()).toEqual({ busy: true, since });
+    expect(getActivity()).toMatchObject({ busy: true, since });
     b();
     expect(getActivity().busy).toBe(false);
   });

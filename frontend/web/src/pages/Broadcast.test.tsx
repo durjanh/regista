@@ -56,7 +56,7 @@ describe("Matchday: live broadcast vs replay", () => {
   ];
 
   it("defaults to the shared broadcast when the match is on air, and renders its ticks", async () => {
-    mockApi(routes(NEG));
+    const fetch = mockApi(routes(NEG));
     renderMatchday();
     await joinLive();
     expect(screen.getByRole("button", { name: /Live broadcast/ })).toHaveAttribute("aria-pressed", "true");
@@ -65,6 +65,7 @@ describe("Matchday: live broadcast vs replay", () => {
     await act(async () => FakeWebSocket.last.group(`match.${HERO}`, tick({ t: 3300, minute: 55, moments: [moment()],
       events: [event({ id: "g1", t: 3300, minute: 55, type: "shot", shot_outcome: "goal", score: { home: 1, away: 0 } })], score: { home: 1, away: 0 } })));
     expect(screen.getByText("GOAL: Gordon 55'")).toBeInTheDocument();
+    expect(String(fetch.mock.calls.find((c) => String(c[0]).includes("/realtime/negotiate"))?.[0])).not.toContain("monitor");   // viewers count
     expect(FakeEventSource.last.closed).toBe(true);   // the personal replay stream was paused
   });
 
@@ -117,6 +118,8 @@ describe("Studio: go live to all viewers", () => {
     await waitFor(() => expect(panel).toHaveTextContent("On air"));
     expect(panel).toHaveTextContent("50.8 KB");
     expect(panel).toHaveTextContent("👁 10,000+ viewers");   // the Web PubSub count, capped
+    // The producer's own connection is a monitor, so it never inflates that count.
+    await waitFor(() => expect(fetch.mock.calls.some((c) => /\/realtime\/negotiate\?.*monitor=true/.test(String(c[0])))).toBe(true));
     await userEvent.click(screen.getByRole("button", { name: /Stop broadcast/ }));
     await waitFor(() => expect(panel).toHaveTextContent("Off air"));
   });

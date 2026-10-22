@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import dataclasses
 import json
+from types import SimpleNamespace
 
 import pytest
 from fastapi.testclient import TestClient
@@ -21,8 +22,8 @@ class FakeWebPubSub:
         self.tokens: list[dict] = []
         self.closed = False
 
-    async def get_client_access_token(self, roles=None, minutes_to_expire=60, **kw):
-        self.tokens.append({"roles": roles, "minutes_to_expire": minutes_to_expire})
+    async def get_client_access_token(self, roles=None, minutes_to_expire=60, user_id=None, **kw):
+        self.tokens.append({"roles": roles, "minutes_to_expire": minutes_to_expire, "user_id": user_id})
         return {"url": "wss://fake.webpubsub.azure.com/client/hubs/regista?access_token=t", "token": "t"}
 
     async def send_to_group(self, group, message, content_type=None, **kw):
@@ -82,7 +83,9 @@ def test_negotiate_issues_join_only_roles_for_this_match(wps):
     r = asyncio.run(broadcast.negotiate(HERO, "es"))
     groups = [f"match.{HERO}", f"match.{HERO}.es", f"overlay.{HERO}"]
     assert r["enabled"] and r["url"].startswith("wss://") and r["groups"] == groups and r["hub"] == "regista"
-    assert wps.tokens == [{"roles": [f"webpubsub.joinLeaveGroup.{g}" for g in groups], "minutes_to_expire": 60}]
+    assert wps.tokens == [{"roles": [f"webpubsub.joinLeaveGroup.{g}" for g in groups], "minutes_to_expire": 60, "user_id": None}]
+    asyncio.run(broadcast.negotiate(HERO, "es", monitor=True))     # the Studio: same access, tagged so it isn't counted
+    assert wps.tokens[-1]["user_id"] == broadcast.MONITOR_USER_ID and wps.tokens[-1]["roles"] == wps.tokens[0]["roles"]
 
 
 def test_start_stop_status_are_idempotent(wps, monkeypatch):
@@ -282,8 +285,8 @@ def test_viewer_count_comes_from_web_pubsub_and_is_capped(loaded_store, monkeypa
             listed.append((group, top))
 
             async def gen():
-                for _ in range(min(self.n, top or self.n)):
-                    yield object()
+                for i in range(min(self.n, top or self.n)):
+                    yield SimpleNamespace(connection_id=f"c{i}", user_id=None)
             return gen()
 
     settings = dataclasses.replace(config.settings, webpubsub_endpoint="https://wps.example", force_offline=False,
@@ -298,12 +301,23 @@ def test_viewer_count_comes_from_web_pubsub_and_is_capped(loaded_store, monkeypa
     asyncio.run(b.count_viewers())
     assert (b.viewers, b.viewers_more) == (3, True) and b.status()["viewers"] == 3 and b.status()["viewers_more"]
 
+    class WithStudio:                                            # the producer's Studio is a monitor, not a viewer
+        def list_connections(self, group, top=None):
+            async def gen():
+                for uid in (None, broadcast.MONITOR_USER_ID, None, broadcast.MONITOR_USER_ID):
+                    yield SimpleNamespace(connection_id="c", user_id=uid)
+            return gen()
+
+    monkeypatch.setattr(broadcast, "client", lambda: WithStudio())
+    asyncio.run(b.count_viewers())
+    assert (b.viewers, b.viewers_more) == (2, False)
+
     def broken():
         raise RuntimeError("service unavailable")
 
     monkeypatch.setattr(broadcast, "client", broken)
     asyncio.run(b.count_viewers())
-    assert b.viewers == 3                                        # a failed count keeps the last value
+    assert b.viewers == 2                                        # a failed count keeps the last value
 
     async def scenario():                                        # refreshed at most once per interval
         monkeypatch.setattr(broadcast, "client", lambda: Members(1))

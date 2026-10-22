@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { matchService, scoutingService } from "../api";
+import { forgeService, scoutingService } from "../api";
 import { PlayerLink } from "../components/ScoutViz";
 import { InfoPop, ModelTag } from "../components/SourceBadge";
 import { EmptyState, ErrorState, Skeleton } from "../components/States";
@@ -16,19 +16,15 @@ const INDEX_NOTE =
 export function Scouting() {
   const { t } = usePrefs();
   const players = useAsync(() => scoutingService.players(), []);
-  const matches = useAsync(() => matchService.list(), []);
+  const allTeams = useAsync(() => forgeService.teams(), []);
   const [q, setQ] = useState("");
   const [team, setTeam] = useState("");
 
-  const featuredTeams = useMemo(() => {
-    const map = new Map<string, { team_id: string; name: string; short: string; colors: { primary: string; secondary: string; text: string } }>();
-    for (const m of matches.data ?? []) {
-      if (m.featured === false) continue;
-      map.set(m.home.team_id, m.home);
-      map.set(m.away.team_id, m.away);
-    }
-    return [...map.values()].sort((a, b) => a.name.localeCompare(b.name));
-  }, [matches.data]);
+  // A report for every team with scouted players (the same teams as the player filter), not only featured fixtures.
+  const reportTeams = useMemo(() => {
+    const scouted = new Set((players.data ?? []).map((p) => p.team_id));
+    return (allTeams.data ?? []).filter((tm) => scouted.has(tm.team_id)).sort((a, b) => a.name.localeCompare(b.name));
+  }, [players.data, allTeams.data]);
 
   const teams = useMemo(() => {
     const map = new Map<string, string>();
@@ -64,11 +60,11 @@ export function Scouting() {
         <div className="card-head">
           <h2 className="card-title">{t("scout.teamReport")}</h2>
         </div>
-        {matches.loading ? (
+        {players.loading || allTeams.loading ? (
           <Skeleton h={40} />
         ) : (
           <div className="chips">
-            {featuredTeams.map((tm) => (
+            {reportTeams.map((tm) => (
               <Link key={tm.team_id} to={teamReportPath(tm.team_id)} className="chip">
                 <TeamSwatch team={tm} size="sm" /> {tm.name}
               </Link>
@@ -94,6 +90,11 @@ export function Scouting() {
               </option>
             ))}
           </select>
+          {team ? (
+            <Link to={teamReportPath(team)} className="btn">
+              {t("scout.teamReport")} →
+            </Link>
+          ) : null}
         </div>
         {players.error ? (
           <ErrorState message={players.error} onRetry={players.reload} />

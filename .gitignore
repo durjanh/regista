@@ -37,3 +37,6 @@ frontend/web/.env*.local
 .coverage
 .coverage.*
 coverage.xml
+
+# Personal workbench: helpers for building and pitching the project (decks, screenshots, diagram generator); never committed
+workbench/

@@ -505,12 +505,13 @@ type BroadcastCue = { type: "cue"; match_id: string; action: "on_air" | "kill"; 
 type BroadcastEnd = { type: "end"; match_id: string; t: number };
 
 type BroadcastStatus = { match_id: string; live: boolean; source: "replay" | "eventhub"; speed: number; t: number; minute: number;
-  started_at: string | null; ticks_published: number; bytes_published: number; languages: string[] };
+  started_at: string | null; ticks_published: number; bytes_published: number; languages: string[];
+  viewers: number /* connections in the match group, Studio monitors excluded */; viewers_more: boolean /* over the cap */ };
 ```
 
 | Method & path | Request | Response |
 |---|---|---|
-| `GET /api/realtime/negotiate` | query `match_id`, `language` (default `en`) | `{ enabled: false }` or `{ enabled: true, url: string /* wss://…?access_token=… (Entra-issued, ~60 min) */, groups: string[], hub: string }` |
+| `GET /api/realtime/negotiate` | query `match_id`, `language` (default `en`), `monitor` (default false; the Studio sets it so its own connection isn't counted as a viewer) | `{ enabled: false }` or `{ enabled: true, url: string /* wss://…?access_token=… (Entra-issued, ~60 min) */, groups: string[], hub: string }` |
 | `POST /api/broadcast/{match_id}/start` | `{ speed?: number = 1, start_t?: number = 0, languages?: string[] = ["en"] }` | `BroadcastStatus` (idempotent: an already-live match returns its status) |
 | `POST /api/broadcast/{match_id}/stop` | | `BroadcastStatus` |
 | `GET /api/broadcast/status` | | `BroadcastStatus[]` |

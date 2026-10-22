@@ -13,10 +13,11 @@ router = APIRouter(prefix="/api", tags=["realtime"])
 
 
 @router.get("/realtime/negotiate")
-async def realtime_negotiate(match_id: str, language: str = "en", store: MatchStore = Depends(get_store)):
-    """A short-lived Web PubSub client URL for one match (Entra-issued; join-only roles). enabled=false -> use SSE."""
+async def realtime_negotiate(match_id: str, language: str = "en", monitor: bool = False, store: MatchStore = Depends(get_store)):
+    """A short-lived Web PubSub client URL for one match (Entra-issued; join-only roles). enabled=false -> use SSE.
+    monitor=true for the Studio: its connection isn't counted as a viewer."""
     ensure_match(store, match_id)
-    return await broadcast.negotiate(match_id, language)
+    return await broadcast.negotiate(match_id, language, monitor)
 
 
 @router.post("/broadcast/{match_id}/start")

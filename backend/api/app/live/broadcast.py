@@ -52,6 +52,10 @@ def enabled() -> bool:
     return settings.webpubsub
 
 
+# Web PubSub user id of Studio (producer) connections: they watch the broadcast but aren't audience.
+MONITOR_USER_ID = "regista-studio-monitor"
+
+
 def client():
     """Async Web PubSub service client, Entra-authenticated (managed identity in Azure, az login locally)."""
     global _client
@@ -63,12 +67,14 @@ def client():
     return _client
 
 
-async def negotiate(match_id: str, language: str = "en") -> dict:
-    """A short-lived client URL allowed to join exactly this match's groups (and nothing else)."""
+async def negotiate(match_id: str, language: str = "en", monitor: bool = False) -> dict:
+    """A short-lived client URL allowed to join exactly this match's groups (and nothing else). ``monitor``: the
+    producer's own Studio connection, tagged so the viewer count leaves it out."""
     if not enabled():
         return {"enabled": False}
     groups = [match_group(match_id), language_group(match_id, language), overlay_group(match_id)]
-    token = await client().get_client_access_token(roles=[f"webpubsub.joinLeaveGroup.{g}" for g in groups], minutes_to_expire=60)
+    token = await client().get_client_access_token(roles=[f"webpubsub.joinLeaveGroup.{g}" for g in groups], minutes_to_expire=60,
+                                                   user_id=MONITOR_USER_ID if monitor else None)
     return {"enabled": True, "url": token["url"], "groups": groups, "hub": settings.webpubsub_hub}
 
 
@@ -136,8 +142,8 @@ class Broadcast:
         cap = settings.broadcast_viewer_count_max
         try:
             n = 0
-            async for _ in client().list_connections(group=match_group(self.match_id), top=cap + 1):
-                n += 1
+            async for member in client().list_connections(group=match_group(self.match_id), top=cap + 1):
+                n += getattr(member, "user_id", None) != MONITOR_USER_ID   # the producer's Studio isn't a viewer
             self.viewers, self.viewers_more = min(n, cap), n > cap
         except Exception as exc:  # the count is informative only: keep the last value
             log.warning("Viewer count for %s failed: %s", self.match_id, exc)

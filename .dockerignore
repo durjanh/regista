@@ -20,3 +20,5 @@ scripts
 backend/functions
 # Data Forge what-ifs generated locally (git ignores them too): only the curated real rebuilds ship in the image
 data/matches/whatif-*
+# Personal workbench (decks, screenshots, helper scripts)
+workbench

@@ -1,5 +1,5 @@
 import axios, { AxiosError, type AxiosInstance, type AxiosRequestConfig } from "axios";
-import { beginActivity } from "../../lib/activity";
+import { beginActivity, noteAnswer } from "../../lib/activity";
 import { ApiError } from "./ApiError";
 import type { HttpClient } from "./HttpClient";
 
@@ -65,8 +65,12 @@ export class AxiosHttpClient implements HttpClient {
     const done = beginActivity();   // synchronous, so `quietly(...)` around the call is honoured
     return this.http
       .request<T>(config)
-      .then((res) => res.data)
+      .then((res) => {
+        noteAnswer();
+        return res.data;
+      })
       .catch((err: unknown) => {
+        if (err instanceof AxiosError && err.response) noteAnswer();   // an HTTP error is still an answer from a running API
         throw toApiError(err);
       })
       .finally(done);

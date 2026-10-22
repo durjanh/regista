@@ -2,7 +2,7 @@ import { act, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ActivityIndicator } from "./ActivityIndicator";
 import { Skeleton, SkeletonCard } from "./States";
-import { beginActivity, getActivity } from "../lib/activity";
+import { WARM_FOR_MS, beginActivity, getActivity, noteAnswer } from "../lib/activity";
 import { HEALTH, mockApi, renderWithPrefs } from "../test/utils";
 
 describe("ActivityIndicator", () => {
@@ -11,13 +11,18 @@ describe("ActivityIndicator", () => {
     vi.useRealTimers();
   });
 
-  it("appears for slow calls, explains a cold start, and goes away when the call ends", async () => {
+  const renderIdle = async () => {
     mockApi([HEALTH]);   // the preferences provider checks /api/health on mount
-    const { container } = renderWithPrefs(<ActivityIndicator />);
+    const view = renderWithPrefs(<ActivityIndicator />);
     await act(async () => {
       await vi.waitFor(() => expect(getActivity().busy).toBe(false));
     });
-    act(() => vi.advanceTimersByTime(1000));
+    return view;
+  };
+
+  it("appears for slow calls, explains a cold start when the API hasn't answered lately, and goes away", async () => {
+    const { container } = await renderIdle();
+    vi.setSystemTime(Date.now() + WARM_FOR_MS + 1000);   // quiet long enough to scale to zero (no timers, so no health poll)
     expect(container.querySelector(".activity-bar")).toBeNull();
 
     let done: () => void = () => undefined;
@@ -35,6 +40,19 @@ describe("ActivityIndicator", () => {
     act(() => done());
     expect(container.querySelector(".activity-bar")).toBeNull();
     expect(screen.getByRole("status")).toHaveTextContent("");
+  });
+
+  it("says the work is still running, not waking up, when the API answered recently (a long AI call)", async () => {
+    await renderIdle();
+    act(() => noteAnswer());
+    let done: () => void = () => undefined;
+    act(() => {
+      done = beginActivity();
+    });
+    act(() => vi.advanceTimersByTime(5300));
+    expect(screen.getByRole("status")).toHaveTextContent(/Still working… AI agents can take up to a minute/);
+    expect(screen.getByRole("status")).not.toHaveTextContent(/Waking up/);
+    act(() => done());
   });
 });
 
