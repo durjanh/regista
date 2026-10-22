@@ -11,6 +11,8 @@ import { useAsync } from "../hooks/useAsync";
 import { sourceUrl } from "../lib/format";
 import { usePrefs } from "../lib/prefs";
 import { mechanismLabel } from "../lib/truth";
+import { IconDirect, IconForge, IconPlay, IconSimulate, IconStudio } from "../components/icons";
+import { quietly } from "../lib/activity";
 
 const SCENARIOS: { value: Scenario; label: string }[] = [
   { value: "balanced", label: "Balanced" },
@@ -62,7 +64,7 @@ export function Forge() {
     setDirecting(true);
     setErr(null);
     try {
-      const res = await forgeService.scenario(prompt);
+      const res = await quietly(() => forgeService.scenario(prompt));   // the button shows progress
       setConfig(res.config);
       setExplanation({ text: res.explanation, engine: res.engine });
     } catch (e) {
@@ -81,7 +83,7 @@ export function Forge() {
       if (!clean.home_formation) delete clean.home_formation;
       if (!clean.away_formation) delete clean.away_formation;
       if (!clean.as_of) delete clean.as_of;
-      setResult(await forgeService.generate(clean));
+      setResult(await quietly(() => forgeService.generate(clean)));
     } catch (e) {
       setErr(e instanceof Error ? e.message : String(e));
     } finally {
@@ -98,7 +100,7 @@ export function Forge() {
   return (
     <div className="stack">
       <div>
-        <h1 className="page-title">⚒ {t("nav.forge")}</h1>
+        <h1 className="page-title row" style={{ gap: 10 }}><IconForge width={30} height={30} /> {t("nav.forge")}</h1>
         <p className="muted" style={{ maxWidth: "70ch" }}>
           Direct a <b>what-if</b> match between real national teams in plain English. The Scenario Director agent turns your brief into a
           simulator config, team strength comes from Elo built on 150 years of real results, and every generated match is checked against
@@ -124,7 +126,7 @@ export function Forge() {
                 ))}
               </div>
               <button className="btn primary" onClick={direct} disabled={directing || !prompt.trim()} aria-busy={directing}>
-                ✦ {directing ? "Directing…" : t("forge.direct")}
+                <IconDirect /> {directing ? "Directing…" : t("forge.direct")}
               </button>
             </div>
             {explanation ? (
@@ -219,7 +221,7 @@ export function Forge() {
                 </div>
                 {config.home_team_id === config.away_team_id ? <div className="xs" style={{ color: "var(--warn)" }}>Pick two different teams.</div> : null}
                 <button className="btn primary" onClick={generate} disabled={generating || config.home_team_id === config.away_team_id} aria-busy={generating}>
-                  ⚒ {generating ? "Simulating…" : t("forge.generate")}
+                  <IconSimulate /> {generating ? "Simulating…" : t("forge.generate")}
                 </button>
               </div>
             )}
@@ -248,10 +250,10 @@ export function Forge() {
               </div>
               <div className="row">
                 <Link to={`/match/${result.match.match_id}`} className="btn primary">
-                  ▶ Watch it unfold
+                  <IconPlay /> Watch it unfold
                 </Link>
                 <Link to={`/studio/${result.match.match_id}`} className="btn">
-                  🎛 Studio
+                  <IconStudio /> Studio
                 </Link>
                 <span className="xs muted">
                   Calibration for this run: {result.calibration.metrics.filter((m) => m.status === "pass").length}/{result.calibration.metrics.length} metrics in range

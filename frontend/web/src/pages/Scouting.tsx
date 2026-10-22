@@ -8,6 +8,7 @@ import { TeamSwatch } from "../components/TeamSwatch";
 import { useAsync } from "../hooks/useAsync";
 import { teamReportPath } from "../lib/players";
 import { usePrefs } from "../lib/prefs";
+import { IconNext } from "../components/icons";
 
 const INDEX_NOTE =
   "Profiles combine a REAL record from the international results dataset (goals, penalties, assists, venues) with MODEL tendencies " +
@@ -92,7 +93,7 @@ export function Scouting() {
           </select>
           {team ? (
             <Link to={teamReportPath(team)} className="btn">
-              {t("scout.teamReport")} →
+              {t("scout.teamReport")} <IconNext />
             </Link>
           ) : null}
         </div>

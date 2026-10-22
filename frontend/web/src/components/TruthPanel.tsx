@@ -5,6 +5,8 @@ import { clock, cx, pct } from "../lib/format";
 import { usePrefs } from "../lib/prefs";
 import { mechanismIcon, mechanismLabel, plantStatus, type PlantStatus } from "../lib/truth";
 import { Skeleton } from "./States";
+import { IconCounterfactual } from "./icons";
+import { quietly } from "../lib/activity";
 
 type Props = {
   matchId: string;
@@ -52,7 +54,7 @@ export function TruthPanel({ matchId, report, t, ended, teams, error }: Props) {
   const runCf = async (p: Plant) => {
     setCf((c) => ({ ...c, [p.id]: { loading: true } }));
     try {
-      const data = await truthService.counterfactual(matchId, p.id);
+      const data = await quietly(() => truthService.counterfactual(matchId, p.id));   // the button shows progress
       setCf((c) => ({ ...c, [p.id]: { loading: false, data } }));
     } catch (e) {
       setCf((c) => ({ ...c, [p.id]: { loading: false, error: e instanceof Error ? e.message : String(e) } }));
@@ -122,7 +124,7 @@ export function TruthPanel({ matchId, report, t, ended, teams, error }: Props) {
                       <CounterfactualCard cf={c.data} color={team?.color} />
                     ) : (
                       <button className="btn sm" onClick={() => runCf(plant)} disabled={c?.loading} aria-busy={!!c?.loading}>
-                        {c?.loading ? "Replaying the match without it…" : `↺ ${tr("truth.whatChanged")}`}
+                        <IconCounterfactual /> {c?.loading ? "Replaying the match without it…" : tr("truth.whatChanged")}
                       </button>
                     )}
                     {c?.loading ? <div style={{ marginTop: 8 }}><Skeleton h={70} /></div> : null}

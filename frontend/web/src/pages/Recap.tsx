@@ -13,6 +13,8 @@ import { LANGUAGES } from "../lib/i18n";
 import { teamColors } from "../lib/match";
 import { usePrefs } from "../lib/prefs";
 import { PlayerLink } from "../components/ScoutViz";
+import { IconAI } from "../components/icons";
+import { quietly } from "../lib/activity";
 
 const RECAP_PERSONAS: Persona[] = ["casual", "analyst", "kids", "fantasy", "broadcaster", "social", "accessible"];
 const PLATFORM_LABEL: Record<string, string> = { x: "X", instagram: "Instagram", tiktok: "TikTok", whatsapp: "WhatsApp" };
@@ -52,7 +54,7 @@ export function Recap() {
     setBusy(true);
     setError(null);
     try {
-      setRecap(await narrationService.recap({ match_id: id, persona, language }));
+      setRecap(await quietly(() => narrationService.recap({ match_id: id, persona, language })));   // the button shows progress
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     } finally {
@@ -85,7 +87,7 @@ export function Recap() {
             </select>
           </div>
           <button className="btn primary" onClick={generate} disabled={busy} aria-busy={busy}>
-            {busy ? `✦ ${prefs.t("recap.generating")}` : `✦ ${prefs.t("recap.generate")}`}
+            <IconAI /> {busy ? prefs.t("recap.generating") : prefs.t("recap.generate")}
           </button>
           <span className="xs muted" style={{ flex: 1, minWidth: 200 }}>
             Analyst and Tactician agents run in parallel; the Narrator writes; the Fact-checker verifies every claim; the Localizer adapts the

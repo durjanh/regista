@@ -131,7 +131,8 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .brand-tag { color: var(--text-faint); font-size: 12px; display: none; }
 @media (min-width: 1100px) { .brand-tag { display: inline; } }
 .topnav { display: flex; gap: 4px; margin-inline-start: 8px; }
-.topnav a { padding: 7px 12px; border-radius: 999px; color: var(--text-dim); font-weight: 550; font-size: 14px; }
+.topnav a { display: inline-flex; align-items: center; gap: 7px; padding: 7px 12px; border-radius: 999px; color: var(--text-dim); font-weight: 550; font-size: 14px; }
+.topnav a svg { width: 16px; height: 16px; flex: none; }
 .topnav a:hover { color: var(--text); background: var(--surface-2); }
 .topnav a.active { color: var(--text); background: var(--surface-3); }
 .topbar-right { margin-inline-start: auto; display: flex; align-items: center; gap: 8px; }
@@ -168,6 +169,12 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .btn.ghost:hover { color: var(--text); background: var(--surface-2); }
 .btn.sm { padding: 5px 10px; min-height: 30px; font-size: 13px; border-radius: 8px; }
 .btn.icon { padding: 0; width: 36px; }
+/* Icons inside buttons and pills: sized by the text, never squeezed. */
+.btn svg { width: 16px; height: 16px; flex: none; }
+.btn.sm svg { width: 14px; height: 14px; }
+.btn[aria-busy="true"] svg { display: none; }   /* the busy spinner takes the icon's place */
+.pill svg, .card-title svg { width: 14px; height: 14px; flex: none; vertical-align: -2px; }
+.seg button svg, .chip svg { width: 14px; height: 14px; flex: none; vertical-align: -2px; }
 .btn.danger { color: var(--danger); }
 .btn.success { color: var(--accent); }
 
@@ -247,7 +254,8 @@ h1, h2, h3 { margin: 0; line-height: 1.15; }
 .match-header { display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px; }
 .subnav { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; border-bottom: 1px solid var(--border); }
 .subnav::-webkit-scrollbar { display: none; }
-.subnav a { padding: 10px 14px; color: var(--text-dim); font-weight: 600; font-size: 14px; border-bottom: 2px solid transparent; white-space: nowrap; }
+.subnav a { display: inline-flex; align-items: center; gap: 7px; padding: 10px 14px; color: var(--text-dim); font-weight: 600; font-size: 14px; border-bottom: 2px solid transparent; white-space: nowrap; }
+.subnav a svg { width: 16px; height: 16px; flex: none; }
 .subnav a:hover { color: var(--text); }
 .subnav a.active { color: var(--text); border-bottom-color: var(--accent); }
 
@@ -425,6 +433,14 @@ h1, h2, h3 { margin: 0; line-height: 1.15; }
 .bubble { max-width: 86%; padding: 12px 14px; border-radius: 14px; line-height: 1.55; }
 .bubble.user { align-self: flex-end; background: var(--accent); color: var(--accent-ink); border-end-end-radius: 4px; font-weight: 550; }
 .bubble.assistant { align-self: flex-start; background: var(--surface-2); border: 1px solid var(--border); border-end-start-radius: 4px; }
+/* A chat message: avatar + bubble; the user's on the right, the agent's on the left. */
+.msg { display: flex; align-items: flex-start; gap: 10px; max-width: 92%; }
+.msg.user { align-self: flex-end; flex-direction: row-reverse; }
+.msg.assistant { align-self: flex-start; }
+.msg > .bubble { max-width: none; min-width: 0; }
+.avatar { flex: none; width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; border: 1px solid var(--border); background: var(--surface-2); color: var(--accent); }
+.avatar svg { width: 17px; height: 17px; }
+.avatar.user { background: var(--accent-soft); border-color: transparent; }
 .composer { display: flex; gap: 8px; align-items: flex-end; position: sticky; bottom: 12px; background: var(--surface); border: 1px solid var(--border-strong); border-radius: 14px; padding: 8px; box-shadow: var(--shadow); }
 .composer .textarea { min-height: 44px; max-height: 160px; border: 0; background: transparent; }
 .suggestions { display: flex; flex-direction: column; gap: 8px; }

@@ -13,9 +13,11 @@ import { EmptyState, ErrorState, Skeleton } from "../components/States";
 import { useAsync } from "../hooks/useAsync";
 import { useLiveMatch } from "../hooks/useLiveMatch";
 import { MOMENT_ICON, clock, cx, importanceTier, median, percentile } from "../lib/format";
+import { quietly } from "../lib/activity";
 import { usePrefs } from "../lib/prefs";
 import { usePoll, useTruthMode, useVerifierDrill } from "../lib/truth";
 import { LANGUAGES } from "../lib/i18n";
+import { IconApprove, IconBack, IconEdit, IconExternal, IconKill, IconOnAir, IconReject, IconSave, IconStudio } from "../components/icons";
 
 const KIND_LABEL: Record<StudioItem["kind"], string> = {
   lower_third: "Lower third",
@@ -200,7 +202,7 @@ function GraphicCard({ item, onAction }: { item: StudioItem; onAction: ActionFn 
   const run = async (action: StudioAction, edit?: { title: string; body: string }) => {
     setBusy(action);
     try {
-      await onAction(item, action, edit);
+      await quietly(() => onAction(item, action, edit));   // the button shows progress
       if (action === "edit") setEditing(false);
     } finally {
       setBusy(null);
@@ -257,7 +259,7 @@ function GraphicCard({ item, onAction }: { item: StudioItem; onAction: ActionFn 
         {editing ? (
           <>
             <button className="btn sm primary" disabled={!!busy} aria-busy={busy === "edit"} onClick={() => run("edit", { title, body })}>
-              Save
+              <IconSave /> Save
             </button>
             <button className="btn sm ghost" onClick={() => setEditing(false)}>
               Cancel
@@ -267,25 +269,25 @@ function GraphicCard({ item, onAction }: { item: StudioItem; onAction: ActionFn 
           <>
             {item.status === "proposed" ? (
               <button className="btn sm success" disabled={!!busy} aria-busy={busy === "approve"} onClick={() => run("approve")}>
-                ✓ {t("studio.approve")}
+                <IconApprove /> {t("studio.approve")}
               </button>
             ) : null}
             {item.status !== "rejected" && item.status !== "on_air" ? (
               <button className="btn sm danger" disabled={!!busy} aria-busy={busy === "reject"} onClick={() => run("reject")}>
-                ✕ {t("studio.reject")}
+                <IconReject /> {t("studio.reject")}
               </button>
             ) : null}
             <button className="btn sm" disabled={!!busy} onClick={() => setEditing(true)}>
-              ✎ {t("studio.edit")}
+              <IconEdit /> {t("studio.edit")}
             </button>
             {item.status !== "on_air" && item.status !== "rejected" && item.status !== "killed" ? (
               <button className="btn sm signal" disabled={!!busy} aria-busy={busy === "on_air"} onClick={() => run("on_air")}>
-                ● {t("studio.onair")}
+                <IconOnAir /> {t("studio.onair")}
               </button>
             ) : null}
             {item.status === "on_air" ? (
               <button className="btn sm danger" disabled={!!busy} aria-busy={busy === "kill"} onClick={() => run("kill")} title="Take this graphic off air immediately">
-                ■ {t("studio.kill")}
+                <IconKill /> {t("studio.kill")}
               </button>
             ) : null}
           </>
@@ -395,17 +397,17 @@ function StudioConsole({ match }: { match: MatchMeta }) {
     <div className="stack">
       <div className="row" style={{ justifyContent: "space-between" }}>
         <div className="row">
-          <h1 className="display" style={{ fontSize: 28, fontWeight: 800, textTransform: "uppercase" }}>
-            🎛 {t("nav.studio")}
+          <h1 className="display row" style={{ fontSize: 28, fontWeight: 800, textTransform: "uppercase", gap: 10 }}>
+            <IconStudio width={28} height={28} /> {t("nav.studio")}
           </h1>
           <SourceBadge source={match.source} />
         </div>
         <div className="row">
           <Link to={`/match/${id}`} className="btn sm">
-            ← {t("nav.matchday")}
+            <IconBack /> {t("nav.matchday")}
           </Link>
           <a href={`/overlay/${id}?preview=1`} target="_blank" rel="noreferrer" className="btn sm" title="Preview the overlay; in OBS / vMix use /overlay/{id} as a 1920×1080 browser source">
-            ↗ Overlay URL
+            <IconExternal /> Overlay URL
           </a>
         </div>
       </div>

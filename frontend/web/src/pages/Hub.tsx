@@ -7,6 +7,7 @@ import { EmptyState, ErrorState, Skeleton } from "../components/States";
 import { TeamLink, TeamSwatch } from "../components/TeamSwatch";
 import { useAsync } from "../hooks/useAsync";
 import { usePrefs } from "../lib/prefs";
+import { IconForge, IconNext, IconPlay, IconStudio } from "../components/icons";
 
 function formatDate(iso: string): string {
   const d = new Date(`${iso.slice(0, 10)}T12:00:00Z`);
@@ -59,10 +60,10 @@ function Fixture({ m }: { m: MatchSummary }) {
       </div>
       <div className="fixture-actions">
         <Link to={`/match/${m.match_id}`} className="btn primary">
-          ▶ {t("hub.open")}
+          <IconPlay /> {t("hub.open")}
         </Link>
         <Link to={`/studio/${m.match_id}`} className="btn" title={t("hub.studio")}>
-          🎛 <span className="hide-sm">{t("nav.studio")}</span>
+          <IconStudio /> <span className="hide-sm">{t("nav.studio")}</span>
         </Link>
       </div>
     </article>
@@ -97,7 +98,7 @@ export function Hub() {
         <Link to="/forge" className="card forge-cta">
           <div>
             <div className="card-title" style={{ marginBottom: 8 }}>
-              ⚒ {t("hub.forge.title")} · What-if
+              <IconForge /> {t("hub.forge.title")} · What-if
             </div>
             <div className="section-title" style={{ fontSize: 22, marginBottom: 6 }}>
               “Brazil v Japan, as of 2002, with a late red card”
@@ -105,7 +106,7 @@ export function Hub() {
             <div className="muted small">{t("hub.forge.body")}</div>
           </div>
           <span className="btn primary" style={{ alignSelf: "flex-start" }}>
-            {t("nav.forge")} →
+            {t("nav.forge")} <IconNext />
           </span>
         </Link>
       </section>

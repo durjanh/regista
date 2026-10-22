@@ -1,5 +1,6 @@
 import type { CSSProperties, ReactNode } from "react";
 import { usePrefs } from "../lib/prefs";
+import { IconRetry } from "./icons";
 
 export function Spinner({ size }: { size?: "sm" | "lg" }) {
   return <span className={size ? `spinner ${size}` : "spinner"} aria-hidden="true" />;
@@ -48,7 +49,7 @@ export function ErrorState({ message, onRetry }: { message?: string | null; onRe
       </div>
       {onRetry ? (
         <button className="btn sm" onClick={onRetry}>
-          {t("retry")}
+          <IconRetry /> {t("retry")}
         </button>
       ) : null}
     </div>

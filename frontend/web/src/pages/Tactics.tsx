@@ -13,6 +13,7 @@ import { useAsync } from "../hooks/useAsync";
 import { MOMENT_ICON, clock, cx, describeEvent } from "../lib/format";
 import { playerMaps, teamColors } from "../lib/match";
 import { PlayerLink } from "../components/ScoutViz";
+import { IconPause, IconPlay, IconStepBack, IconStepForward, IconToStart } from "../components/icons";
 
 export function Tactics() {
   const { id = "" } = useParams();
@@ -324,8 +325,8 @@ export function Tactics() {
                   />
                 </Pitch>
                 <div className="stepper" style={{ marginTop: 10 }}>
-                  <button className="btn sm" onClick={() => { setPlaying(false); setStep(0); }} disabled={step === 0} aria-label="First event">⏮</button>
-                  <button className="btn sm" onClick={() => { setPlaying(false); setStep((s) => Math.max(0, s - 1)); }} disabled={step === 0} aria-label="Previous event">◀</button>
+                  <button className="btn sm" onClick={() => { setPlaying(false); setStep(0); }} disabled={step === 0} aria-label="First event"><IconToStart /></button>
+                  <button className="btn sm" onClick={() => { setPlaying(false); setStep((s) => Math.max(0, s - 1)); }} disabled={step === 0} aria-label="Previous event"><IconStepBack /></button>
                   <button
                     className="btn sm primary"
                     onClick={() => {
@@ -333,9 +334,9 @@ export function Tactics() {
                       setPlaying((p) => !p);
                     }}
                   >
-                    {playing ? "❚❚ Pause" : "▶ Play"}
+                    {playing ? <><IconPause /> Pause</> : <><IconPlay /> Play</>}
                   </button>
-                  <button className="btn sm" onClick={() => { setPlaying(false); setStep((s) => Math.min(seq.length - 1, s + 1)); }} disabled={atEnd} aria-label="Next event">▶</button>
+                  <button className="btn sm" onClick={() => { setPlaying(false); setStep((s) => Math.min(seq.length - 1, s + 1)); }} disabled={atEnd} aria-label="Next event"><IconStepForward /></button>
                   <span className="xs muted tnum">
                     {step + 1}/{seq.length}
                   </span>

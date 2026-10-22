@@ -2,6 +2,7 @@ import { NavLink } from "react-router-dom";
 import type { Persona } from "../api/types";
 import { LANGUAGES } from "../lib/i18n";
 import { usePrefs } from "../lib/prefs";
+import { IconDark, IconForge, IconLight, IconMatches, IconScouting } from "./icons";
 
 const PERSONAS: Persona[] = ["casual", "analyst", "kids", "fantasy", "accessible"];
 
@@ -70,10 +71,14 @@ export function TopBar() {
       </NavLink>
       <nav className="topnav" aria-label="Primary">
         <NavLink to="/" end>
-          {t("nav.hub")}
+          <IconMatches /> {t("nav.hub")}
         </NavLink>
-        <NavLink to="/scouting">{t("nav.scouting")}</NavLink>
-        <NavLink to="/forge">{t("nav.forge")}</NavLink>
+        <NavLink to="/scouting">
+          <IconScouting /> {t("nav.scouting")}
+        </NavLink>
+        <NavLink to="/forge">
+          <IconForge /> {t("nav.forge")}
+        </NavLink>
       </nav>
       <div className="topbar-right">
         <span className="hide-sm">
@@ -84,7 +89,7 @@ export function TopBar() {
           <EnginePill />
         </span>
         <button className="btn icon ghost" onClick={() => setTheme(theme === "dark" ? "light" : "dark")} aria-label={t("theme.toggle")} title={t("theme.toggle")}>
-          {theme === "dark" ? "☀" : "☾"}
+          {theme === "dark" ? <IconLight /> : <IconDark />}
         </button>
       </div>
     </header>

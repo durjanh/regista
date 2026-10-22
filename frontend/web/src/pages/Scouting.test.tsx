@@ -29,8 +29,8 @@ describe("Scouting", () => {
     expect(chips[1]).toHaveAttribute("href", "/scouting/team/switzerland");
 
     // Picking a team in the player filter offers that team's report too.
-    expect(screen.queryByRole("link", { name: /Scouting report →/ })).toBeNull();
+    expect(screen.queryByRole("link", { name: /^Scouting report$/ })).toBeNull();
     await userEvent.selectOptions(screen.getByRole("combobox", { name: "Team" }), "switzerland");
-    expect(screen.getByRole("link", { name: /Scouting report →/ })).toHaveAttribute("href", "/scouting/team/switzerland");
+    expect(screen.getByRole("link", { name: /^Scouting report$/ })).toHaveAttribute("href", "/scouting/team/switzerland");
   });
 });

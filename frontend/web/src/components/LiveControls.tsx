@@ -1,6 +1,7 @@
 import type { LiveState } from "../hooks/useLiveMatch";
 import { usePrefs } from "../lib/prefs";
 import { cx } from "../lib/format";
+import { IconPause, IconPlay, IconRestart, IconToEnd } from "./icons";
 
 const SPEEDS = [10, 30, 60, 120];
 /** Jump points on the match clock; 58' sits just before the showcase match's planted press. */
@@ -46,15 +47,15 @@ export function LiveControls({ state, speed, play, pause, restart, setSpeed, jum
     <div className="controls" role="toolbar" aria-label="Replay controls">
       {running ? (
         <button className="btn" onClick={pause} aria-label={t("live.pause")}>
-          ❚❚ <span className="hide-sm">{t("live.pause")}</span>
+          <IconPause /> <span className="hide-sm">{t("live.pause")}</span>
         </button>
       ) : (
         <button className="btn primary" onClick={state.status === "ended" ? restart : play} aria-label={state.status === "error" ? t("live.resume") : t("live.play")}>
-          ▶ <span className="hide-sm">{state.status === "error" ? t("live.resume") : state.status === "ended" ? t("live.restart") : t("live.play")}</span>
+          <IconPlay /> <span className="hide-sm">{state.status === "error" ? t("live.resume") : state.status === "ended" ? t("live.restart") : t("live.play")}</span>
         </button>
       )}
       <button className="btn ghost" onClick={restart} aria-label={t("live.restart")} title={t("live.restart")}>
-        ↺
+        <IconRestart />
       </button>
       <div className="seg" role="group" aria-label={t("live.speed")}>
         {SPEEDS.map((s) => (
@@ -73,7 +74,7 @@ export function LiveControls({ state, speed, play, pause, restart, setSpeed, jum
         </select>
       ) : null}
       <button className="btn ghost sm hide-sm" onClick={jumpToEnd} disabled={state.status === "ended"}>
-        ⏭ {t("live.toEnd")}
+        <IconToEnd /> {t("live.toEnd")}
       </button>
       <div className="progress" aria-label={`Match progress ${Math.round(progress * 100)}%`} role="progressbar" aria-valuenow={Math.round(progress * 100)} aria-valuemin={0} aria-valuemax={100}>
         <span style={{ width: `${progress * 100}%` }} />

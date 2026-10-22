@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useParams } from "react-router-dom";
 import { narrationService } from "../api";
 import type { AskResponse, ChatTurn } from "../api/types";
@@ -8,7 +8,21 @@ import { useMatch } from "../components/Layout";
 import { ListenButton } from "../components/ListenButton";
 import { CitedText } from "../components/Markdown";
 import { ErrorState } from "../components/States";
+import { quietly } from "../lib/activity";
 import { usePrefs } from "../lib/prefs";
+import { IconAgent, IconSend, IconUser } from "../components/icons";
+
+/** One chat message: an avatar (you, or the analyst agent) beside the bubble. */
+function Message({ from, children, live }: { from: "user" | "assistant"; children: ReactNode; live?: boolean }) {
+  return (
+    <div className={`msg ${from}`} aria-live={live ? "polite" : undefined}>
+      <span className={from === "user" ? "avatar user" : "avatar"} title={from === "user" ? "You" : "Regista analyst agent"}>
+        {from === "user" ? <IconUser /> : <IconAgent />}
+      </span>
+      <div className={`bubble ${from}`}>{children}</div>
+    </div>
+  );
+}
 
 type Turn = { role: "user"; content: string } | { role: "assistant"; content: string; res: AskResponse } | { role: "error"; content: string };
 
@@ -46,7 +60,8 @@ export function Ask() {
     setInput("");
     setBusy(true);
     try {
-      const res = await narrationService.ask({ match_id: id, question, persona, language, history });
+      // The button and the typing bubble show progress, so the page-wide indicator stays out of it.
+      const res = await quietly(() => narrationService.ask({ match_id: id, question, persona, language, history }));
       setTurns((prev) => [...prev, { role: "assistant", content: res.answer, res }]);
     } catch (e) {
       setTurns((prev) => [...prev, { role: "error", content: e instanceof Error ? e.message : String(e) }]);
@@ -73,15 +88,15 @@ export function Ask() {
 
         {turns.map((turn, i) =>
           turn.role === "user" ? (
-            <div key={i} className="bubble user">
+            <Message key={i} from="user">
               {turn.content}
-            </div>
+            </Message>
           ) : turn.role === "error" ? (
-            <div key={i} className="bubble assistant">
+            <Message key={i} from="assistant">
               <ErrorState message={turn.content} />
-            </div>
+            </Message>
           ) : (
-            <div key={i} className="bubble assistant">
+            <Message key={i} from="assistant">
               <div style={{ whiteSpace: "pre-wrap" }}>
                 <CitedText text={turn.res.answer} citations={turn.res.citations} />
               </div>
@@ -122,12 +137,12 @@ export function Ask() {
                   <AgentTrace steps={turn.res.agent_trace} />
                 </details>
               ) : null}
-            </div>
+            </Message>
           ),
         )}
 
         {busy ? (
-          <div className="bubble assistant" aria-live="polite">
+          <Message from="assistant" live>
             <span className="typing" aria-label="Thinking">
               <i />
               <i />
@@ -136,7 +151,7 @@ export function Ask() {
             <span className="xs muted" style={{ marginInlineStart: 8 }}>
               Analyst agent is querying the match…
             </span>
-          </div>
+          </Message>
         ) : null}
         <div ref={endRef} />
 
@@ -165,7 +180,7 @@ export function Ask() {
             }}
           />
           <button className="btn primary" type="submit" disabled={busy || !input.trim()} aria-busy={busy}>
-            {t("ask.send")}
+            <IconSend /> {t("ask.send")}
           </button>
         </form>
       </section>

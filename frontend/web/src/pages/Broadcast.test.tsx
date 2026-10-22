@@ -117,7 +117,7 @@ describe("Studio: go live to all viewers", () => {
     expect(JSON.parse(String((start[1] as RequestInit).body))).toEqual({ speed: 10, start_t: 0, languages: ["en", "fr", "es"] });
     await waitFor(() => expect(panel).toHaveTextContent("On air"));
     expect(panel).toHaveTextContent("50.8 KB");
-    expect(panel).toHaveTextContent("👁 10,000+ viewers");   // the Web PubSub count, capped
+    expect(panel).toHaveTextContent("10,000+ viewers");   // the Web PubSub count, capped
     // The producer's own connection is a monitor, so it never inflates that count.
     await waitFor(() => expect(fetch.mock.calls.some((c) => /\/realtime\/negotiate\?.*monitor=true/.test(String(c[0])))).toBe(true));
     await userEvent.click(screen.getByRole("button", { name: /Stop broadcast/ }));

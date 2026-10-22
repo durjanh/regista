@@ -6,6 +6,8 @@ import { usePrefs } from "../lib/prefs";
 import { EngineBadge, FactCheckBadge } from "./FactCheck";
 import { CitedText } from "./Markdown";
 import { ModelTag } from "./SourceBadge";
+import { IconAdd, IconApprove, IconCopy, IconHalftime } from "./icons";
+import { quietly } from "../lib/activity";
 
 type Row = { label: string; home: string; away: string; value: string };
 /** `key` is stable per match ("ht-xg"), so adding twice is a no-op and the queued item can be found again: id "si-pr-{key}". */
@@ -95,13 +97,14 @@ export function HalftimePack({ match, events, minute, ended, queue, onQueued }: 
     try {
       let htT = htEvent?.t;
       if (htT === undefined) {
-        const ev = await matchService.events(match.match_id, { types: ["half_end"] });
+        const ev = await quietly(() => matchService.events(match.match_id, { types: ["half_end"] }));
         htT = ev.find((e) => e.period === 1)?.t ?? 45 * 60;
       }
-      const [narrative, analysis] = await Promise.all([
+      // The button shows progress, so these calls stay off the page-wide indicator.
+      const [narrative, analysis] = await quietly(() => Promise.all([
         narrationService.narrate({ match_id: match.match_id, scope: "halftime", persona: "broadcaster", language, upto_t: htT }),
         matchService.analysis(match.match_id, htT),
-      ]);
+      ]));
       setPack({ narrative, graphics: suggest(analysis, match, htT), t: htT });
     } catch (e) {
       setErr(e instanceof Error ? e.message : String(e));
@@ -145,10 +148,10 @@ export function HalftimePack({ match, events, minute, ended, queue, onQueued }: 
   return (
     <section className="card">
       <div className="card-head">
-        <h2 className="card-title">⏸ {t("ht.title")}</h2>
+        <h2 className="card-title"><IconHalftime /> {t("ht.title")}</h2>
         <span className="spacer" />
         <button className="btn sm primary" onClick={build} disabled={!ready || busy} aria-busy={busy} title={ready ? undefined : t("ht.locked")}>
-          {busy ? t("loading") : t("ht.build")}
+          <IconHalftime /> {busy ? t("loading") : t("ht.build")}
         </button>
       </div>
       {err ? <div className="xs" style={{ color: "var(--danger)" }}>{err}</div> : null}
@@ -209,10 +212,10 @@ export function HalftimePack({ match, events, minute, ended, queue, onQueued }: 
                   <div className="row" style={{ justifyContent: "space-between" }}>
                     <ModelTag title="From Regista's synthetic first-half events" />
                     <span className="row" style={{ gap: 6 }}>
-                      <button className="btn sm" onClick={() => copy(g, cue)}>{copied === g.key ? `✓ ${t("ht.copied")}` : `⧉ ${t("ht.copy")}`}</button>
+                      <button className="btn sm" onClick={() => copy(g, cue)}>{copied === g.key ? <><IconApprove /> {t("ht.copied")}</> : <><IconCopy /> {t("ht.copy")}</>}</button>
                       {queued ? null : (
                         <button className="btn sm primary" onClick={() => add(g)} disabled={adding !== null}>
-                          {adding === g.key ? t("ht.adding") : `＋ ${t("ht.add")}`}
+                          {adding === g.key ? t("ht.adding") : <><IconAdd /> {t("ht.add")}</>}
                         </button>
                       )}
                     </span>

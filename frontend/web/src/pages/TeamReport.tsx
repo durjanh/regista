@@ -9,6 +9,7 @@ import { TeamSwatch } from "../components/TeamSwatch";
 import { useAsync } from "../hooks/useAsync";
 import { slugName } from "../lib/players";
 import { usePrefs } from "../lib/prefs";
+import { IconBack, IconDNA } from "../components/icons";
 
 const pct = (v: number) => `${Math.round((v > 1 ? v / 100 : v) * 100)}%`;
 
@@ -65,10 +66,10 @@ export function TeamReport() {
         <span style={{ flex: 1 }} />
         <InfoPop text={data.disclosure} label="Where these numbers come from" />
         <Link to={`/team/${encodeURIComponent(data.team_id)}`} className="btn sm">
-          Team DNA
+          <IconDNA /> Team DNA
         </Link>
         <Link to="/scouting" className="btn sm">
-          ← {t("scout.title")}
+          <IconBack /> {t("scout.title")}
         </Link>
       </div>
 

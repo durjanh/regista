@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { usePrefs } from "../lib/prefs";
 import { speak, stopSpeaking } from "../lib/speech";
 import { cx } from "../lib/format";
+import { IconListen, IconStop } from "./icons";
 
 export function ListenButton({ text, language, persona, small }: { text: string; language: string; persona?: string; small?: boolean }) {
   const { t } = usePrefs();
@@ -32,7 +33,7 @@ export function ListenButton({ text, language, persona, small }: { text: string;
       aria-pressed={playing}
       title={via ? `Last played with ${via}` : "Read aloud"}
     >
-      <span aria-hidden="true">{playing ? "■" : "🔊"}</span>
+      {playing ? <IconStop /> : <IconListen />}
       {playing ? t("feed.stop") : t("feed.listen")}
     </button>
   );

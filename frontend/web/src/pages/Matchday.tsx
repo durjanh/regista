@@ -27,6 +27,8 @@ import { currentChain, goalsFromEvents, playerMaps, teamColors } from "../lib/ma
 import { usePrefs } from "../lib/prefs";
 import { speak } from "../lib/speech";
 import { usePoll, useTruthMode } from "../lib/truth";
+import { IconBack } from "../components/icons";
+import { quietly } from "../lib/activity";
 
 export function Matchday() {
   const { id = "" } = useParams();
@@ -123,7 +125,7 @@ export function Matchday() {
   const narrate = async (momentId: string) => {
     setNarrating(momentId);
     try {
-      const n = await narrationService.narrate({ match_id: id, scope: "moment", moment_id: momentId, persona, language, upto_t: state.t });
+      const n = await quietly(() => narrationService.narrate({ match_id: id, scope: "moment", moment_id: momentId, persona, language, upto_t: state.t }));
       setNarratives((prev) => ({ ...prev, [momentId]: n }));
     } catch {
       /* keep the deterministic summary */
@@ -351,7 +353,7 @@ export function Matchday() {
               <span className="spacer" />
               {evidence ? (
                 <button className="btn sm" onClick={() => { setEvidence(null); setSelectedMoment(null); }}>
-                  ← Back to live
+                  <IconBack /> Back to live
                 </button>
               ) : (
                 <span className="xs muted">{match.home.short} attack →</span>

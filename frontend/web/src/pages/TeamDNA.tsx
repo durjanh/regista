@@ -9,6 +9,7 @@ import { useAsync } from "../hooks/useAsync";
 import { PlayerLink } from "../components/ScoutViz";
 import { slugName, teamReportPath } from "../lib/players";
 import { useMemo } from "react";
+import { IconBack } from "../components/icons";
 
 export function TeamDNA() {
   const { teamId = "" } = useParams();
@@ -51,7 +52,7 @@ export function TeamDNA() {
           🔎 Scouting report
         </Link>
         <Link to="/" className="btn sm">
-          ← Fixtures
+          <IconBack /> Fixtures
         </Link>
       </div>
 

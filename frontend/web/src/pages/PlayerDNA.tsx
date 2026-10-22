@@ -8,6 +8,7 @@ import { useAsync } from "../hooks/useAsync";
 import { readableOn } from "../lib/format";
 import { teamReportPath } from "../lib/players";
 import { usePrefs } from "../lib/prefs";
+import { IconBack } from "../components/icons";
 
 const pct = (v: number) => `${Math.round(v * 100)}%`;
 
@@ -74,7 +75,7 @@ export function PlayerDNA() {
         <span style={{ flex: 1 }} />
         <InfoPop text={data.disclosure} label="Where these numbers come from" />
         <Link to="/scouting" className="btn sm">
-          ← {t("scout.title")}
+          <IconBack /> {t("scout.title")}
         </Link>
       </div>
 

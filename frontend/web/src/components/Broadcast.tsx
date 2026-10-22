@@ -4,6 +4,8 @@ import type { BroadcastStatus } from "../api/types";
 import { useBroadcast } from "../hooks/useBroadcast";
 import { usePrefs } from "../lib/prefs";
 import type { RealtimeStatus } from "../lib/webpubsub";
+import { IconGoLive, IconMatchday, IconPlay, IconStop, IconViewers } from "./icons";
+import { quietly } from "../lib/activity";
 
 export type LiveSource = "broadcast" | "replay";
 
@@ -33,7 +35,7 @@ export function SourceSwitch({ source, onChange }: { source: LiveSource; onChang
       {(["broadcast", "replay"] as const).map((s) => (
         <button key={s} className={source === s ? "on" : undefined} aria-pressed={source === s} onClick={() => onChange(s)}
           title={s === "broadcast" ? t("bc.liveHint") : t("bc.replayHint")}>
-          {s === "broadcast" ? `📡 ${t("bc.live")}` : `⏯ ${t("bc.replay")}`}
+          {s === "broadcast" ? <><IconMatchday /> {t("bc.live")}</> : <><IconPlay /> {t("bc.replay")}</>}
         </button>
       ))}
     </div>
@@ -102,8 +104,8 @@ export function GoLivePanel({ matchId, currentT, homeId, awayId }: { matchId: st
     setErr(null);
     try {
       const next = start
-        ? await broadcastService.start(matchId, { speed, start_t: from === "clock" ? Math.floor(currentT) : 0, languages })
-        : await broadcastService.stop(matchId);
+        ? await quietly(() => broadcastService.start(matchId, { speed, start_t: from === "clock" ? Math.floor(currentT) : 0, languages }))
+        : await quietly(() => broadcastService.stop(matchId));
       setStatus(next);
     } catch (e) {
       setErr(e instanceof Error ? e.message : String(e));
@@ -115,12 +117,12 @@ export function GoLivePanel({ matchId, currentT, homeId, awayId }: { matchId: st
   return (
     <section className="card" aria-labelledby="golive-title">
       <div className="card-head">
-        <h2 className="card-title" id="golive-title">📡 {t("bc.goLive")}</h2>
+        <h2 className="card-title" id="golive-title"><IconGoLive /> {t("bc.goLive")}</h2>
         <span className="spacer" />
         <span className={live ? "pill accent" : "pill"}>{live ? `● ${t("bc.onAir")}` : `○ ${t("bc.offAir")}`}</span>
         {live && status ? (
           <span className="pill" role="status" aria-live="polite" title={t("bc.viewersHint")}>
-            👁 {status.viewers.toLocaleString(language)}{status.viewers_more ? "+" : ""} {t("bc.viewers")}
+            <IconViewers /> {status.viewers.toLocaleString(language)}{status.viewers_more ? "+" : ""} {t("bc.viewers")}
           </span>
         ) : null}
         {live ? <LiveBadge connection={bc.connection} latencyMs={bc.latencyMs} /> : null}
@@ -143,9 +145,9 @@ export function GoLivePanel({ matchId, currentT, homeId, awayId }: { matchId: st
         <span className="xs muted">{t("bc.languages")}: {languages.join(" · ")}</span>
         <span className="spacer" />
         {live ? (
-          <button className="btn" disabled={busy} aria-busy={busy} onClick={() => void act(false)}>■ {t("bc.stop")}</button>
+          <button className="btn" disabled={busy} aria-busy={busy} onClick={() => void act(false)}><IconStop /> {t("bc.stop")}</button>
         ) : (
-          <button className="btn primary" disabled={busy} aria-busy={busy} onClick={() => void act(true)}>▶ {t("bc.start")}</button>
+          <button className="btn primary" disabled={busy} aria-busy={busy} onClick={() => void act(true)}><IconGoLive /> {t("bc.start")}</button>
         )}
       </div>
       {status ? (

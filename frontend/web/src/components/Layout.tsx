@@ -9,6 +9,7 @@ import { ActivityIndicator } from "./ActivityIndicator";
 import { ErrorState, Loading, Skeleton } from "./States";
 import { TopBar } from "./TopBar";
 import { teamReportPath } from "../lib/players";
+import { IconAsk, IconDugout, IconMatchday, IconRecap, IconReport, IconStudio, IconTactics } from "./icons";
 
 export function AppLayout() {
   const { t } = usePrefs();
@@ -56,11 +57,11 @@ export function MatchLayout() {
     );
 
   const tabs = [
-    { to: `/match/${id}`, label: t("nav.matchday"), end: true },
-    { to: `/match/${id}/tactics`, label: t("nav.tactics") },
-    { to: `/match/${id}/ask`, label: t("nav.ask") },
-    { to: `/match/${id}/recap`, label: t("nav.recap") },
-    { to: `/match/${id}/dugout`, label: `🧢 ${t("nav.dugout")}` },
+    { to: `/match/${id}`, label: t("nav.matchday"), icon: <IconMatchday />, end: true },
+    { to: `/match/${id}/tactics`, label: t("nav.tactics"), icon: <IconTactics /> },
+    { to: `/match/${id}/ask`, label: t("nav.ask"), icon: <IconAsk /> },
+    { to: `/match/${id}/recap`, label: t("nav.recap"), icon: <IconRecap /> },
+    { to: `/match/${id}/dugout`, label: t("nav.dugout"), icon: <IconDugout /> },
   ];
 
   return (
@@ -77,7 +78,9 @@ export function MatchLayout() {
           <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
             <SourceBadge source={match.source} />
             <span className="row xs" style={{ gap: 4 }}>
-              <span className="muted">{t("scout.teamReport")}:</span>
+              <span className="muted row" style={{ gap: 4 }}>
+                <IconReport width={14} height={14} /> {t("scout.teamReport")}:
+              </span>
               <NavLink to={teamReportPath(match.home.team_id)} className="btn sm">
                 {match.home.short}
               </NavLink>
@@ -86,7 +89,7 @@ export function MatchLayout() {
               </NavLink>
             </span>
             <NavLink to={`/studio/${id}`} className="btn sm">
-              🎛 {t("nav.studio")}
+              <IconStudio /> {t("nav.studio")}
             </NavLink>
           </div>
         </div>
@@ -113,7 +116,7 @@ export function MatchLayout() {
         <nav className="subnav" aria-label="Match sections">
           {tabs.map((tab) => (
             <NavLink key={tab.to} to={tab.to} end={tab.end}>
-              {tab.label}
+              {tab.icon} {tab.label}
             </NavLink>
           ))}
         </nav>

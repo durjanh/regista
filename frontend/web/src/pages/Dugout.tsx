@@ -18,6 +18,8 @@ import { clock, cx, readableOn } from "../lib/format";
 import { teamColors } from "../lib/match";
 import { playerIndex, teamReportPath } from "../lib/players";
 import { usePrefs } from "../lib/prefs";
+import { IconApprove, IconBrief, IconReject } from "../components/icons";
+import { quietly } from "../lib/activity";
 
 type Side = "home" | "away";
 
@@ -86,7 +88,7 @@ export function Dugout() {
     setBriefing(true);
     setBriefError(null);
     try {
-      setBrief(await dugoutService.brief({ match_id: id, side, upto_t: Math.max(1, Math.floor(state.t)), language }));
+      setBrief(await quietly(() => dugoutService.brief({ match_id: id, side, upto_t: Math.max(1, Math.floor(state.t)), language })));
     } catch (e) {
       setBriefError(e instanceof Error ? e.message : String(e));
     } finally {
@@ -307,7 +309,7 @@ export function Dugout() {
               <h2 className="card-title">{t("dugout.briefing")}</h2>
               <span className="spacer" />
               <button className="btn primary sm" onClick={runBrief} disabled={briefing} aria-busy={briefing}>
-                {briefing ? t("recap.generating") : `🎙 ${t("dugout.brief")}`}
+                {briefing ? t("recap.generating") : <><IconBrief /> {t("dugout.brief")}</>}
               </button>
             </div>
             {brief ? (
@@ -504,10 +506,10 @@ function RecommendationCard({
         ) : (
           <>
             <button className="btn sm primary" onClick={onAccept}>
-              {t("dugout.accept")}
+              <IconApprove /> {t("dugout.accept")}
             </button>
             <button className="btn sm ghost" onClick={onDismiss}>
-              {t("dugout.dismiss")}
+              <IconReject /> {t("dugout.dismiss")}
             </button>
           </>
         )}
