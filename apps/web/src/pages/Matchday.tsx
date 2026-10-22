@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
-import { api } from "../api/client";
+import { narrationService, truthService } from "../api";
 import type { Evidence, MatchEvent, Narrative } from "../api/types";
 import { ChaosBand, ChaosMeter, EventDetail } from "../components/ChaosMeter";
 import { EventLayer } from "../components/EventLayer";
@@ -123,7 +123,7 @@ export function Matchday() {
   const narrate = async (momentId: string) => {
     setNarrating(momentId);
     try {
-      const n = await api.narrate({ match_id: id, scope: "moment", moment_id: momentId, persona, language, upto_t: state.t });
+      const n = await narrationService.narrate({ match_id: id, scope: "moment", moment_id: momentId, persona, language, upto_t: state.t });
       setNarratives((prev) => ({ ...prev, [momentId]: n }));
     } catch {
       /* keep the deterministic summary */
@@ -139,11 +139,11 @@ export function Matchday() {
   const tLive = useRef(0);
   tLive.current = state.t;
   const truthActive = truthMode && (state.status === "live" || state.status === "ended" || state.status === "paused");
-  const truth = usePoll(() => api.truth(id, Math.max(1, tLive.current)), 3000, truthActive && state.status === "live", [id]);
+  const truth = usePoll(() => truthService.report(id, Math.max(1, tLive.current)), 3000, truthActive && state.status === "live", [id]);
   // one refresh when the stream stops, so the panel reflects the final clock
   useEffect(() => {
     if (truthMode && (state.status === "paused" || state.status === "ended") && state.t > 0) {
-      api.truth(id, Math.max(1, state.t)).then(truth.setData).catch(() => undefined);
+      truthService.report(id, Math.max(1, state.t)).then(truth.setData).catch(() => undefined);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [truthMode, state.status, id]);

@@ -24,6 +24,8 @@ env:
   AZURE_ENV_NAME: ${{ vars.AZURE_ENV_NAME }}
   BUDGET_EMAIL: ${{ vars.BUDGET_EMAIL }}
   BUDGET_AMOUNT: ${{ vars.BUDGET_AMOUNT || '150' }}
+  # Overrides of the API's service-contract settings, KEY=value;KEY=value (infra/modules/api-settings.bicep)
+  API_SERVICE_SETTINGS: ${{ vars.API_SERVICE_SETTINGS }}
   DEPLOYER_PRINCIPAL_TYPE: ServicePrincipal
   DEPLOYMENT_NAME: main
 

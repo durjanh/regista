@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
-import { api } from "../api/client";
+import { matchService } from "../api";
 import type { Analysis, MomentDetail, PassProfile, Shot } from "../api/types";
 import { ChaosBand, EventDetail } from "../components/ChaosMeter";
 import { ModelTag } from "../components/SourceBadge";
@@ -20,7 +20,7 @@ export function Tactics() {
   const colors = teamColors(match);
   const { shirts, names, placeholders } = useMemo(() => playerMaps(match), [match]);
   const keys = useMemo(() => new Map([...match.home.players, ...match.away.players].map((pl) => [pl.player_id, pl.player_key])), [match]);
-  const { data, error, loading, reload } = useAsync<Analysis>(() => api.analysis(id), [id]);
+  const { data, error, loading, reload } = useAsync<Analysis>(() => matchService.analysis(id), [id]);
   const [side, setSide] = useState<"home" | "away">("home");
   const [minEdge, setMinEdge] = useState(3);
   const [shot, setShot] = useState<Shot | null>(null);
@@ -37,7 +37,7 @@ export function Tactics() {
     let alive = true;
     setDetail(null);
     setDetailErr(null);
-    api
+    matchService
       .moment(id, momentId)
       .then((d) => {
         if (!alive) return;

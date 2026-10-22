@@ -1,5 +1,5 @@
 import { Link, useParams } from "react-router-dom";
-import { api } from "../api/client";
+import { referenceService, scoutingService } from "../api";
 import type { PlayerDNA as PlayerDNAT } from "../api/types";
 import { AdviceCards, ChannelArrows, GoalMouth, HalfPitchShots, PercentileBar, SplitBar } from "../components/ScoutViz";
 import { InfoPop, ModelTag, RealTag } from "../components/SourceBadge";
@@ -24,8 +24,8 @@ function initials(name: string): string {
 export function PlayerDNA() {
   const { key = "" } = useParams();
   const { t } = usePrefs();
-  const { data, error, loading, reload } = useAsync<PlayerDNAT>(() => api.playerDNA(key), [key]);
-  const team = useAsync(() => api.referenceTeam(key.split(":")[0] ?? ""), [key]);
+  const { data, error, loading, reload } = useAsync<PlayerDNAT>(() => scoutingService.playerDNA(key), [key]);
+  const team = useAsync(() => referenceService.team(key.split(":")[0] ?? ""), [key]);
 
   if (error)
     return (

@@ -62,40 +62,42 @@ def test_studio_approve_translates_multi_language_cue(client, monkeypatch):
 
 
 def test_speech_endpoint(client, azure, monkeypatch):
-    from app import main
+    from app.api.deps import get_synthesizer
+    overrides = client.app.dependency_overrides
     assert client.post("/api/speech", json={"text": "Goal"}).status_code == 501
     azure()
 
     async def synth(text, language, persona):
         return b"ID3-fake-mp3"
 
-    monkeypatch.setattr(main, "synthesize", synth)
+    monkeypatch.setitem(overrides, get_synthesizer, lambda: synth)
     r = client.post("/api/speech", json={"text": "Goal for England", "language": "en", "persona": "kids"})
     assert r.status_code == 200 and r.headers["content-type"] == "audio/mpeg" and r.content == b"ID3-fake-mp3"
 
     async def broken(text, language, persona):
         raise RuntimeError("speech down")
 
-    monkeypatch.setattr(main, "synthesize", broken)
+    monkeypatch.setitem(overrides, get_synthesizer, lambda: broken)
     assert client.post("/api/speech", json={"text": "Another line"}).status_code == 502
 
 
 def test_translate_endpoint(client, azure, monkeypatch):
-    from app import main
+    from app.api.deps import get_translator
+    overrides = client.app.dependency_overrides
     assert client.post("/api/translate", json={"texts": ["Hi"], "to": "es"}).json()["engine"] == "offline"
     azure()
 
     async def tr(texts, to):
         return [f"{t} ({to})" for t in texts]
 
-    monkeypatch.setattr(main, "translate", tr)
+    monkeypatch.setitem(overrides, get_translator, lambda: tr)
     assert client.post("/api/translate", json={"texts": ["Hi"], "to": "es"}).json() == {"texts": ["Hi (es)"], "engine": "azure"}
     assert client.post("/api/translate", json={"texts": ["Hi"], "to": "en"}).json()["engine"] == "offline"
 
     async def broken(texts, to):
         raise RuntimeError("down")
 
-    monkeypatch.setattr(main, "translate", broken)
+    monkeypatch.setitem(overrides, get_translator, lambda: broken)
     assert client.post("/api/translate", json={"texts": ["Hi"], "to": "fr"}).json() == {"texts": ["Hi"], "engine": "offline"}
 
 

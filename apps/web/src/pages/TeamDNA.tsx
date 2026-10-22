@@ -1,5 +1,5 @@
 import { Link, useParams } from "react-router-dom";
-import { api } from "../api/client";
+import { referenceService, scoutingService } from "../api";
 import type { TeamDNA as TeamDNAT } from "../api/types";
 import { EloChart } from "../components/EloChart";
 import { RealTag } from "../components/SourceBadge";
@@ -12,8 +12,8 @@ import { useMemo } from "react";
 
 export function TeamDNA() {
   const { teamId = "" } = useParams();
-  const { data, error, loading, reload } = useAsync<TeamDNAT>(() => api.referenceTeam(teamId), [teamId]);
-  const squad = useAsync(() => api.scoutingPlayers({ team_id: teamId }), [teamId]);
+  const { data, error, loading, reload } = useAsync<TeamDNAT>(() => referenceService.team(teamId), [teamId]);
+  const squad = useAsync(() => scoutingService.players({ team_id: teamId }), [teamId]);
   const known = useMemo(() => new Set((squad.data ?? []).map((p) => p.player_key)), [squad.data]);
 
   if (error) return <div className="card"><ErrorState message={error} onRetry={reload} /></div>;

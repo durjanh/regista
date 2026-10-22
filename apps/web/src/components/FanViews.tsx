@@ -1,6 +1,7 @@
+import { quietly } from "../lib/activity";
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { useSearchParams } from "react-router-dom";
-import { api } from "../api/client";
+import { matchService } from "../api";
 import type { Analysis, LiveMoment, MatchMeta, MomentType, Narrative, Physical, PlayerStat, Position } from "../api/types";
 import type { LiveState } from "../hooks/useLiveMatch";
 import { MOMENT_ICON, clock, cx, describeEvent } from "../lib/format";
@@ -94,7 +95,7 @@ function useLiveData<T>(fn: () => Promise<T>, ms: number, state: LiveState, deps
   const fnRef = useRef(fn);
   fnRef.current = fn;
   useEffect(() => {
-    if (!live && state.t > 0) fnRef.current().then(poll.setData).catch(() => undefined);
+    if (!live && state.t > 0) quietly(fnRef.current).then(poll.setData).catch(() => undefined);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [live, state.status, ...deps]);
   return poll;
@@ -233,8 +234,8 @@ export function PlayerFocusView({ match, state, colors, playerId, onPlayer }: {
   const side: Side = player?.team_id === match.away.team_id ? "away" : "home";
   const tRef = useRef(0);
   tRef.current = state.t;
-  const stats = useLiveData<PlayerStat[]>(() => api.players(id, tRef.current || undefined), 5000, state, [id]);
-  const phys = useLiveData<Physical>(() => api.physical(id, tRef.current || undefined), 5000, state, [id]);
+  const stats = useLiveData<PlayerStat[]>(() => matchService.players(id, tRef.current || undefined), 5000, state, [id]);
+  const phys = useLiveData<Physical>(() => matchService.physical(id, tRef.current || undefined), 5000, state, [id]);
   const st = stats.data?.find((p) => p.player_id === pid);
   const ph = phys.data?.players.find((p) => p.player_id === pid);
   const mine = useMemo(() => state.events.filter((e) => e.player_id === pid), [state.events, pid]);
@@ -527,7 +528,7 @@ export function KeyBattle({ match, state, colors }: { match: MatchMeta; state: L
   const { t } = usePrefs();
   const tRef = useRef(0);
   tRef.current = state.t;
-  const analysis = useLiveData<Analysis>(() => api.analysis(match.match_id, tRef.current || undefined), 15000, state, [match.match_id]);
+  const analysis = useLiveData<Analysis>(() => matchService.analysis(match.match_id, tRef.current || undefined), 15000, state, [match.match_id]);
   const a = analysis.data;
   const battle = useMemo(() => {
     if (!a) return null;

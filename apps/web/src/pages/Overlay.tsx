@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
-import { api, overlayUrl } from "../api/client";
+import { broadcastService, studioService } from "../api";
 import type { BroadcastCue, StudioItem } from "../api/types";
 import { connectRealtime } from "../lib/webpubsub";
 
@@ -83,7 +83,7 @@ export function Overlay() {
     let es: EventSource | null = null;
     let fellBack = false;
     const rt = connectRealtime({
-      negotiate: () => api.realtimeNegotiate(id, "en"),
+      negotiate: () => broadcastService.negotiate(id, "en"),
       groups: (g) => g === `overlay.${id}`,
       onStatus: (st) => {
         if ((st === "disabled" || st === "error") && !fellBack) {
@@ -110,7 +110,7 @@ export function Overlay() {
   }, [id, demo]);
 
   function sse(): EventSource {
-    const es = new EventSource(overlayUrl(id));
+    const es = new EventSource(studioService.overlayUrl(id));
     es.addEventListener("on_air", (e) => {
       try {
         show(JSON.parse((e as MessageEvent).data) as StudioItem);

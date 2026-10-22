@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { api, liveUrl } from "../api/client";
+import { matchService } from "../api";
+import { beginActivity } from "../lib/activity";
 import type { LiveInsight, LiveMeta, LiveMoment, LiveSnapshot, MatchEvent, Score, StudioItem } from "../api/types";
 
 export type LiveStatus = "idle" | "connecting" | "live" | "paused" | "ended" | "error";
@@ -121,10 +122,18 @@ export function useLiveMatch(matchId: string | undefined, { persona, language, i
     if (raf.current === null) raf.current = requestAnimationFrame(flush);
   }, [flush]);
 
+  // A stream counts as a backend call for the loading indicator until the API answers (or the stream closes).
+  const connecting = useRef<(() => void) | null>(null);
+  const connected = useCallback(() => {
+    connecting.current?.();
+    connecting.current = null;
+  }, []);
+
   const close = useCallback(() => {
+    connected();
     esRef.current?.close();
     esRef.current = null;
-  }, []);
+  }, [connected]);
 
   const connect = useCallback(
     (startT: number, spd: number) => {
@@ -132,8 +141,9 @@ export function useLiveMatch(matchId: string | undefined, { persona, language, i
       close();
       endedRef.current = false;
       setState((s) => ({ ...s, status: "connecting", error: undefined }));
-      const es = new EventSource(liveUrl(matchId, { speed: spd, start_t: Math.floor(startT), persona, language, drill }));
+      const es = new EventSource(matchService.liveUrl(matchId, { speed: spd, start_t: Math.floor(startT), persona, language, drill }));
       esRef.current = es;
+      connecting.current = beginActivity();
       const parse = <T,>(e: MessageEvent): T | null => {
         try {
           return JSON.parse(e.data) as T;
@@ -178,7 +188,10 @@ export function useLiveMatch(matchId: string | undefined, { persona, language, i
         close();
         schedule();
       });
-      es.onopen = () => setState((s) => (s.status === "connecting" ? { ...s, status: "live" } : s));
+      es.onopen = () => {
+        connected();
+        setState((s) => (s.status === "connecting" ? { ...s, status: "live" } : s));
+      };
       es.onerror = () => {
         if (endedRef.current) return;
         // EventSource would silently reconnect from the original start_t; stop and let the user resume.
@@ -186,7 +199,7 @@ export function useLiveMatch(matchId: string | undefined, { persona, language, i
         setState((s) => ({ ...s, status: "error", error: "Live stream interrupted" }));
       };
     },
-    [matchId, persona, language, drill, close, schedule],
+    [matchId, persona, language, drill, close, connected, schedule],
   );
 
   // Restart from kick-off on match change; resume at the current clock when persona/language/drill change.
@@ -256,7 +269,7 @@ export function useLiveMatch(matchId: string | undefined, { persona, language, i
       if (!matchId) return;
       if (secondHalf.current?.match !== matchId) {
         try {
-          const kos = await api.events(matchId, { types: ["kick_off"] });
+          const kos = await matchService.events(matchId, { types: ["kick_off"] });
           const k2 = kos.find((e) => e.period === 2);
           secondHalf.current = { match: matchId, t: k2?.t ?? 45 * 60, minute: k2?.minute ?? 46 };
         } catch {

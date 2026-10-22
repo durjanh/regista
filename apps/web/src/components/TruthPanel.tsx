@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { api } from "../api/client";
+import { truthService } from "../api";
 import type { Counterfactual, Plant, Range3, TruthReport } from "../api/types";
 import { clock, cx, pct } from "../lib/format";
 import { usePrefs } from "../lib/prefs";
@@ -52,7 +52,7 @@ export function TruthPanel({ matchId, report, t, ended, teams, error }: Props) {
   const runCf = async (p: Plant) => {
     setCf((c) => ({ ...c, [p.id]: { loading: true } }));
     try {
-      const data = await api.counterfactual(matchId, p.id);
+      const data = await truthService.counterfactual(matchId, p.id);
       setCf((c) => ({ ...c, [p.id]: { loading: false, data } }));
     } catch (e) {
       setCf((c) => ({ ...c, [p.id]: { loading: false, error: e instanceof Error ? e.message : String(e) } }));
@@ -121,7 +121,7 @@ export function TruthPanel({ matchId, report, t, ended, teams, error }: Props) {
                     {c?.data ? (
                       <CounterfactualCard cf={c.data} color={team?.color} />
                     ) : (
-                      <button className="btn sm" onClick={() => runCf(plant)} disabled={c?.loading}>
+                      <button className="btn sm" onClick={() => runCf(plant)} disabled={c?.loading} aria-busy={!!c?.loading}>
                         {c?.loading ? "Replaying the match without it…" : `↺ ${tr("truth.whatChanged")}`}
                       </button>
                     )}

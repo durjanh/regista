@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { api } from "../api/client";
+import { broadcastService, matchService } from "../api";
 import type {
   BroadcastCue, BroadcastMessage, BroadcastNarrative, BroadcastTick, LiveInsight, LiveMoment, LiveSnapshot, MatchEvent,
   Narrative, StudioItem,
@@ -121,7 +121,7 @@ export function useBroadcast(matchId: string | undefined, { language, active = t
     if (caughtUp.current || upTo < 60) return;
     caughtUp.current = true;
     try {
-      const past = await api.events(id, { to_t: Math.floor(upTo) });
+      const past = await matchService.events(id, { to_t: Math.floor(upTo) });
       setState((s) => {
         const seen = new Set(s.events.map((e) => e.id));
         const older = past.filter((e) => !seen.has(e.id)).map(({ freeze_frame: _ff, ...e }) => e as MatchEvent);
@@ -143,7 +143,7 @@ export function useBroadcast(matchId: string | undefined, { language, active = t
     setLatencyMs(null);
     setAvailable(null);
     const conn = connectRealtime({
-      negotiate: () => api.realtimeNegotiate(matchId, language),
+      negotiate: () => broadcastService.negotiate(matchId, language),
       onStatus: (st) => {
         setConnection(st);
         if (st === "disabled") setAvailable(false);

@@ -1,11 +1,12 @@
 import { NavLink, Outlet, useOutletContext, useParams } from "react-router-dom";
-import { api } from "../api/client";
+import { matchService } from "../api";
 import type { MatchMeta } from "../api/types";
 import { useAsync } from "../hooks/useAsync";
 import { usePrefs } from "../lib/prefs";
 import { SourceBadge } from "./SourceBadge";
 import { TeamLink, TeamSwatch } from "./TeamSwatch";
-import { ErrorState, Skeleton } from "./States";
+import { ActivityIndicator } from "./ActivityIndicator";
+import { ErrorState, Loading, Skeleton } from "./States";
 import { TopBar } from "./TopBar";
 import { teamReportPath } from "../lib/players";
 
@@ -17,6 +18,7 @@ export function AppLayout() {
         Skip to content
       </a>
       <TopBar />
+      <ActivityIndicator />
       <main id="main" className="main">
         <Outlet />
       </main>
@@ -40,12 +42,13 @@ export function useMatch(): MatchMeta {
 export function MatchLayout() {
   const { id = "" } = useParams();
   const { t } = usePrefs();
-  const { data: match, error, loading, reload } = useAsync(() => api.match(id), [id]);
+  const { data: match, error, loading, reload } = useAsync(() => matchService.get(id), [id]);
 
   if (error) return <ErrorState message={error} onRetry={reload} />;
   if (loading || !match)
     return (
-      <div className="stack">
+      <div className="stack" aria-busy="true">
+        <Loading />
         <Skeleton h={28} w="40%" />
         <Skeleton h={44} />
         <Skeleton h={420} />

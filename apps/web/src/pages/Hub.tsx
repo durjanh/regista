@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { api } from "../api/client";
+import { matchService } from "../api";
 import type { MatchSummary } from "../api/types";
 import { ReferenceStrip } from "../components/ReferenceStrip";
 import { SourceBadge } from "../components/SourceBadge";
@@ -71,7 +71,7 @@ function Fixture({ m }: { m: MatchSummary }) {
 
 export function Hub() {
   const { t } = usePrefs();
-  const { data, error, loading, reload } = useAsync(() => api.matches(), []);
+  const { data, error, loading, reload } = useAsync(() => matchService.list(), []);
   const sorted = data ? [...data].sort((a, b) => (b.source?.real?.date ?? b.kickoff).localeCompare(a.source?.real?.date ?? a.kickoff)) : [];
 
   return (

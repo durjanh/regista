@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useParams } from "react-router-dom";
-import { api } from "../api/client";
+import { narrationService } from "../api";
 import type { Persona, Recap as RecapT } from "../api/types";
 import { AgentTrace } from "../components/AgentTrace";
 import { EngineBadge, FactCheckBadge, FactCheckPanel } from "../components/FactCheck";
@@ -52,7 +52,7 @@ export function Recap() {
     setBusy(true);
     setError(null);
     try {
-      setRecap(await api.recap({ match_id: id, persona, language }));
+      setRecap(await narrationService.recap({ match_id: id, persona, language }));
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     } finally {
@@ -84,7 +84,7 @@ export function Recap() {
               ))}
             </select>
           </div>
-          <button className="btn primary" onClick={generate} disabled={busy}>
+          <button className="btn primary" onClick={generate} disabled={busy} aria-busy={busy}>
             {busy ? `✦ ${prefs.t("recap.generating")}` : `✦ ${prefs.t("recap.generate")}`}
           </button>
           <span className="xs muted" style={{ flex: 1, minWidth: 200 }}>

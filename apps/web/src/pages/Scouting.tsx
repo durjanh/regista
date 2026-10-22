@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { api } from "../api/client";
+import { matchService, scoutingService } from "../api";
 import { PlayerLink } from "../components/ScoutViz";
 import { InfoPop, ModelTag } from "../components/SourceBadge";
 import { EmptyState, ErrorState, Skeleton } from "../components/States";
@@ -15,8 +15,8 @@ const INDEX_NOTE =
 
 export function Scouting() {
   const { t } = usePrefs();
-  const players = useAsync(() => api.scoutingPlayers(), []);
-  const matches = useAsync(() => api.matches(), []);
+  const players = useAsync(() => scoutingService.players(), []);
+  const matches = useAsync(() => matchService.list(), []);
   const [q, setQ] = useState("");
   const [team, setTeam] = useState("");
 

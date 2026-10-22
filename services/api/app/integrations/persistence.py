@@ -79,7 +79,7 @@ async def _onelake(path: str, data: bytes) -> None:
         from azure.storage.filedatalake.aio import DataLakeServiceClient
 
         from ..ai.clients import credential
-        async with DataLakeServiceClient("https://onelake.dfs.fabric.microsoft.com", credential=credential()) as svc:
+        async with DataLakeServiceClient(settings.onelake_dfs_endpoint, credential=credential()) as svc:
             fs = svc.get_file_system_client(settings.onelake_workspace)
             f = fs.get_file_client(f"{settings.onelake_lakehouse}.Lakehouse/Files/{path}")
             await f.upload_data(data, overwrite=True)

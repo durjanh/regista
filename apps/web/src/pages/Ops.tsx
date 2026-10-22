@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { api } from "../api/client";
+import { systemService } from "../api";
 import type { Ops as OpsT } from "../api/types";
 import { EmptyState, ErrorState, Skeleton } from "../components/States";
 import { usePrefs } from "../lib/prefs";
@@ -14,7 +14,7 @@ function uptime(s: number): string {
 /** Production view: latency SLO for live narratives and the model cost of covering a match. */
 export function Ops() {
   const { t } = usePrefs();
-  const { data, error } = usePoll<OpsT>(() => api.ops(), 5000, true);
+  const { data, error } = usePoll<OpsT>(() => systemService.ops(), 5000, true);
 
   if (error && !data) return <ErrorState message={error} />;
   if (!data) return <Skeleton h={420} />;

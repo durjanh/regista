@@ -1,4 +1,4 @@
-import { synthesize } from "../api/client";
+import { languageService } from "../api";
 import { speechLang } from "./i18n";
 
 let current: HTMLAudioElement | null = null;
@@ -35,7 +35,7 @@ export async function speak(text: string, language: string, persona?: string): P
   const clean = speakable(text);
   if (!clean) return "none";
   try {
-    const blob = await synthesize(clean, language, persona);
+    const blob = await languageService.synthesize(clean, language, persona);
     if (blob) {
       currentUrl = URL.createObjectURL(blob);
       const audio = new Audio(currentUrl);

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { api, type StudioAction } from "../api/client";
+import { matchService, studioService, truthService, type StudioAction } from "../api";
 import type { AuditEntry, BroadcasterProfile, Cue, MatchMeta, StudioItem, StudioSettings, StudioStatus } from "../api/types";
 import { GoLivePanel } from "../components/Broadcast";
 import { HalftimePack } from "../components/HalftimePack";
@@ -70,7 +70,7 @@ function GovernanceBar({ matchId }: { matchId: string }) {
   const [draft, setDraft] = useState<number | null>(null);
   useEffect(() => {
     let alive = true;
-    Promise.all([api.studioProfiles(), api.studioSettings(matchId)])
+    Promise.all([studioService.profiles(), studioService.settings(matchId)])
       .then(([p, st]) => {
         if (!alive) return;
         setProfiles(p);
@@ -86,7 +86,7 @@ function GovernanceBar({ matchId }: { matchId: string }) {
   const save = async (body: Partial<StudioSettings>) => {
     setErr(null);
     try {
-      const st = await api.saveStudioSettings(matchId, body);
+      const st = await studioService.saveSettings(matchId, body);
       setSettings(st);
       setDraft(st.auto_approve_threshold);
     } catch (e) {
@@ -138,7 +138,7 @@ function GovernanceBar({ matchId }: { matchId: string }) {
 
 function AuditLog({ matchId }: { matchId: string }) {
   const { t } = usePrefs();
-  const { data, error } = usePoll<AuditEntry[]>(() => api.studioAudit(matchId), 4000, true, [matchId]);
+  const { data, error } = usePoll<AuditEntry[]>(() => studioService.audit(matchId), 4000, true, [matchId]);
   return (
     <section className="card">
       <div className="card-head">
@@ -189,7 +189,7 @@ function GraphicCard({ item, onAction }: { item: StudioItem; onAction: ActionFn 
   const [editing, setEditing] = useState(false);
   const [title, setTitle] = useState(item.title);
   const [body, setBody] = useState(item.body);
-  const [busy, setBusy] = useState(false);
+  const [busy, setBusy] = useState<StudioAction | null>(null);
   useEffect(() => {
     if (!editing) {
       setTitle(item.title);
@@ -198,12 +198,12 @@ function GraphicCard({ item, onAction }: { item: StudioItem; onAction: ActionFn 
   }, [item.title, item.body, editing]);
 
   const run = async (action: StudioAction, edit?: { title: string; body: string }) => {
-    setBusy(true);
+    setBusy(action);
     try {
       await onAction(item, action, edit);
       if (action === "edit") setEditing(false);
     } finally {
-      setBusy(false);
+      setBusy(null);
     }
   };
 
@@ -256,7 +256,7 @@ function GraphicCard({ item, onAction }: { item: StudioItem; onAction: ActionFn 
       <div className="gfx-actions">
         {editing ? (
           <>
-            <button className="btn sm primary" disabled={busy} onClick={() => run("edit", { title, body })}>
+            <button className="btn sm primary" disabled={!!busy} aria-busy={busy === "edit"} onClick={() => run("edit", { title, body })}>
               Save
             </button>
             <button className="btn sm ghost" onClick={() => setEditing(false)}>
@@ -266,25 +266,25 @@ function GraphicCard({ item, onAction }: { item: StudioItem; onAction: ActionFn 
         ) : (
           <>
             {item.status === "proposed" ? (
-              <button className="btn sm success" disabled={busy} onClick={() => run("approve")}>
+              <button className="btn sm success" disabled={!!busy} aria-busy={busy === "approve"} onClick={() => run("approve")}>
                 ✓ {t("studio.approve")}
               </button>
             ) : null}
             {item.status !== "rejected" && item.status !== "on_air" ? (
-              <button className="btn sm danger" disabled={busy} onClick={() => run("reject")}>
+              <button className="btn sm danger" disabled={!!busy} aria-busy={busy === "reject"} onClick={() => run("reject")}>
                 ✕ {t("studio.reject")}
               </button>
             ) : null}
-            <button className="btn sm" disabled={busy} onClick={() => setEditing(true)}>
+            <button className="btn sm" disabled={!!busy} onClick={() => setEditing(true)}>
               ✎ {t("studio.edit")}
             </button>
             {item.status !== "on_air" && item.status !== "rejected" && item.status !== "killed" ? (
-              <button className="btn sm signal" disabled={busy} onClick={() => run("on_air")}>
+              <button className="btn sm signal" disabled={!!busy} aria-busy={busy === "on_air"} onClick={() => run("on_air")}>
                 ● {t("studio.onair")}
               </button>
             ) : null}
             {item.status === "on_air" ? (
-              <button className="btn sm danger" disabled={busy} onClick={() => run("kill")} title="Take this graphic off air immediately">
+              <button className="btn sm danger" disabled={!!busy} aria-busy={busy === "kill"} onClick={() => run("kill")} title="Take this graphic off air immediately">
                 ■ {t("studio.kill")}
               </button>
             ) : null}
@@ -298,7 +298,7 @@ function GraphicCard({ item, onAction }: { item: StudioItem; onAction: ActionFn 
 
 export function Studio() {
   const { id = "" } = useParams();
-  const { data: match, error, loading, reload } = useAsync<MatchMeta>(() => api.match(id), [id]);
+  const { data: match, error, loading, reload } = useAsync<MatchMeta>(() => matchService.get(id), [id]);
   if (error) return <ErrorState message={error} onRetry={reload} />;
   if (loading || !match) return <Skeleton h={500} />;
   return <StudioConsole match={match} />;
@@ -331,9 +331,9 @@ function StudioConsole({ match }: { match: MatchMeta }) {
   useEffect(() => {
     let alive = true;
     const load = () =>
-      api
+      studioService
         // Always bound by the clock: before kick-off t is 0, and an unbounded queue would show the full-time graphics.
-        .studioQueue(id, tRef.current)
+        .queue(id, tRef.current)
         .then((q) => alive && merge(q))
         .catch(() => undefined);
     load();
@@ -347,7 +347,7 @@ function StudioConsole({ match }: { match: MatchMeta }) {
   const onAction: ActionFn = async (item, action, edit) => {
     setActionErr(null);
     try {
-      const updated = await api.studioAction(id, item.id, { action, ...(edit ?? {}) });
+      const updated = await studioService.act(id, item.id, { action, ...(edit ?? {}) });
       merge([updated]);
     } catch (e) {
       setActionErr(e instanceof Error ? e.message : String(e));
@@ -368,9 +368,9 @@ function StudioConsole({ match }: { match: MatchMeta }) {
   const lastEvent = state.events[state.events.length - 1];
 
   const [truthMode, setTruthMode] = useTruthMode();
-  const truth = usePoll(() => api.truth(id, Math.max(1, tRef.current)), 3000, truthMode && state.status === "live", [id]);
+  const truth = usePoll(() => truthService.report(id, Math.max(1, tRef.current)), 3000, truthMode && state.status === "live", [id]);
   useEffect(() => {
-    if (truthMode && state.status !== "live" && state.t > 0) api.truth(id, Math.max(1, state.t)).then(truth.setData).catch(() => undefined);
+    if (truthMode && state.status !== "live" && state.t > 0) truthService.report(id, Math.max(1, state.t)).then(truth.setData).catch(() => undefined);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [truthMode, state.status, id]);
   const plantedFor = useMemo(() => {

@@ -84,7 +84,7 @@ export function MomentCard({ moment, narrative, teamColor, selected, activeFact,
         {n ? <EngineBadge engine={n.engine} ms={n.latency_ms} /> : null}
         {n ? <FactCheckBadge fc={n.fact_check} /> : null}
         {!n && onNarrate ? (
-          <button type="button" className="btn sm ghost" onClick={onNarrate} disabled={narrating}>
+          <button type="button" className="btn sm ghost" onClick={onNarrate} disabled={narrating} aria-busy={narrating}>
             ✦ {narrating ? "Writing…" : "Narrate"}
           </button>
         ) : null}

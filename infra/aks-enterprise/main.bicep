@@ -11,6 +11,7 @@
 targetScope = 'resourceGroup'
 
 import { token, dashed } from '../modules/naming.bicep'
+import { apiServiceSettings, parseApiServiceSettings } from '../modules/api-settings.bicep'
 
 @minLength(3)
 @maxLength(12)
@@ -107,6 +108,9 @@ param webPubSubSku string = 'Standard_S1'
 
 @description('Web PubSub units as a string (azd substitutes text): 1 = 1,000 viewers, 100 = 100,000.')
 param webPubSubUnits string = '1'
+
+@description('Overrides of the API\'s service-contract settings (REST paths, API versions, limits, timeouts; modules/api-settings.bicep) as "KEY=value;KEY=value". Empty = defaults.')
+param apiServiceSettingsOverrides string = ''
 
 @description('Fabric OneLake workspace and lakehouse for Data Forge exports (set by deploy/hooks/fabric.sh). Empty = none.')
 param oneLakeWorkspace string = ''
@@ -377,3 +381,22 @@ output EVENTHUB_NAME string = platform.outputs.eventHubName
 output APPLICATIONINSIGHTS_CONNECTION_STRING string = platform.outputs.appInsightsConnectionString
 output FUNCTION_APP_NAME string = deployFunctions ? dashed('func', environmentName, tok) : ''
 output FABRIC_CAPACITY_NAME string = platform.outputs.fabricCapacityName
+
+// The API's service-contract settings, for the Kubernetes manifests (deploy/k8s/*/10-deployment.yaml)
+var apiSettings = apiServiceSettings(parseApiServiceSettings(apiServiceSettingsOverrides))
+output AZURE_COGNITIVE_SCOPE string = apiSettings.AZURE_COGNITIVE_SCOPE
+output AZURE_TOKEN_REFRESH_MARGIN_S string = apiSettings.AZURE_TOKEN_REFRESH_MARGIN_S
+output HTTP_TIMEOUT_S string = apiSettings.HTTP_TIMEOUT_S
+output AZURE_OPENAI_API_PATH string = apiSettings.AZURE_OPENAI_API_PATH
+output AZURE_OPENAI_TIMEOUT_S string = apiSettings.AZURE_OPENAI_TIMEOUT_S
+output AZURE_OPENAI_MAX_RETRIES string = apiSettings.AZURE_OPENAI_MAX_RETRIES
+output AZURE_SPEECH_TTS_URL string = apiSettings.AZURE_SPEECH_TTS_URL
+output AZURE_SPEECH_OUTPUT_FORMAT string = apiSettings.AZURE_SPEECH_OUTPUT_FORMAT
+output AZURE_TRANSLATOR_PATH string = apiSettings.AZURE_TRANSLATOR_PATH
+output AZURE_TRANSLATOR_API_VERSION string = apiSettings.AZURE_TRANSLATOR_API_VERSION
+output AZURE_CONTENT_SAFETY_API_VERSION string = apiSettings.AZURE_CONTENT_SAFETY_API_VERSION
+output AZURE_CONTENT_SAFETY_ANALYZE_PATH string = apiSettings.AZURE_CONTENT_SAFETY_ANALYZE_PATH
+output AZURE_CONTENT_SAFETY_SHIELD_PATH string = apiSettings.AZURE_CONTENT_SAFETY_SHIELD_PATH
+output AZURE_CONTENT_SAFETY_MAX_CHARS string = apiSettings.AZURE_CONTENT_SAFETY_MAX_CHARS
+output AZURE_CONTENT_SAFETY_BLOCK_SEVERITY string = apiSettings.AZURE_CONTENT_SAFETY_BLOCK_SEVERITY
+output ONELAKE_DFS_ENDPOINT string = apiSettings.ONELAKE_DFS_ENDPOINT

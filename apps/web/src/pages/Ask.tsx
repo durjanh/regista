@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
-import { api } from "../api/client";
+import { narrationService } from "../api";
 import type { AskResponse, ChatTurn } from "../api/types";
 import { AgentTrace } from "../components/AgentTrace";
 import { EngineBadge, FactCheckBadge } from "../components/FactCheck";
@@ -46,7 +46,7 @@ export function Ask() {
     setInput("");
     setBusy(true);
     try {
-      const res = await api.ask({ match_id: id, question, persona, language, history });
+      const res = await narrationService.ask({ match_id: id, question, persona, language, history });
       setTurns((prev) => [...prev, { role: "assistant", content: res.answer, res }]);
     } catch (e) {
       setTurns((prev) => [...prev, { role: "error", content: e instanceof Error ? e.message : String(e) }]);
@@ -164,7 +164,7 @@ export function Ask() {
               }
             }}
           />
-          <button className="btn primary" type="submit" disabled={busy || !input.trim()}>
+          <button className="btn primary" type="submit" disabled={busy || !input.trim()} aria-busy={busy}>
             {t("ask.send")}
           </button>
         </form>

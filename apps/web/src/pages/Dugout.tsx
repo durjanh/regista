@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { api } from "../api/client";
+import { dugoutService } from "../api";
 import type { Dugout as DugoutT, DugoutPlayer, DugoutRecommendation, Evidence, Narrative, WinProb } from "../api/types";
 import { EngineBadge, FactCheckBadge } from "../components/FactCheck";
 import { InsightCard } from "../components/InsightCard";
@@ -55,7 +55,7 @@ export function Dugout() {
     async (s: Side) => {
       const call = ++callId.current;
       try {
-        const d = await api.dugout(id, s, Math.max(1, tRef.current));
+        const d = await dugoutService.dashboard(id, s, Math.max(1, tRef.current));
         if (call === callId.current) {
           setData(d);
           setError(null);
@@ -86,7 +86,7 @@ export function Dugout() {
     setBriefing(true);
     setBriefError(null);
     try {
-      setBrief(await api.dugoutBrief({ match_id: id, side, upto_t: Math.max(1, Math.floor(state.t)), language }));
+      setBrief(await dugoutService.brief({ match_id: id, side, upto_t: Math.max(1, Math.floor(state.t)), language }));
     } catch (e) {
       setBriefError(e instanceof Error ? e.message : String(e));
     } finally {
@@ -306,7 +306,7 @@ export function Dugout() {
             <div className="card-head">
               <h2 className="card-title">{t("dugout.briefing")}</h2>
               <span className="spacer" />
-              <button className="btn primary sm" onClick={runBrief} disabled={briefing}>
+              <button className="btn primary sm" onClick={runBrief} disabled={briefing} aria-busy={briefing}>
                 {briefing ? t("recap.generating") : `🎙 ${t("dugout.brief")}`}
               </button>
             </div>

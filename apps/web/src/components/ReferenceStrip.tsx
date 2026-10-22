@@ -1,4 +1,4 @@
-import { api } from "../api/client";
+import { referenceService } from "../api";
 import { useAsync } from "../hooks/useAsync";
 import { sourceUrl } from "../lib/format";
 import { RealTag } from "./SourceBadge";
@@ -6,7 +6,7 @@ import { Skeleton } from "./States";
 
 /** Headline numbers of the real CC0 dataset that grounds every match. */
 export function ReferenceStrip() {
-  const { data, error } = useAsync(() => api.referenceSummary(), []);
+  const { data, error } = useAsync(() => referenceService.summary(), []);
   if (error) return null;
   if (!data)
     return (

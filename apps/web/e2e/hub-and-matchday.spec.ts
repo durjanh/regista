@@ -16,6 +16,22 @@ test.describe("Hub", () => {
   });
 });
 
+test.describe("Loading feedback", () => {
+  test("a slow backend call shows the loading indicator and a spinner, then the content", async ({ page }) => {
+    // Hold /api/matches for 1.5 s, as a cold start would, then let it through.
+    await page.route(/\/api\/matches$/, async (route) => {
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+      await route.continue();
+    });
+    await page.goto("/");
+    await expect(page.locator(".activity-pill")).toHaveText(/Loading…/);
+    await expect(page.locator(".activity-bar")).toBeVisible();
+    await expect(page.locator(".spinner").first()).toBeVisible();
+    await expect(page.getByRole("link", { name: /Open match/ }).first()).toBeVisible();
+    await expect(page.locator(".activity-bar")).toHaveCount(0);
+  });
+});
+
 test.describe("Matchday", () => {
   test("replays from 80:00 at speed: the clock advances", async ({ page }) => {
     await page.goto(`/match/${HERO}`);

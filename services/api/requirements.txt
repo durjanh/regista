@@ -4,6 +4,7 @@ uvicorn[standard]~=0.54
 pydantic~=2.14
 sse-starlette~=3.5
 httpx~=0.28
+python-dotenv~=1.2   # services/api/.env for local development
 mcp~=1.30
 openai~=3.35
 azure-identity~=1.26

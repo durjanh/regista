@@ -152,6 +152,23 @@ Main parameters (`infra/main.bicepparam`):
 | `deployFunctions` | `true` | Recap automation |
 | `deployFabricCapacity` | `false` | `true` creates a billed F2. Prefer the trial. |
 | `oneLakeWorkspace` / `oneLakeLakehouse` | empty | Set after step 5 |
+| `apiServiceSettings` | empty | Overrides of the API's service-contract settings, see below |
+
+### API settings (no hard-coded endpoints, API versions or limits)
+
+The API reads every endpoint, REST path, API version, limit and timeout from its settings (`services/api/app/config.py`). There are no keys: every Azure call uses a Microsoft Entra token.
+
+- **Deployment-specific values** (the Azure OpenAI, AI Services, Cosmos DB, Storage, Event Hubs, Web PubSub and App Insights endpoints, CORS, the API's own URL) come from the provisioned resources. Container Apps sets them as container app settings; on AKS they reach the pod through the provision outputs and `deploy/k8s/*/10-deployment.yaml`.
+- **Service-contract values** (the token scope, Speech URL and output format, Translator path and API version, Content Safety paths, API version, text limit and block severity, Azure OpenAI path, timeout and retries, the shared REST client's timeout, the OneLake DFS endpoint) are defined once in `infra/modules/api-settings.bicep` and applied by every profile.
+
+Change one per environment without touching code, then re-provision:
+
+```bash
+azd env set API_SERVICE_SETTINGS 'AZURE_CONTENT_SAFETY_API_VERSION=2025-09-15-preview;HTTP_TIMEOUT_S=30'
+azd provision
+```
+
+The format is `KEY=value` pairs separated by `;`. It's plain text because azd pastes the value into `main.parameters.json` as-is, so quoted JSON would break the file. In pipelines, set the `API_SERVICE_SETTINGS` variable: a GitHub repository variable, or the Azure DevOps variable group. Locally, copy `services/api/.env.example` to `services/api/.env`; real environment variables win over the file.
 
 ## 3. Build and deploy the apps
 
@@ -271,7 +288,7 @@ Fabric items (workspace, Lakehouse, Eventhouse, Eventstream) are not Azure Resou
 
 ```bash
 scripts/grant-dev-access.sh --rg rg-regista   # your user gets the same data-plane roles; prints env values
-# paste the printed values into services/api/.env
+# paste the printed values into services/api/.env (template: services/api/.env.example)
 scripts/local-dev.sh                           # API :8000, web :5173
 ```
 

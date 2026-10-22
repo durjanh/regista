@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { api } from "../api/client";
+import { matchService, narrationService, studioService } from "../api";
 import type { Analysis, Cue, MatchMeta, MatchEvent, Narrative, StudioItem } from "../api/types";
 import { clock, cx } from "../lib/format";
 import { usePrefs } from "../lib/prefs";
@@ -95,12 +95,12 @@ export function HalftimePack({ match, events, minute, ended, queue, onQueued }: 
     try {
       let htT = htEvent?.t;
       if (htT === undefined) {
-        const ev = await api.events(match.match_id, { types: ["half_end"] });
+        const ev = await matchService.events(match.match_id, { types: ["half_end"] });
         htT = ev.find((e) => e.period === 1)?.t ?? 45 * 60;
       }
       const [narrative, analysis] = await Promise.all([
-        api.narrate({ match_id: match.match_id, scope: "halftime", persona: "broadcaster", language, upto_t: htT }),
-        api.analysis(match.match_id, htT),
+        narrationService.narrate({ match_id: match.match_id, scope: "halftime", persona: "broadcaster", language, upto_t: htT }),
+        matchService.analysis(match.match_id, htT),
       ]);
       setPack({ narrative, graphics: suggest(analysis, match, htT), t: htT });
     } catch (e) {
@@ -125,7 +125,7 @@ export function HalftimePack({ match, events, minute, ended, queue, onQueued }: 
     setAdding(g.key);
     setErr(null);
     try {
-      const item = await api.studioAdd(match.match_id, {
+      const item = await studioService.addItem(match.match_id, {
         // The engine finishes the last first-half possession a few seconds past the second-half kick-off clock;
         // stamp the cue just before it so it reads 45' rather than 46'.
         kind: g.kind, title: g.title, body: g.body, priority: g.priority, duration_s: DURATION_S,
@@ -147,7 +147,7 @@ export function HalftimePack({ match, events, minute, ended, queue, onQueued }: 
       <div className="card-head">
         <h2 className="card-title">⏸ {t("ht.title")}</h2>
         <span className="spacer" />
-        <button className="btn sm primary" onClick={build} disabled={!ready || busy} title={ready ? undefined : t("ht.locked")}>
+        <button className="btn sm primary" onClick={build} disabled={!ready || busy} aria-busy={busy} title={ready ? undefined : t("ht.locked")}>
           {busy ? t("loading") : t("ht.build")}
         </button>
       </div>

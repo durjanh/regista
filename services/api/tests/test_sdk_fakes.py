@@ -127,7 +127,7 @@ def rest(azure, monkeypatch):
     from app.ai import clients, services
     azure()
 
-    async def tok(scope=clients.COGNITIVE_SCOPE):
+    async def tok(scope=None):
         return "TOKEN"
 
     monkeypatch.setattr(clients, "token", tok)
@@ -145,7 +145,8 @@ def test_speech_uses_aad_resource_token(rest):
     h = install([FakeResponse(content=b"mp3")])
     assert asyncio.run(services.synthesize("Goal <for> England", "es", "kids")) == b"mp3"
     url, kw = h.calls[0]
-    assert "uksouth.tts.speech" in url and kw["headers"]["Authorization"].startswith("Bearer aad#/subscriptions/")
+    assert "uksouth.tts.speech" in url and kw["token"].startswith("aad#/subscriptions/")
+    assert kw["headers"]["X-Microsoft-OutputFormat"] == "audio-24khz-48kbitrate-mono-mp3"
     assert b"&lt;for&gt;" in kw["content"] and b"-6%" in kw["content"]
 
 
@@ -175,8 +176,7 @@ def test_services_not_configured_and_http_singleton():
     with pytest.raises(RuntimeError):
         asyncio.run(services.translate(["x"], "es"))
     assert asyncio.run(services.shield_prompt("x")) is False
-    services._http = None
-    assert services.http() is services.http()
+    assert services.http() is services.http()   # one shared client
 
 
 # ---------------------------------------------------------------- persistence

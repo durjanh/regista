@@ -10,7 +10,6 @@ from functools import lru_cache
 from ..config import settings
 
 log = logging.getLogger("regista.ai")
-COGNITIVE_SCOPE = "https://cognitiveservices.azure.com/.default"
 
 
 @lru_cache(maxsize=1)
@@ -28,9 +27,11 @@ def sync_credential():
 _token_cache: dict[str, tuple[str, float]] = {}
 
 
-async def token(scope: str = COGNITIVE_SCOPE) -> str:
+async def token(scope: str | None = None) -> str:
+    """Entra access token for `scope` (default: settings.cognitive_scope), reused until shortly before it expires."""
+    scope = scope or settings.cognitive_scope
     cached = _token_cache.get(scope)
-    if cached and cached[1] - 120 > time.time():
+    if cached and cached[1] - settings.token_refresh_margin_s > time.time():
         return cached[0]
     tok = await credential().get_token(scope)
     _token_cache[scope] = (tok.token, tok.expires_on)
@@ -41,8 +42,9 @@ async def token(scope: str = COGNITIVE_SCOPE) -> str:
 def openai_client():
     from azure.identity.aio import get_bearer_token_provider
     from openai import AsyncOpenAI
-    provider = get_bearer_token_provider(credential(), COGNITIVE_SCOPE)
-    return AsyncOpenAI(base_url=f"{settings.openai_endpoint.rstrip('/')}/openai/v1/", api_key=provider, max_retries=2, timeout=40)
+    provider = get_bearer_token_provider(credential(), settings.cognitive_scope)
+    return AsyncOpenAI(base_url=f"{settings.openai_endpoint.rstrip('/')}{settings.openai_api_path}", api_key=provider,
+                       max_retries=settings.openai_max_retries, timeout=settings.openai_timeout_s)
 
 
 async def chat(messages: list[dict], *, deployment: str | None = None, json_mode: bool = False,

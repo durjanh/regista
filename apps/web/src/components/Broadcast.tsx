@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { api } from "../api/client";
+import { broadcastService, studioService } from "../api";
 import type { BroadcastStatus } from "../api/types";
 import { useBroadcast } from "../hooks/useBroadcast";
 import { usePrefs } from "../lib/prefs";
@@ -48,7 +48,7 @@ export function useBroadcastStatus(matchId: string, pollMs?: number) {
   const [status, setStatus] = useState<BroadcastStatus | null>(null);
   const refresh = useCallback(async () => {
     try {
-      const all = await api.broadcastStatus();
+      const all = await broadcastService.status();
       setStatus(all.find((s) => s.match_id === matchId) ?? null);
     } catch {
       setStatus(null);
@@ -86,7 +86,7 @@ export function GoLivePanel({ matchId, currentT, homeId, awayId }: { matchId: st
 
   useEffect(() => {
     let cancelled = false;
-    Promise.all([api.studioSettings(matchId), api.studioProfiles()])
+    Promise.all([studioService.settings(matchId), studioService.profiles()])
       .then(([s, profiles]) => {
         const p = profiles.find((x) => x.id === s.profile_id);
         if (!cancelled && p?.languages.length) setLanguages(p.languages);
@@ -102,8 +102,8 @@ export function GoLivePanel({ matchId, currentT, homeId, awayId }: { matchId: st
     setErr(null);
     try {
       const next = start
-        ? await api.broadcastStart(matchId, { speed, start_t: from === "clock" ? Math.floor(currentT) : 0, languages })
-        : await api.broadcastStop(matchId);
+        ? await broadcastService.start(matchId, { speed, start_t: from === "clock" ? Math.floor(currentT) : 0, languages })
+        : await broadcastService.stop(matchId);
       setStatus(next);
     } catch (e) {
       setErr(e instanceof Error ? e.message : String(e));
@@ -138,9 +138,9 @@ export function GoLivePanel({ matchId, currentT, homeId, awayId }: { matchId: st
         <span className="xs muted">{t("bc.languages")}: {languages.join(" · ")}</span>
         <span className="spacer" />
         {live ? (
-          <button className="btn" disabled={busy} onClick={() => void act(false)}>■ {t("bc.stop")}</button>
+          <button className="btn" disabled={busy} aria-busy={busy} onClick={() => void act(false)}>■ {t("bc.stop")}</button>
         ) : (
-          <button className="btn primary" disabled={busy} onClick={() => void act(true)}>▶ {t("bc.start")}</button>
+          <button className="btn primary" disabled={busy} aria-busy={busy} onClick={() => void act(true)}>▶ {t("bc.start")}</button>
         )}
       </div>
       {status ? (

@@ -13,8 +13,8 @@ export default defineConfig({
       include: ["src/**/*.{ts,tsx}"],
       exclude: ["src/main.tsx", "src/api/types.ts", "src/test/**", "src/**/*.test.{ts,tsx}"],
       reporter: ["text-summary", "text", "json-summary"],
-      // Floor a couple of points under what the suite achieves (57.9 / 48.0 / 50.3 / 60.5); raise it as pages gain tests.
-      thresholds: { statements: 55, branches: 46, functions: 48, lines: 58 },
+      // Floor a few points under what the suite achieves (65.6 / 54.2 / 58.3 / 68.3); raise it as pages gain tests.
+      thresholds: { statements: 62, branches: 51, functions: 55, lines: 65 },
     },
   },
 });

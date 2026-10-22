@@ -1,3 +1,4 @@
+import { quietly } from "./activity";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Grade, Mechanism, Plant } from "../api/types";
 
@@ -82,11 +83,13 @@ export function usePoll<T>(fn: () => Promise<T>, ms: number, active: boolean, de
   useEffect(() => {
     if (!active) return;
     let alive = true;
+    let loaded = false;
+    // The first fetch shows the loading indicator; refreshes of data already on screen stay in the background.
     const run = () =>
-      fnRef
-        .current()
+      (loaded ? quietly(fnRef.current) : fnRef.current())
         .then((d) => {
           if (!alive) return;
+          loaded = true;
           setData(d);
           setError(null);
         })

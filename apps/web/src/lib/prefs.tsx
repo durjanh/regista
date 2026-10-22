@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
-import { api } from "../api/client";
+import { systemService } from "../api";
 import type { Health, Persona } from "../api/types";
 import { RTL, translate, type I18nKey } from "./i18n";
 
@@ -62,7 +62,7 @@ export function PrefsProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let alive = true;
     const poll = () =>
-      api
+      systemService
         .health()
         .then((h) => alive && setHealth(h))
         .catch(() => alive && setHealth(null));

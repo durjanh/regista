@@ -9,6 +9,7 @@
 targetScope = 'resourceGroup'
 
 import { token, compact, dashed } from 'modules/naming.bicep'
+import { apiServiceEnv, parseApiServiceSettings } from 'modules/api-settings.bicep'
 
 @minLength(3)
 @maxLength(12)
@@ -87,6 +88,9 @@ param tags object = {}
 @minValue(0)
 @maxValue(1)
 param apiMinReplicas int = 0
+
+@description('Overrides of the API\'s service-contract settings (REST paths, API versions, limits, timeouts; modules/api-settings.bicep) as "KEY=value;KEY=value". Empty = defaults.')
+param apiServiceSettings string = ''
 
 @description('Log Analytics daily ingestion cap in GB (cost guardrail; ingestion pauses for the rest of the day when reached). -1 = no cap.')
 param logDailyCapGb int = 1
@@ -274,6 +278,7 @@ var apiEnv = [
   { name: 'OTEL_SERVICE_NAME', value: 'regista-api' }
   { name: 'WEBPUBSUB_ENDPOINT', value: webPubSub.outputs.endpoint }
   { name: 'WEBPUBSUB_HUB', value: webPubSub.outputs.hubName }
+  ...apiServiceEnv(parseApiServiceSettings(apiServiceSettings))   // REST paths, API versions, limits and timeouts (one definition for every profile)
 ]
 
 module webPubSub 'modules/webpubsub.bicep' = {

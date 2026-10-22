@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { api } from "../api/client";
+import { forgeService, referenceService, truthService } from "../api";
 import type { Calibration, ForgeConfig, MatchSummary, ReferenceTeam, Scenario, Team, TruthScore } from "../api/types";
 import { DistributionChart, RangeBar } from "../components/charts";
 import { ReferenceStrip } from "../components/ReferenceStrip";
@@ -32,8 +32,8 @@ const PROMPTS = [
 
 export function Forge() {
   const { t } = usePrefs();
-  const teams = useAsync<Team[]>(() => api.forgeTeams(), []);
-  const calib = useAsync<Calibration>(() => api.calibration(), []);
+  const teams = useAsync<Team[]>(() => forgeService.teams(), []);
+  const calib = useAsync<Calibration>(() => forgeService.calibration(), []);
   const [refTeams, setRefTeams] = useState<Map<string, ReferenceTeam>>(new Map());
   const [prompt, setPrompt] = useState(PROMPTS[0]);
   const [config, setConfig] = useState<ForgeConfig | null>(null);
@@ -44,8 +44,8 @@ export function Forge() {
   const [result, setResult] = useState<{ match: MatchSummary; calibration: Calibration } | null>(null);
 
   useEffect(() => {
-    api
-      .referenceTeams()
+    referenceService
+      .teams()
       .then((list) => setRefTeams(new Map(list.map((x) => [x.team_id, x]))))
       .catch(() => undefined);
   }, []);
@@ -62,7 +62,7 @@ export function Forge() {
     setDirecting(true);
     setErr(null);
     try {
-      const res = await api.forgeScenario(prompt);
+      const res = await forgeService.scenario(prompt);
       setConfig(res.config);
       setExplanation({ text: res.explanation, engine: res.engine });
     } catch (e) {
@@ -81,7 +81,7 @@ export function Forge() {
       if (!clean.home_formation) delete clean.home_formation;
       if (!clean.away_formation) delete clean.away_formation;
       if (!clean.as_of) delete clean.as_of;
-      setResult(await api.forgeGenerate(clean));
+      setResult(await forgeService.generate(clean));
     } catch (e) {
       setErr(e instanceof Error ? e.message : String(e));
     } finally {
@@ -123,7 +123,7 @@ export function Forge() {
                   </button>
                 ))}
               </div>
-              <button className="btn primary" onClick={direct} disabled={directing || !prompt.trim()}>
+              <button className="btn primary" onClick={direct} disabled={directing || !prompt.trim()} aria-busy={directing}>
                 ✦ {directing ? "Directing…" : t("forge.direct")}
               </button>
             </div>
@@ -218,7 +218,7 @@ export function Forge() {
                   </div>
                 </div>
                 {config.home_team_id === config.away_team_id ? <div className="xs" style={{ color: "var(--warn)" }}>Pick two different teams.</div> : null}
-                <button className="btn primary" onClick={generate} disabled={generating || config.home_team_id === config.away_team_id}>
+                <button className="btn primary" onClick={generate} disabled={generating || config.home_team_id === config.away_team_id} aria-busy={generating}>
                   ⚒ {generating ? "Simulating…" : t("forge.generate")}
                 </button>
               </div>
@@ -284,7 +284,7 @@ export function Forge() {
 /** Evaluation-driven development, made visible: how well the agents find the changes the engine secretly plants. */
 function TruthScoreSection() {
   const { t } = usePrefs();
-  const ts = useAsync<TruthScore>(() => api.truthScore(), []);
+  const ts = useAsync<TruthScore>(() => truthService.score(), []);
   return (
     <section className="card">
       <div className="card-head">

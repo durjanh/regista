@@ -128,6 +128,35 @@ In CI, `python -m app.evals.run --record` scores 48 fresh-seed matches (36 with 
 
 The agents reach match data through the **same MCP server** (`/mcp`) that broadcasters and GitHub Copilot use. One tool surface serves every client.
 
+## Code structure
+
+Both sides are layered so each module has one reason to change, and each layer depends on an abstraction of the one below it (SOLID: single responsibility, dependency inversion).
+
+**API (`services/api/app`)**
+
+| Layer | Where | Responsibility |
+|---|---|---|
+| Composition root | `main.py` | `create_app()`: lifespan (load data, warm caches, Event Hubs consumer), middleware, routers, MCP mount |
+| HTTP | `api/routes/*.py` | One `APIRouter` per domain (matches, studio, truth, forge, scouting, dugout, reference, narration, language, realtime, system). Validate input, call a service, map domain errors to HTTP status |
+| Contracts | `api/schemas.py` | Request models (Pydantic) |
+| Dependencies | `api/deps.py` | What routes receive through `Depends`: the match store, reference data, the speech and translation engines, `require_match`. Tests swap them with `app.dependency_overrides` |
+| Use cases | `services/*.py` | Moment detail, truth grading, counterfactuals, Data Forge generation, speech caching (`Memo`); no HTTP |
+| Domain | `analytics/`, `ai/`, `forge/`, `live/`, `integrations/` | Match analytics, agents, the simulator, live replay and broadcast, Azure adapters |
+| Agent tools | `ai/tools/` | The 14 match-intelligence tools, one module per area (`match`, `reference`, `scouting`, `forge`). Each registers itself with `@tool` in `ToolRegistry` (`registry.py`), which feeds the MCP server, the Agent Framework agents and the OpenAI tool loop. A new tool is a decorated function, with no list to edit. Tools stay plain functions because all three build the model's schema from the function's name, annotations and docstring |
+| Outbound HTTP | `integrations/http.py` | `HttpClient`: the one pooled REST client every class shares (bearer token per call, timeout from settings, error on non-2xx). `ai/services.py`'s `AzureAIServices` (Speech, Translator, Content Safety, Prompt Shields) receives it, a token provider and the settings through its constructor. Azure SDK clients keep their own transports |
+| Settings | `config.py` | Every endpoint, REST path, API version, limit and timeout, from app settings (`infra/modules/api-settings.bicep` for the service-contract values) or `services/api/.env` locally. No keys anywhere: Microsoft Entra tokens only |
+
+**Web (`apps/web/src/api`)**
+
+| Layer | Where | Responsibility |
+|---|---|---|
+| Transport contract | `http/HttpClient.ts` | The interface services depend on: `get`, `post`, `postBlob`, `url` |
+| Transport | `http/AxiosHttpClient.ts` | axios, a 120 s timeout, `ApiError` from the API's `detail`, and the global loading indicator on every call |
+| Domain services | `services/*Service.ts` | One class per area of the API (`MatchService`, `StudioService`, `TruthService`, `ForgeService`, `ScoutingService`, `DugoutService`, `ReferenceService`, `NarrationService`, `LanguageService`, `BroadcastService`, `SystemService`), each constructed with an `HttpClient` |
+| Composition root | `index.ts` | Creates the one `AxiosHttpClient` and the service instances components import |
+
+**Loading feedback.** Every call through `AxiosHttpClient`, and every live stream still connecting, counts as activity (`lib/activity.ts`). The app shows a progress bar and a "Loading…" status after 300 ms, then explains a cold start after 5 s, because the API scales to zero. Placeholders 60 px or taller carry a spinner, and busy buttons show one (`aria-busy`). A poll refreshing data already on screen runs inside `quietly(...)` and stays silent.
+
 ## Deployment profiles
 
 One platform, three ways to run the compute. In every profile the React front end is on **Azure Static Web Apps** and calls the API directly (fetch and server-sent events) at a URL baked in at build time, with the API's CORS limited to the Static Web App's origin. A linked backend was ruled out: it needs the Standard plan, can't link AKS, and would put a proxy in front of the live streams. All three are azd projects, built from the same Bicep modules, and deployed by azd, GitHub Actions or Azure Pipelines (details and costs in [DEPLOYMENT.md](DEPLOYMENT.md#deployment-profiles)).

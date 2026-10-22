@@ -54,6 +54,23 @@ spec:
             - { name: WEBPUBSUB_HUB, value: "{{.Env.WEBPUBSUB_HUB}}" }
             - { name: PUBLIC_BASE_URL, value: "{{.Env.API_URL}}" }      # the API's own public URL (MCP)
             - { name: CORS_ORIGINS, value: "{{.Env.WEB_URL}}" }         # only the Static Web App may call it from a browser
+            # REST paths, API versions, limits and timeouts: infra/modules/api-settings.bicep, via the provision outputs
+            - { name: AZURE_COGNITIVE_SCOPE, value: "{{.Env.AZURE_COGNITIVE_SCOPE}}" }
+            - { name: AZURE_TOKEN_REFRESH_MARGIN_S, value: "{{.Env.AZURE_TOKEN_REFRESH_MARGIN_S}}" }
+            - { name: HTTP_TIMEOUT_S, value: "{{.Env.HTTP_TIMEOUT_S}}" }
+            - { name: AZURE_OPENAI_API_PATH, value: "{{.Env.AZURE_OPENAI_API_PATH}}" }
+            - { name: AZURE_OPENAI_TIMEOUT_S, value: "{{.Env.AZURE_OPENAI_TIMEOUT_S}}" }
+            - { name: AZURE_OPENAI_MAX_RETRIES, value: "{{.Env.AZURE_OPENAI_MAX_RETRIES}}" }
+            - { name: AZURE_SPEECH_TTS_URL, value: "{{.Env.AZURE_SPEECH_TTS_URL}}" }
+            - { name: AZURE_SPEECH_OUTPUT_FORMAT, value: "{{.Env.AZURE_SPEECH_OUTPUT_FORMAT}}" }
+            - { name: AZURE_TRANSLATOR_PATH, value: "{{.Env.AZURE_TRANSLATOR_PATH}}" }
+            - { name: AZURE_TRANSLATOR_API_VERSION, value: "{{.Env.AZURE_TRANSLATOR_API_VERSION}}" }
+            - { name: AZURE_CONTENT_SAFETY_API_VERSION, value: "{{.Env.AZURE_CONTENT_SAFETY_API_VERSION}}" }
+            - { name: AZURE_CONTENT_SAFETY_ANALYZE_PATH, value: "{{.Env.AZURE_CONTENT_SAFETY_ANALYZE_PATH}}" }
+            - { name: AZURE_CONTENT_SAFETY_SHIELD_PATH, value: "{{.Env.AZURE_CONTENT_SAFETY_SHIELD_PATH}}" }
+            - { name: AZURE_CONTENT_SAFETY_MAX_CHARS, value: "{{.Env.AZURE_CONTENT_SAFETY_MAX_CHARS}}" }
+            - { name: AZURE_CONTENT_SAFETY_BLOCK_SEVERITY, value: "{{.Env.AZURE_CONTENT_SAFETY_BLOCK_SEVERITY}}" }
+            - { name: ONELAKE_DFS_ENDPOINT, value: "{{.Env.ONELAKE_DFS_ENDPOINT}}" }
           resources:
             requests: { cpu: 500m, memory: 1Gi }
             limits: { cpu: "2", memory: 2Gi }

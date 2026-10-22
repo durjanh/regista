@@ -15,6 +15,7 @@ apps/web/dist/
 # Local settings and secrets
 .env
 .env.*
+!.env.example
 local.settings.json
 *.local.json
 

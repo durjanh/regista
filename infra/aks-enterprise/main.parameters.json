@@ -82,6 +82,9 @@
     },
     "webPubSubUnits": {
       "value": "${WEBPUBSUB_UNITS=1}"
+    },
+    "apiServiceSettingsOverrides": {
+      "value": "${API_SERVICE_SETTINGS}"
     }
   }
 }

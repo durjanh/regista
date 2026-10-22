@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { Link, useParams } from "react-router-dom";
-import { api } from "../api/client";
+import { scoutingService } from "../api";
 import type { Leader, TeamReport as TeamReportT } from "../api/types";
 import { AdviceCards, ChannelArrows, GoalMouth, PlayerLink, RecordTable } from "../components/ScoutViz";
 import { InfoPop, ModelTag, RealTag } from "../components/SourceBadge";
@@ -24,8 +24,8 @@ const BOARDS: { key: keyof TeamReportT["model"]["leaders"]; title: string }[] = 
 export function TeamReport() {
   const { teamId = "" } = useParams();
   const { t } = usePrefs();
-  const { data, error, loading, reload } = useAsync<TeamReportT>(() => api.teamReport(teamId), [teamId]);
-  const squad = useAsync(() => api.scoutingPlayers({ team_id: teamId }), [teamId]);
+  const { data, error, loading, reload } = useAsync<TeamReportT>(() => scoutingService.teamReport(teamId), [teamId]);
+  const squad = useAsync(() => scoutingService.players({ team_id: teamId }), [teamId]);
   const known = useMemo(() => new Set((squad.data ?? []).map((p) => p.player_key)), [squad.data]);
 
   if (error) return <div className="card"><ErrorState message={error} onRetry={reload} /></div>;

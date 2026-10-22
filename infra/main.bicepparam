@@ -51,6 +51,8 @@ param staticWebAppSku = readEnvironmentVariable('STATIC_WEB_APP_SKU', 'Free')   
 // Pay only when used: the API scales to zero by default. `azd env set API_MIN_REPLICAS 1` keeps one warm (judging, video).
 param apiMinReplicas = int(readEnvironmentVariable('API_MIN_REPLICAS', '0'))
 param logDailyCapGb = int(readEnvironmentVariable('LOG_DAILY_CAP_GB', '1'))
+// The API's service-contract settings: defaults in modules/api-settings.bicep, overrides as KEY=value;KEY=value.
+param apiServiceSettings = readEnvironmentVariable('API_SERVICE_SETTINGS', '')
 
 // Shared live broadcast: 1 Standard unit = 1,000 concurrent viewers (~$49/month, estimate). WEBPUBSUB_UNITS=100 = 100,000.
 param webPubSubSku = readEnvironmentVariable('WEBPUBSUB_SKU', 'Standard_S1')
