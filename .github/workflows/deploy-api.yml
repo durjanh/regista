@@ -37,7 +37,7 @@ jobs:
       - name: Build the image (ACR Tasks)
         run: |
           az acr build -r "${{ steps.azure.outputs.acr }}" -t "regista-api:${{ github.sha }}" -t "regista-api:latest" \
-            -f services/api/Dockerfile .
+            -f backend/api/Dockerfile .
 
       - name: Roll out
         env:
@@ -62,7 +62,7 @@ jobs:
           python-version: "3.12"
 
       - name: Health, then the deployed integration tests (CORS, SSE, MCP, Web PubSub, the site)
-        working-directory: services/api
+        working-directory: backend/api
         env:
           REGISTA_IT_API_URL: ${{ steps.azure.outputs.api_url }}
           REGISTA_IT_WEB_URL: ${{ steps.azure.outputs.web_url }}

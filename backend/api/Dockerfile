@@ -1,13 +1,13 @@
 # Regista API. Build from the repository root so the image can bundle data/ (CC0 reference results and the
-# pre-built real-result rebuilds):  docker build -f services/api/Dockerfile -t regista-api .
+# pre-built real-result rebuilds):  docker build -f backend/api/Dockerfile -t regista-api .
 FROM python:3.12-slim AS base
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PIP_NO_CACHE_DIR=1 PORT=8000
-WORKDIR /srv/services/api
+WORKDIR /srv/backend/api
 
-COPY services/api/requirements.txt .
+COPY backend/api/requirements.txt .
 RUN pip install --upgrade pip && pip install -r requirements.txt
 
-COPY services/api/app ./app
+COPY backend/api/app ./app
 COPY data /srv/data
 
 RUN useradd --create-home --uid 10001 regista && chown -R regista /srv

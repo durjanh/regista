@@ -66,14 +66,14 @@ Known limits: the AKS application routing add-on's NGINX is supported by Microso
 
 ### Azure DevOps pipelines
 
-One pipeline per part, each independent: you run the one you want to deploy, and nothing deploys on its own (no
-deploy on push, no pipeline starting another). Each runs its tests first; every deployment is a deployment job on the
+One pipeline per part, each independent: you run the one you want, and nothing runs on its own (nothing on a push,
+no pipeline starting another). Each runs its tests first; every deployment is a deployment job on the
 environment `regista-<profile>`, so its approval check gates it. Parameter `profile` (default `containerapps`).
-Only *Test everything* runs automatically, on every push to `main` and every pull request; it deploys nothing.
+*Test everything* is manual too: run it before you deploy; it deploys nothing.
 
 | Pipeline (folder `\Regista`) | File | Runs | What it does |
 |---|---|---|---|
-| Test everything | `ci.yml` | automatically: push to `main`, every PR | Ruff, pytest (90% floor), integration, evaluation gate, Vitest (floor), build, Playwright, Bicep, manifests and hooks. Deploys nothing |
+| Test everything | `ci.yml` | manual | Ruff, pytest (90% floor), integration, evaluation gate, Vitest (floor), build, Playwright, Bicep, manifests and hooks. Deploys nothing |
 | Infrastructure | `infra.yml` | manual | Bicep build + lint → what-if → **Provision** (no application code) |
 | API | `api.yml` | manual | API checks → **`azd deploy api`** → deployed integration tests. Enterprise: the deploy runs on the Managed DevOps Pool |
 | Frontend | `frontend.yml` | manual | Typecheck, Vitest, build → **`azd deploy web`** (Static Web Apps; `web` is the frontend's azd service name) |
@@ -167,7 +167,7 @@ Main parameters (`infra/main.bicepparam`):
 
 ### API settings (no hard-coded endpoints, API versions or limits)
 
-The API reads every endpoint, REST path, API version, limit and timeout from its settings (`services/api/app/config.py`). There are no keys: every Azure call uses a Microsoft Entra token.
+The API reads every endpoint, REST path, API version, limit and timeout from its settings (`backend/api/app/config.py`). There are no keys: every Azure call uses a Microsoft Entra token.
 
 - **Deployment-specific values** (the Azure OpenAI, AI Services, Cosmos DB, Storage, Event Hubs, Web PubSub and App Insights endpoints, CORS, the API's own URL) come from the provisioned resources. Container Apps sets them as container app settings; on AKS they reach the pod through the provision outputs and `deploy/k8s/*/10-deployment.yaml`.
 - **Service-contract values** (the token scope, Speech URL and output format, Translator path and API version, Content Safety paths, API version, text limit and block severity, Azure OpenAI path, timeout and retries, the shared REST client's timeout, the OneLake DFS endpoint) are defined once in `infra/modules/api-settings.bicep` and applied by every profile.
@@ -179,17 +179,17 @@ azd env set API_SERVICE_SETTINGS 'AZURE_CONTENT_SAFETY_API_VERSION=2025-09-15-pr
 azd provision
 ```
 
-The format is `KEY=value` pairs separated by `;`. It's plain text because azd pastes the value into `main.parameters.json` as-is, so quoted JSON would break the file. In pipelines, set the `API_SERVICE_SETTINGS` variable: a GitHub repository variable, or the Azure DevOps variable group. Locally, copy `services/api/.env.example` to `services/api/.env`; real environment variables win over the file.
+The format is `KEY=value` pairs separated by `;`. It's plain text because azd pastes the value into `main.parameters.json` as-is, so quoted JSON would break the file. In pipelines, set the `API_SERVICE_SETTINGS` variable: a GitHub repository variable, or the Azure DevOps variable group. Locally, copy `backend/api/.env.example` to `backend/api/.env`; real environment variables win over the file.
 
 ## 3. Build and deploy the apps
 
 GitHub Actions mirrors the Azure DevOps pipelines, with the same names: each part is a separate, manual workflow
 (*Run workflow* in the Actions tab, or `gh workflow run`), runs CI's checks first, and waits for the `production`
-environment's required reviewer. Only *Test everything* runs automatically (push to `main`, pull requests).
+environment's required reviewer. *Test everything* is manual as well; nothing runs on a push.
 
 | Workflow | File | Runs | What it does |
 |---|---|---|---|
-| Test everything | `ci.yml` | automatically: push to `main`, every PR | API and frontend tests (the shared `_api-tests.yml`, `_frontend-tests.yml`), Playwright, Bicep, manifests and hooks |
+| Test everything | `ci.yml` | manual | API and frontend tests (the shared `_api-tests.yml`, `_frontend-tests.yml`), Playwright, Bicep, manifests and hooks |
 | Infrastructure | `infra.yml` | manual | What-if (summary on the run page) → **Provision** (Bicep only, keeps the running API image) |
 | API | `deploy-api.yml` | manual | API tests → image built by **ACR Tasks** → new revision → deployed integration tests |
 | Frontend | `deploy-frontend.yml` | manual | Frontend tests → build with the API's address → **Static Web Apps** upload (token read through OIDC, never stored) → site and CORS check |
@@ -312,7 +312,7 @@ Fabric items (workspace, Lakehouse, Eventhouse, Eventstream) are not Azure Resou
 
 ```bash
 scripts/grant-dev-access.sh --rg rg-regista   # your user gets the same data-plane roles; prints env values
-# paste the printed values into services/api/.env (template: services/api/.env.example)
+# paste the printed values into backend/api/.env (template: backend/api/.env.example)
 scripts/local-dev.sh                           # API :8000, web :5173
 ```
 

@@ -1,4 +1,4 @@
-# Deploy services/functions to the Flex Consumption Function app in the resource group: zip deploy with a remote
+# Deploy backend/functions to the Flex Consumption Function app in the resource group: zip deploy with a remote
 # build (the platform installs requirements.txt on Linux). No Function app (deployFunctions=false) = nothing to do.
 parameters:
   - name: serviceConnection
@@ -19,7 +19,7 @@ steps:
           exit 0
         fi
         pkg="$(Agent.TempDirectory)/functions.zip"
-        (cd services/functions && zip -qr "$pkg" . -x "local.settings*" "__pycache__/*" ".venv/*")
+        (cd backend/functions && zip -qr "$pkg" . -x "local.settings*" "__pycache__/*" ".venv/*")
         az functionapp deployment source config-zip -g "$AZURE_RESOURCE_GROUP" -n "$app" --src "$pkg" --build-remote true -o none
         echo "Deployed to $app. Functions:"
         az functionapp function list -g "$AZURE_RESOURCE_GROUP" -n "$app" --query "[].name" -o tsv

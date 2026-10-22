@@ -14,9 +14,9 @@ Regista is an AI match-intelligence platform built for the Microsoft × Premier 
 
 | Path | What |
 |---|---|
-| `services/api` | Python 3.12 FastAPI: real-result loader + Elo, conditioned event simulator (Data Forge), analytics (xG, xT, win probability, tactics), Agent Framework multi-agent workflows, MCP server at `/mcp` |
-| `apps/web` | React + TypeScript (Vite): fan companion, studio console, broadcast overlay, tactics board, Ask Regista, recap studio, Data Forge |
-| `services/functions` | Azure Functions (Flex Consumption): full-time recap automation from Event Hubs |
+| `backend/api` | Python 3.12 FastAPI: real-result loader + Elo, conditioned event simulator (Data Forge), analytics (xG, xT, win probability, tactics), Agent Framework multi-agent workflows, MCP server at `/mcp` |
+| `frontend/web` | React + TypeScript (Vite): fan companion, studio console, broadcast overlay, tactics board, Ask Regista, recap studio, Data Forge |
+| `backend/functions` | Azure Functions (Flex Consumption): full-time recap automation from Event Hubs |
 | `infra` | Bicep, resource-group scope, idempotent; `main.bicep` + `modules/` |
 | `.github/workflows` | CI, infrastructure (what-if → deploy), app deploy, Foundry evaluations |
 | `scripts` | GitHub OIDC bootstrap (az + gh), developer access, Fabric setup, local dev |
@@ -32,9 +32,9 @@ Regista is an AI match-intelligence platform built for the Microsoft × Premier 
 
 ```bash
 scripts/local-dev.sh                                  # API :8000 + web :5173
-cd services/api && pytest -q && ruff check .          # backend checks
+cd backend/api && pytest -q && ruff check .          # backend checks
 python -m app.evals.run --mode offline --threshold 0.95
-cd apps/web && npm run typecheck && npm run build     # frontend checks
+cd frontend/web && npm run typecheck && npm run build     # frontend checks
 az bicep build --file infra/main.bicep && az bicep lint --file infra/main.bicep
 ```
 

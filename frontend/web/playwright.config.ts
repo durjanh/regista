@@ -28,7 +28,7 @@ export default defineConfig({
   webServer: [
     {
       command: `.venv/bin/uvicorn app.main:app --host 127.0.0.1 --port ${API_PORT}`,
-      cwd: "../../services/api",
+      cwd: "../../backend/api",
       env: { REGISTA_OFFLINE: "1" },
       url: `http://127.0.0.1:${API_PORT}/api/health`,
       timeout: 120_000,

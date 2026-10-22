@@ -1,7 +1,7 @@
 """Runtime settings, read once from the environment. Every Azure dependency is optional.
 
 Nothing deployment-specific is hard-coded: endpoints, API versions, limits and timeouts are settings with a sensible
-default, overridable by environment variables (Container Apps / AKS app settings) or, locally, by services/api/.env
+default, overridable by environment variables (Container Apps / AKS app settings) or, locally, by backend/api/.env
 (see .env.example; real environment variables win). There are no keys: every Azure call uses a Microsoft Entra token.
 """
 

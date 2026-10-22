@@ -97,7 +97,7 @@ if os.environ.get("CHECK"):
 if [ -n "${FABRIC_WORKSPACE_NAME:-}" ] && [ -z "$CHECK" ]; then
   echo
   echo "▶ Microsoft Fabric dry run: workspace '$FABRIC_WORKSPACE_NAME' (nothing is created)"
-  py=services/api/.venv/bin/python; [ -x "$py" ] || py=python3
+  py=backend/api/.venv/bin/python; [ -x "$py" ] || py=python3
   set -- --workspace "$FABRIC_WORKSPACE_NAME" --dry-run
   [ -n "${FABRIC_CAPACITY_NAME:-}" ] && set -- "$@" --capacity-name "$FABRIC_CAPACITY_NAME"
   [ -n "${FABRIC_EVENTHUB_CONNECTION_ID:-}" ] && set -- "$@" --eventhub-connection-id "$FABRIC_EVENTHUB_CONNECTION_ID"

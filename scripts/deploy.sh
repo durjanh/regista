@@ -55,7 +55,7 @@ ACR="$(out ACR_NAME)"; LOGIN="$(out ACR_LOGIN_SERVER)"
 TAG="$(git rev-parse --short HEAD 2>/dev/null || date +%s)"
 
 echo "▶ Build the API image in ACR ($ACR, tag $TAG)"
-az acr build -r "$ACR" -t "regista-api:$TAG" -f services/api/Dockerfile . -o none
+az acr build -r "$ACR" -t "regista-api:$TAG" -f backend/api/Dockerfile . -o none
 
 echo "▶ Roll out the real image (ports, probes and the feeder command switch from the placeholder)"
 az deployment group create -g "$RG" -n "$DEPLOYMENT-apps" --template-file infra/main.bicep --parameters infra/main.bicepparam \
@@ -66,9 +66,9 @@ SWA="$(az deployment group show -g "$RG" -n "$DEPLOYMENT-apps" --query propertie
 
 echo "▶ Build the SPA against $API_URL and upload it to Static Web Apps ($SWA)"
 command -v npm >/dev/null || { echo "Node.js/npm is required to build the web app" >&2; exit 1; }
-(cd apps/web && npm ci --no-audit --no-fund && VITE_API_BASE_URL="$API_URL" npm run build)
+(cd frontend/web && npm ci --no-audit --no-fund && VITE_API_BASE_URL="$API_URL" npm run build)
 SWA_TOKEN="$(az staticwebapp secrets list -n "$SWA" -g "$RG" --query properties.apiKey -o tsv)"
-npx --yes @azure/static-web-apps-cli@2.0.10 deploy apps/web/dist --deployment-token "$SWA_TOKEN" --env production
+npx --yes @azure/static-web-apps-cli@2.0.10 deploy frontend/web/dist --deployment-token "$SWA_TOKEN" --env production
 
 echo "▶ Smoke test"
 for i in $(seq 1 30); do

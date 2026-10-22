@@ -1,5 +1,5 @@
 // The API's service-contract settings: REST paths, API versions, limits and timeouts. One definition for every
-// profile; the names are the API's environment variables (services/api/app/config.py, services/api/.env.example).
+// profile; the names are the API's environment variables (backend/api/app/config.py, backend/api/.env.example).
 // Override any of them per environment without a code change, as KEY=value pairs separated by ';' (plain text, so
 // it survives azd's substitution into a parameters file), e.g.:
 //   azd env set API_SERVICE_SETTINGS 'AZURE_CONTENT_SAFETY_API_VERSION=2025-09-15-preview;HTTP_TIMEOUT_S=30'

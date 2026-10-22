@@ -1,16 +1,10 @@
-# Regista CI on Azure DevOps (mirror of .github/workflows/ci.yml), the gate for every PR and push to main: lint, tests
+# Regista CI on Azure DevOps (mirror of .github/workflows/ci.yml), run by hand before you deploy: lint, tests
 # with coverage floors, the offline evaluation gate (truth score, Verifier drill, grounding, fidelity, calibration,
 # scouting), frontend tests and build, Bicep build + lint for all three profiles, azd/Kubernetes config checks.
 # The test steps are shared templates, so the per-service pipelines run exactly the same checks.
 
-trigger:
-  branches:
-    include:
-      - main
-pr:
-  branches:
-    include:
-      - main
+trigger: none   # manual: run it when you want the full test run
+pr: none
 
 pool:
   vmImage: ubuntu-latest
@@ -37,9 +31,9 @@ jobs:
           version: "24.x"
       - bash: |
           set -euo pipefail
-          python -m venv services/api/.venv
-          services/api/.venv/bin/pip install -r services/api/requirements.txt
-          cd apps/web
+          python -m venv backend/api/.venv
+          backend/api/.venv/bin/pip install -r backend/api/requirements.txt
+          cd frontend/web
           npm ci
           npx playwright install --with-deps chromium
           CI=true npm run e2e
@@ -47,7 +41,7 @@ jobs:
       - task: PublishPipelineArtifact@1
         condition: always()
         inputs:
-          targetPath: apps/web/playwright-report
+          targetPath: frontend/web/playwright-report
           artifact: playwright-report
 
   - job: infra

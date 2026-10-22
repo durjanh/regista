@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: services/api
+        working-directory: backend/api
     steps:
       - uses: actions/checkout@v4
 
@@ -23,7 +23,7 @@ jobs:
           python-version: "3.12"
           cache: pip
           cache-dependency-path: |
-            services/api/requirements*.txt
+            backend/api/requirements*.txt
 
       - name: Install dependencies
         run: |
@@ -79,8 +79,8 @@ jobs:
         with:
           name: eval-results
           path: |
-            services/api/eval-results/
-            services/api/coverage.xml
+            backend/api/eval-results/
+            backend/api/coverage.xml
             data/reference/truth-latest.json
             data/reference/truth-score-history.json
             docs/truth-score.svg

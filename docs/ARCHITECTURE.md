@@ -132,7 +132,7 @@ The agents reach match data through the **same MCP server** (`/mcp`) that broadc
 
 Both sides are layered so each module has one reason to change, and each layer depends on an abstraction of the one below it (SOLID: single responsibility, dependency inversion).
 
-**API (`services/api/app`)**
+**API (`backend/api/app`)**
 
 | Layer | Where | Responsibility |
 |---|---|---|
@@ -144,9 +144,9 @@ Both sides are layered so each module has one reason to change, and each layer d
 | Domain | `analytics/`, `ai/`, `forge/`, `live/`, `integrations/` | Match analytics, agents, the simulator, live replay and broadcast, Azure adapters |
 | Agent tools | `ai/tools/` | The 14 match-intelligence tools, one module per area (`match`, `reference`, `scouting`, `forge`). Each registers itself with `@tool` in `ToolRegistry` (`registry.py`), which feeds the MCP server, the Agent Framework agents and the OpenAI tool loop. A new tool is a decorated function, with no list to edit. Tools stay plain functions because all three build the model's schema from the function's name, annotations and docstring |
 | Outbound HTTP | `integrations/http.py` | `HttpClient`: the one pooled REST client every class shares (bearer token per call, timeout from settings, error on non-2xx). `ai/services.py`'s `AzureAIServices` (Speech, Translator, Content Safety, Prompt Shields) receives it, a token provider and the settings through its constructor. Azure SDK clients keep their own transports |
-| Settings | `config.py` | Every endpoint, REST path, API version, limit and timeout, from app settings (`infra/modules/api-settings.bicep` for the service-contract values) or `services/api/.env` locally. No keys anywhere: Microsoft Entra tokens only |
+| Settings | `config.py` | Every endpoint, REST path, API version, limit and timeout, from app settings (`infra/modules/api-settings.bicep` for the service-contract values) or `backend/api/.env` locally. No keys anywhere: Microsoft Entra tokens only |
 
-**Web (`apps/web/src/api`)**
+**Web (`frontend/web/src/api`)**
 
 | Layer | Where | Responsibility |
 |---|---|---|

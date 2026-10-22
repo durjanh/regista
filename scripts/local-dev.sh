@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Runs the API (http://localhost:8000) and the web app (http://localhost:5173) together.
 # With no Azure variables set, the API runs in offline mode with deterministic narratives.
-# Put Azure settings in services/api/.env to use Foundry, Speech, Translator and Cosmos DB.
+# Put Azure settings in backend/api/.env to use Foundry, Speech, Translator and Cosmos DB.
 #
 # Usage: scripts/local-dev.sh
 
@@ -12,7 +12,7 @@ cleanup() { kill 0 2>/dev/null || true; }
 trap cleanup EXIT INT TERM
 
 # --- API ----------------------------------------------------------------------------------------
-cd "$ROOT/services/api"
+cd "$ROOT/backend/api"
 if [[ ! -d .venv ]]; then
   python3 -m venv .venv
 fi
@@ -24,7 +24,7 @@ export REGISTA_DATA_DIR="${REGISTA_DATA_DIR:-$ROOT/data/matches}"
 .venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload &
 
 # --- Web ----------------------------------------------------------------------------------------
-cd "$ROOT/apps/web"
+cd "$ROOT/frontend/web"
 [[ -d node_modules ]] || npm install
 npm run dev -- --host &
 

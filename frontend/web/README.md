@@ -6,10 +6,10 @@ React 19 + TypeScript + Vite front end for Regista. Types mirror [`docs/API_CONT
 
 ```bash
 # terminal 1: API on :8000
-cd services/api && .venv/bin/uvicorn app.main:app --port 8000
+cd backend/api && .venv/bin/uvicorn app.main:app --port 8000
 
 # terminal 2: web on :5173 (proxies /api and /mcp to :8000)
-cd apps/web && npm install && npm run dev
+cd frontend/web && npm install && npm run dev
 ```
 
 `npm run typecheck` runs a strict type check and `npm run build` produces the production build in `dist/`.

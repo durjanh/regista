@@ -33,7 +33,7 @@ stages:
               versionSpec: "3.12"
           - bash: |
               set -euo pipefail
-              cd services/functions
+              cd backend/functions
               python -m venv .venv
               .venv/bin/pip install --quiet -r requirements.txt
               .venv/bin/python -m py_compile function_app.py

@@ -1,6 +1,6 @@
 # Regista API contract
 
-Source of truth for the frontend (`apps/web`), the backend (`services/api`), the Azure Function (`services/functions`) and the infrastructure (`infra/`). If code and this document disagree, fix the code.
+Source of truth for the frontend (`frontend/web`), the backend (`backend/api`), the Azure Function (`backend/functions`) and the infrastructure (`infra/`). If code and this document disagree, fix the code.
 
 **Data model in one sentence:** matches are REAL international results (teams, date, tournament, venue, score, scorers, goal minutes, penalties, own goals, assists from the CC0 dataset `martj42/international_results`, 49,945 results 1872–2026) rebuilt as SYNTHETIC ball-by-ball event data constrained to reproduce the real goals exactly, plus synthetic "what-if" matches between real national teams. Team ids are slugs (`england`, `saudi-arabia`).
 

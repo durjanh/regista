@@ -94,7 +94,7 @@ steps:
             # deployed integration tests: health, CORS, SSE, MCP, the Web PubSub broadcast and the Static Web App.
             if [ -z "$service" ] || [ "$service" = "api" ]; then
               api=$(azd env get-value API_URL); web=$(azd env get-value WEB_URL)
-              cd "$(Build.SourcesDirectory)/services/api"
+              cd "$(Build.SourcesDirectory)/backend/api"
               python3 -m venv .it && .it/bin/pip install --quiet -r requirements-dev.txt
               REGISTA_IT_API_URL="$api" REGISTA_IT_WEB_URL="$web" .it/bin/pytest -m deployed --no-cov
             fi

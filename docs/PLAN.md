@@ -98,8 +98,8 @@ Record from replay with the deployed URL visible, `REGISTA_VIDEO_SAFE=1`, captio
 | Technology | Where |
 |---|---|
 | Microsoft Foundry | `infra/modules/foundry.bicep`: models `gpt-5.4-mini` (chat) and `gpt-5.5` (reasoning), project, evaluations (`.github/workflows/evals.yml`), tracing |
-| Microsoft Agent Framework | `services/api/app/ai/agents.py` (`Agent`, `FoundryChatClient`, `ConcurrentBuilder`, `MCPStreamableHTTPTool`); OpenTelemetry instrumentation in `integrations/telemetry.py` |
-| MCP | `services/api/app/mcp_server.py` (14 tools at `/mcp`); `.vscode/mcp.json` (Regista, Azure MCP Server, Fabric RTI Eventhouse) |
+| Microsoft Agent Framework | `backend/api/app/ai/agents.py` (`Agent`, `FoundryChatClient`, `ConcurrentBuilder`, `MCPStreamableHTTPTool`); OpenTelemetry instrumentation in `integrations/telemetry.py` |
+| MCP | `backend/api/app/mcp_server.py` (14 tools at `/mcp`); `.vscode/mcp.json` (Regista, Azure MCP Server, Fabric RTI Eventhouse) |
 | GitHub Copilot agent mode | `.github/copilot-instructions.md`, `.github/agents/`, `.github/prompts/`; Copilot-authored pull requests after the repo is created |
 | GitHub + CLI | Actions CI/CD with OIDC; `scripts/bootstrap-github-oidc.sh` uses `gh` |
 | Azure DevOps | `.azuredevops/pipelines` (CI + azd deploy with approvals; enterprise deploys from a Managed DevOps Pool in the VNet); `scripts/setup-azure-devops.sh` creates a workload-identity service connection |

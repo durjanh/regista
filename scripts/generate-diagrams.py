@@ -219,7 +219,7 @@ def container_apps():
            "<br><b>③</b> Web PubSub pushes live updates to the app", 12, 340, 246, 52, parent=users, size=9)
 
     gh = d.group("GitHub", 20, 510, 270, 400, stroke=GITHUB, fill="#FFFFFF")
-    d.box("Repository", "services/api · apps/web · infra (Bicep) · deploy (azd)", 12, 40, 246, 60, GITHUB, parent=gh)
+    d.box("Repository", "backend/api · frontend/web · infra (Bicep) · deploy (azd)", 12, 40, 246, 60, GITHUB, parent=gh)
     d.box("Actions: ci.yml", "ruff · pytest (≥ 90% coverage) · eval gates + truth score · Vitest (coverage floor) · Bicep lint", 12, 110, 246, 84, GITHUB, parent=gh)
     deploy = d.box("infra.yml · deploy.yml · evals.yml", "OIDC (no secrets) · what-if · ACR build · SPA upload to Static Web Apps · smoke tests", 12, 204, 246, 84, GITHUB, parent=gh)
     d.box("Azure DevOps (option)", "azure-dev.yml: azd what-if → provision → deploy, with approvals", 12, 298, 246, 84, DEVOPS, parent=gh, icon="devops", size=10)

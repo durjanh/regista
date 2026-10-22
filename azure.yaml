@@ -13,14 +13,14 @@ infra:
   module: main
 services:
   api:
-    project: ./services/api
+    project: ./backend/api
     language: python
     host: containerapp
     docker:
       path: ./Dockerfile
       context: ../..        # the API image bundles data/ from the repository root
   web:
-    project: ./apps/web
+    project: ./frontend/web
     language: js
     host: staticwebapp
     dist: dist                 # Vite build output; the SPA calls API_URL directly (CORS)
@@ -29,14 +29,14 @@ services:
         shell: sh
         run: |
           set -e
-          [ -f package.json ] || cd apps/web 2>/dev/null || cd ../../apps/web
+          [ -f package.json ] || cd frontend/web 2>/dev/null || cd ../../frontend/web
           if [ -z "${API_URL:-}" ]; then echo "API_URL not known yet: run 'azd provision' before packaging the web app"; exit 0; fi
           printf 'VITE_API_BASE_URL=%s\n' "$API_URL" > .env.production.local
       predeploy:
         shell: sh
         run: |
           set -e
-          [ -f package.json ] || cd apps/web 2>/dev/null || cd ../../apps/web
+          [ -f package.json ] || cd frontend/web 2>/dev/null || cd ../../frontend/web
           if [ -z "${API_URL:-}" ]; then echo "API_URL not known yet: run 'azd provision' before packaging the web app"; exit 0; fi
           printf 'VITE_API_BASE_URL=%s\n' "$API_URL" > .env.production.local
           # azd up packages before it provisions; rebuild if this bundle was built without the API's address.

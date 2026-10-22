@@ -38,10 +38,10 @@ jobs:
         with:
           node-version: "24"
           cache: npm
-          cache-dependency-path: apps/web/package-lock.json
+          cache-dependency-path: frontend/web/package-lock.json
 
       - name: Build with the API's address
-        working-directory: apps/web
+        working-directory: frontend/web
         env:
           VITE_API_BASE_URL: ${{ steps.azure.outputs.api_url }}
         run: npm ci && npm run build
@@ -50,7 +50,7 @@ jobs:
         run: |
           token=$(az staticwebapp secrets list -n "${{ steps.azure.outputs.static_web_app }}" -g "$AZURE_RESOURCE_GROUP" --query properties.apiKey -o tsv)
           echo "::add-mask::$token"
-          npx --yes @azure/static-web-apps-cli@2.0.10 deploy apps/web/dist --deployment-token "$token" --env production
+          npx --yes @azure/static-web-apps-cli@2.0.10 deploy frontend/web/dist --deployment-token "$token" --env production
 
       - name: The site answers and the API accepts its origin (CORS)
         env:

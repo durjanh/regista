@@ -83,8 +83,8 @@ Every push runs `python -m app.evals.run --mode offline` as a gate:
 
 Diagrams (open in diagrams.net or the Draw.io VS Code extension): [Container Apps](docs/architecture.drawio) · [AKS standard](docs/architecture-aks.drawio) · [AKS enterprise: API Management, private endpoints](docs/architecture-aks-enterprise.drawio). Details: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) · API: [docs/API_CONTRACT.md](docs/API_CONTRACT.md) · Deploy: [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) · Strategy, hero moment and video script: [docs/PLAN.md](docs/PLAN.md)
 
-- **API** (`services/api`, Python/FastAPI): match engine with planted scenarios, detectors and Grader, analytics (xG, xT, win probability, PPDA, shapes), live engine (SSE), Agent Framework agents, MCP server at `/mcp`, guardrails, ops.
-- **Web** (`apps/web`, React + TypeScript, hosted on **Azure Static Web Apps**): control room, overlay, matchday, dugout, scouting, tactics, ask, recap, forge, ops. It calls the API directly; the API's CORS allows only the Static Web App.
+- **API** (`backend/api`, Python/FastAPI): match engine with planted scenarios, detectors and Grader, analytics (xG, xT, win probability, PPDA, shapes), live engine (SSE), Agent Framework agents, MCP server at `/mcp`, guardrails, ops.
+- **Web** (`frontend/web`, React + TypeScript, hosted on **Azure Static Web Apps**): control room, overlay, matchday, dugout, scouting, tactics, ask, recap, forge, ops. It calls the API directly; the API's CORS allows only the Static Web App.
 - **Infra** (`infra`, Bicep), three profiles on one shared platform (Foundry models, project, Speech, Translator, Content Safety; Web PubSub for the live broadcast; Event Hubs, Functions, Cosmos DB, Storage, ACR, App Insights, budget alert, optional Fabric capacity):
   - **Container Apps** (`infra/main.bicep`): API and feeder job. The cheapest; runs the live demo.
   - **AKS standard** (`infra/aks`): Entra-only AKS with workload identity, Cilium, app routing and Kubernetes manifests in `deploy/k8s`.
@@ -103,15 +103,15 @@ No login. Open the web URL and:
 ## Run locally (no Azure needed)
 
 ```bash
-cd services/api && python3 -m venv .venv && .venv/bin/pip install -r requirements-dev.txt   # Python 3.12 or newer
+cd backend/api && python3 -m venv .venv && .venv/bin/pip install -r requirements-dev.txt   # Python 3.12 or newer
 .venv/bin/uvicorn app.main:app --port 8000          # http://localhost:8000/docs
-cd apps/web && npm install && npm run dev           # http://localhost:5173
+cd frontend/web && npm install && npm run dev           # http://localhost:5173
 ```
 
 Offline mode runs the same detectors, Grader, analytics and fact-checked narratives with a deterministic engine. Set the variables in [docs/API_CONTRACT.md](docs/API_CONTRACT.md#environment-variables-read-by-the-api) (or deploy) to switch on Foundry agents, Speech, Translator, Content Safety, Cosmos DB, Event Hubs and OneLake.
 
 ```bash
-cd services/api && .venv/bin/ruff check . && .venv/bin/pytest && .venv/bin/python -m app.evals.run --mode offline
+cd backend/api && .venv/bin/ruff check . && .venv/bin/pytest && .venv/bin/python -m app.evals.run --mode offline
 .venv/bin/python -m app.forge.season --teams 20          # 380-match synthetic season with planted changes + realism report
 ```
 
@@ -253,7 +253,7 @@ parallelism has been purchased or granted*. Either request the free grant (https
 set *MS Hosted CI/CD* to 1 (about $40/month; set it back to 0 afterwards). The enterprise Deploy stage runs on the
 Managed DevOps Pool, which uses the organisation's free self-hosted parallel job; its VMs bill to your subscription.
 
-`.azuredevops/pipelines/ci.yml` (*Test everything*) mirrors GitHub CI and is the only pipeline that runs automatically; it deploys nothing. Each part has its own manual, independent pipeline: `infra.yml` (what-if → provision), `api.yml`, `frontend.yml`, `functions.yml` and `jobs.yml` (the feeder job). `azure-dev.yml` (*Full environment*) deploys everything in one run, for the first setup. Every deployment waits for approval on the `regista-<profile>` environment ([details](docs/DEPLOYMENT.md#azure-devops-pipelines)). One-time setup (keyless service connection, variable group, all pipelines):
+`.azuredevops/pipelines/ci.yml` (*Test everything*) mirrors GitHub CI; it deploys nothing. Every pipeline is manual: nothing runs on a push. Each part has its own manual, independent pipeline: `infra.yml` (what-if → provision), `api.yml`, `frontend.yml`, `functions.yml` and `jobs.yml` (the feeder job). `azure-dev.yml` (*Full environment*) deploys everything in one run, for the first setup. Every deployment waits for approval on the `regista-<profile>` environment ([details](docs/DEPLOYMENT.md#azure-devops-pipelines)). One-time setup (keyless service connection, variable group, all pipelines):
 
 ```bash
 az extension add --name azure-devops
@@ -270,7 +270,7 @@ Then add an approval check on the `regista-<profile>` environment and run **Regi
 
 The same pipelines and names as Azure DevOps: *Infrastructure*, *API*, *Frontend*, *Functions*, *Container jobs* and
 *Full environment*, each manual and independent, each running CI's checks first and waiting for approval on the
-`production` environment. Only *Test everything* runs automatically ([details](docs/DEPLOYMENT.md#3-build-and-deploy-the-apps)).
+`production` environment. *Test everything* is manual too ([details](docs/DEPLOYMENT.md#3-build-and-deploy-the-apps)).
 
 ```bash
 gh auth login
