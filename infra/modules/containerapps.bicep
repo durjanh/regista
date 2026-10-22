@@ -176,7 +176,8 @@ resource feeder 'Microsoft.App/jobs@2025-07-01' = {
     configuration: {
       triggerType: 'Manual'
       replicaTimeout: 7200
-      replicaRetryLimit: 0
+      // One retry, as on AKS (backoffLimit: 1): a replica that fails to start on a cold node otherwise fails the run.
+      replicaRetryLimit: 1
       manualTriggerConfig: {
         parallelism: 1
         replicaCompletionCount: 1
