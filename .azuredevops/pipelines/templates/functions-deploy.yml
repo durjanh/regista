@@ -21,5 +21,5 @@ steps:
         pkg="$(Agent.TempDirectory)/functions.zip"
         (cd backend/functions && zip -qr "$pkg" . -x "local.settings*" "__pycache__/*" ".venv/*")
         az functionapp deployment source config-zip -g "$AZURE_RESOURCE_GROUP" -n "$app" --src "$pkg" --build-remote true -o none
-        echo "Deployed to $app. Functions:"
-        az functionapp function list -g "$AZURE_RESOURCE_GROUP" -n "$app" --query "[].name" -o tsv
+        echo "Deployed to $app."
+        scripts/ci/check-functions-indexed.sh "$AZURE_RESOURCE_GROUP" "$app"   # fails if the host indexed 0 functions

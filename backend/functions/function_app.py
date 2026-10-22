@@ -10,13 +10,12 @@ Event Hubs delivers at least once, so every write is an idempotent upsert keyed 
 language. All connections use the app's user-assigned managed identity, with no keys or connection strings.
 """
 
-from __future__ import annotations
-
 import json
 import logging
 import os
 from datetime import datetime, timezone
 from functools import lru_cache
+from typing import List
 
 import azure.functions as func
 import requests
@@ -104,7 +103,7 @@ def persist_recap(match_id: str, recap: dict) -> None:
     consumer_group="%EVENTHUB_CONSUMER_GROUP%",
     cardinality="many",
 )
-def on_match_events(events: list[func.EventHubEvent]) -> None:
+def on_match_events(events: List[func.EventHubEvent]) -> None:   # typing.List: the worker rejects list[...] here
     """Fan-in on the live feed; acts only on full-time whistles."""
     finished = set()
     for event in events:

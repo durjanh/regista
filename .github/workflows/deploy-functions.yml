@@ -51,4 +51,4 @@ jobs:
           (cd backend/functions && zip -qr "$RUNNER_TEMP/functions.zip" . -x "local.settings*" "__pycache__/*" ".venv/*")
           az functionapp deployment source config-zip -g "$AZURE_RESOURCE_GROUP" -n "$app" --src "$RUNNER_TEMP/functions.zip" --build-remote true -o none
           echo "## Functions deployed to $app" >> "$GITHUB_STEP_SUMMARY"
-          az functionapp function list -g "$AZURE_RESOURCE_GROUP" -n "$app" --query "[].name" -o tsv >> "$GITHUB_STEP_SUMMARY"
+          scripts/ci/check-functions-indexed.sh "$AZURE_RESOURCE_GROUP" "$app" | tee -a "$GITHUB_STEP_SUMMARY"   # fails on 0 functions
