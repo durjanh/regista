@@ -6,18 +6,11 @@ on:
       threshold:
         description: Minimum pass rate (0..1)
         default: "0.9"
-  schedule:
-    - cron: "0 5 * * *"
+# Manual only: it calls the deployed models (billed tokens), so it runs when you choose.
 
 permissions:
   id-token: write
   contents: read
-
-env:
-  AZURE_RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP }}
-  # Let az install the containerapp extension on first use without prompting.
-  AZURE_EXTENSION_USE_DYNAMIC_INSTALL: yes_without_prompt
-  DEPLOYMENT_NAME: main
 
 jobs:
   evaluate:
@@ -41,24 +34,27 @@ jobs:
           python -m pip install --upgrade pip
           if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; else pip install -r requirements.txt; fi
 
-      - uses: azure/login@v2
+      - id: azure
+        uses: ./.github/actions/azure-context
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          vars-json: ${{ toJSON(vars) }}
 
-      - name: Point the evaluator at the deployed Foundry project
+      # The API's own settings name every endpoint the evaluator needs, however the environment was provisioned.
+      - name: Point the evaluator at the deployed Foundry project (from the API's settings)
         run: |
-          out() { az deployment group show -g "$AZURE_RESOURCE_GROUP" -n "$DEPLOYMENT_NAME" --query "properties.outputs.$1.value" -o tsv; }
-          {
-            echo "AZURE_OPENAI_ENDPOINT=$(out AZURE_OPENAI_ENDPOINT)"
-            echo "FOUNDRY_PROJECT_ENDPOINT=$(out FOUNDRY_PROJECT_ENDPOINT)"
-            echo "AZURE_AI_SERVICES_ENDPOINT=$(out AZURE_AI_SERVICES_ENDPOINT)"
-            echo "AZURE_AI_SERVICES_REGION=$(out AZURE_LOCATION)"
-            echo "AZURE_AI_SERVICES_RESOURCE_ID=$(out AZURE_AI_SERVICES_RESOURCE_ID)"
-            echo "AZURE_OPENAI_CHAT_DEPLOYMENT=chat"
-            echo "AZURE_OPENAI_REASONING_DEPLOYMENT=reasoning"
-          } >> "$GITHUB_ENV"
+          az containerapp show -g "$AZURE_RESOURCE_GROUP" -n "${{ steps.azure.outputs.api_app }}" \
+            --query "properties.template.containers[0].env" -o json | python3 -c "
+          import json, os, sys
+          keep = {'AZURE_OPENAI_ENDPOINT', 'FOUNDRY_PROJECT_ENDPOINT', 'AZURE_AI_SERVICES_ENDPOINT', 'AZURE_AI_SERVICES_REGION',
+                  'AZURE_AI_SERVICES_RESOURCE_ID', 'AZURE_OPENAI_CHAT_DEPLOYMENT', 'AZURE_OPENAI_REASONING_DEPLOYMENT'}
+          with open(os.environ['GITHUB_ENV'], 'a') as env:
+              for e in json.load(sys.stdin):
+                  if e['name'] in keep and e.get('value'):
+                      env.write(f\"{e['name']}={e['value']}\\n\"); print(e['name'], 'set')
+          "
 
       - name: Run evaluations
         run: |

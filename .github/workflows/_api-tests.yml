@@ -1,6 +1,6 @@
 # Reusable: API lint, unit tests (coverage floor 90%), integration tests, offline evaluation gate.
 # Called by ci.yml and by the matching deploy workflow, so a deploy runs exactly the checks CI runs.
-name: API tests
+name: Shared · API tests
 
 on:
   workflow_call:

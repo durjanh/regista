@@ -1,17 +1,10 @@
-name: Deploy API
+name: API
 
 # The API (FastAPI backend: analytics, agents, MCP, live streams): the same checks as CI, then build the image with
-# ACR Tasks (no Docker on the runner) and roll out a new revision. The image bundles data/. "Deploy jobs" follows.
+# ACR Tasks (no Docker on the runner) and roll out a new revision. The image bundles data/. Manual and independent.
 on:
-  workflow_dispatch:
-  workflow_call:
-  push:
-    branches: [main]
-    paths:
-      - "services/api/**"
-      - "data/**"
-      - ".github/workflows/deploy-api.yml"
-      - ".github/workflows/_api-tests.yml"
+  workflow_dispatch:   # manual and independent: run it when you choose to deploy this part
+  workflow_call:       # also used by Full environment
 
 permissions:
   id-token: write

@@ -1,14 +1,10 @@
-name: Deploy jobs
+name: Container jobs
 
-# Container Apps jobs: the feeder replays a match into Event Hubs with the API's code, so it follows the API. Runs
-# after every successful "Deploy API" on main (or by hand) and points the job at the image the API runs.
+# Container Apps jobs: the feeder replays a match into Event Hubs with the API's code. Manual and independent: run it
+# after deploying the API when the feeder should use the new image.
 on:
-  workflow_dispatch:
-  workflow_call:
-  workflow_run:
-    workflows: ["Deploy API"]
-    types: [completed]
-    branches: [main]
+  workflow_dispatch:   # manual and independent: run it when you choose to deploy this part
+  workflow_call:       # also used by Full environment
 
 permissions:
   id-token: write
@@ -17,7 +13,6 @@ permissions:
 jobs:
   update:
     name: Update the feeder job
-    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     environment: production
     steps:

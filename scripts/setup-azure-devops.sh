@@ -152,8 +152,7 @@ if [[ -n "$REPO" ]]; then
     ado devops service-endpoint update --id "$GH_ID" --enable-for-all true -o none
     extra=(--service-connection "$GH_ID")
   fi
-  # In the \Regista folder: the test run, the full-environment run, then one pipeline per part. "Container jobs" follows
-  # "API" by name (jobs.yml: source Regista\API), so API is created first.
+  # In the \Regista folder: the test run (automatic), the full-environment run, then one manual pipeline per part.
   for entry in "ci:Test everything" "azure-dev:Full environment" "infra:Infrastructure" "api:API" "frontend:Frontend" \
                "functions:Functions" "jobs:Container jobs"; do
     file="${entry%%:*}" name="${entry#*:}"
@@ -170,7 +169,7 @@ cat <<EOF
 Done. In Azure DevOps:
   1. Pipelines > Environments > regista-$PROFILE > Approvals and checks: add yourself,
      so every Provision and Deploy waits for a person to read the what-if.
-  2. First time: run Regista > "Full environment" with profile=$PROFILE (everything). After that, each part deploys
-     on its own when its code changes on main: Infrastructure, API, Frontend, Functions, Container jobs.
+  2. First time: run Regista > "Full environment" with profile=$PROFILE (everything). After that, run the pipeline
+     of the part you want to deploy: Infrastructure, API, Frontend, Functions, Container jobs (each independent).
 EOF
 [[ "$PROFILE" == "aks-enterprise" ]] && echo "  3. After the first Provision, the pool's name is the AZURE_DEVOPS_POOL_NAME output; pass it as managedPool."

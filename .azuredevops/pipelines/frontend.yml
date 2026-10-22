@@ -2,15 +2,7 @@
 # site with `azd deploy web` ("web" is the frontend's service name in azure.yaml). The postdeploy hook checks the
 # site answers and the API accepts its origin (CORS).
 
-trigger:
-  branches:
-    include:
-      - main
-  paths:
-    include:
-      - apps/web
-      - .azuredevops/pipelines/frontend.yml
-      - .azuredevops/pipelines/templates/frontend-tests.yml
+trigger: none   # manual: run it when you choose to deploy this part
 pr: none
 
 parameters:

@@ -1,14 +1,6 @@
 # Regista Azure Functions (recap automation, Flex Consumption): check the code, then zip-deploy it with a remote build.
 
-trigger:
-  branches:
-    include:
-      - main
-  paths:
-    include:
-      - services/functions
-      - .azuredevops/pipelines/functions.yml
-      - .azuredevops/pipelines/templates/functions-deploy.yml
+trigger: none   # manual: run it when you choose to deploy this part
 pr: none
 
 parameters:

@@ -1,18 +1,8 @@
 # Regista API (FastAPI backend: analytics, agents, MCP, live streams): test, then build the image and deploy only the
 # API with `azd deploy api` (Container Apps, or AKS through the Kubernetes manifests). The API image bundles data/.
-# A successful run triggers jobs.yml, which moves the feeder job onto the new image.
+# Manual and independent; run Container jobs afterwards if the feeder should use the new image too.
 
-trigger:
-  branches:
-    include:
-      - main
-  paths:
-    include:
-      - services/api
-      - data
-      - deploy/k8s
-      - .azuredevops/pipelines/api.yml
-      - .azuredevops/pipelines/templates/api-tests.yml
+trigger: none   # manual: run it when you choose to deploy this part
 pr: none
 
 parameters:

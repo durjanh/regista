@@ -1,16 +1,9 @@
 name: Infrastructure
 
 # Infrastructure as code only (Bicep): what-if, then deploy behind the `production` environment. No application code;
-# each service has its own workflow (deploy-api, deploy-frontend, deploy-functions, deploy-jobs).
+# each part has its own workflow (API, Frontend, Functions, Container jobs). Manual.
 on:
-  workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - "infra/**"
-      - "deploy/pipeline-env.txt"
-      - ".github/workflows/infra.yml"
-      - ".github/actions/azure-context/**"
+  workflow_dispatch:   # manual and independent: run it when you choose to deploy this part
 
 permissions:
   id-token: write

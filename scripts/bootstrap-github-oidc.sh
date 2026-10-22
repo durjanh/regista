@@ -150,8 +150,8 @@ cat <<EOF
 Done. Next steps:
   1. Infrastructure (Bicep only):       gh workflow run infra.yml --repo $REPO
   2. Everything else, once:             gh workflow run deploy.yml --repo $REPO
-     After that each part deploys on its own when its code changes: deploy-api, deploy-frontend,
-     deploy-functions, and deploy-jobs (after each API deploy). Approve each run in the Actions tab.
+     After that run the workflow of the part you want to deploy (API, Frontend, Functions,
+     Container jobs); each is manual and independent. Approve each run in the Actions tab.
   3. Watch progress:                    gh run watch --repo $REPO
   4. (Optional) Fabric:                 python scripts/fabric-setup.py --help
 

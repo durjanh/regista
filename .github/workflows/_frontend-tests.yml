@@ -1,6 +1,6 @@
 # Reusable: frontend typecheck, Vitest (coverage floor), production build.
 # Called by ci.yml and by the matching deploy workflow, so a deploy runs exactly the checks CI runs.
-name: Frontend tests
+name: Shared · Frontend tests
 
 on:
   workflow_call:

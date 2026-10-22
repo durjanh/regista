@@ -1,15 +1,10 @@
-name: Deploy functions
+name: Functions
 
 # Azure Functions (recap automation, Flex Consumption): check the app imports and registers its functions, then zip
 # deploy with a remote build (the platform installs requirements.txt on Linux).
 on:
-  workflow_dispatch:
-  workflow_call:
-  push:
-    branches: [main]
-    paths:
-      - "services/functions/**"
-      - ".github/workflows/deploy-functions.yml"
+  workflow_dispatch:   # manual and independent: run it when you choose to deploy this part
+  workflow_call:       # also used by Full environment
 
 permissions:
   id-token: write

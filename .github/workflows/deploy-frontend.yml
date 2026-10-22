@@ -1,16 +1,10 @@
-name: Deploy frontend
+name: Frontend
 
 # The frontend (React SPA on Azure Static Web Apps): the same checks as CI, then build with the API's address (the SPA
 # calls it directly) and upload. The deployment token is read at run time through OIDC; it is never stored.
 on:
-  workflow_dispatch:
-  workflow_call:
-  push:
-    branches: [main]
-    paths:
-      - "apps/web/**"
-      - ".github/workflows/deploy-frontend.yml"
-      - ".github/workflows/_frontend-tests.yml"
+  workflow_dispatch:   # manual and independent: run it when you choose to deploy this part
+  workflow_call:       # also used by Full environment
 
 permissions:
   id-token: write

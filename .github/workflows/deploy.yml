@@ -1,7 +1,7 @@
-name: Deploy all
+name: Full environment
 
 # Everything in one run, for the first deployment or a rebuild: the API, then the frontend (it needs the API's
-# address), the Function app and the feeder job. Day to day each part deploys on its own when its code changes.
+# address), the Function app and the feeder job. Day to day, run each part's own workflow when you choose.
 on:
   workflow_dispatch:
 

@@ -66,18 +66,19 @@ Known limits: the AKS application routing add-on's NGINX is supported by Microso
 
 ### Azure DevOps pipelines
 
-One pipeline per part, so a change ships only what it touches: a frontend change deploys the frontend, a Function
-change deploys the Function app. Each runs its tests first; every deployment is a deployment job on the environment
-`regista-<profile>`, so its approval check gates it. Parameter `profile` (default `containerapps`).
+One pipeline per part, each independent: you run the one you want to deploy, and nothing deploys on its own (no
+deploy on push, no pipeline starting another). Each runs its tests first; every deployment is a deployment job on the
+environment `regista-<profile>`, so its approval check gates it. Parameter `profile` (default `containerapps`).
+Only *Test everything* runs automatically, on every push to `main` and every pull request; it deploys nothing.
 
-| Pipeline (folder `\Regista`) | File | Runs on a change to (main) | What it does |
+| Pipeline (folder `\Regista`) | File | Runs | What it does |
 |---|---|---|---|
-| Test everything | `ci.yml` | anything, and every PR | Ruff, pytest (90% floor), integration, evaluation gate, Vitest (floor), build, Playwright, Bicep, manifests and hooks. Mirrors `.github/workflows/ci.yml` |
-| Infrastructure | `infra.yml` | `infra/`, the `azure.yaml` files, `deploy/hooks/` | Bicep build + lint → what-if → **Provision** (no application code) |
-| API | `api.yml` | `services/api/`, `data/`, `deploy/k8s/` | API checks → **`azd deploy api`** → deployed integration tests. Enterprise: the deploy runs on the Managed DevOps Pool |
-| Frontend | `frontend.yml` | `apps/web/` | Typecheck, Vitest, build → **`azd deploy web`** (Static Web Apps; `web` is the frontend's azd service name) |
-| Functions | `functions.yml` | `services/functions/` | Dependencies resolve and the app registers its functions → **zip deploy with a remote build** (Flex Consumption) |
-| Container jobs | `jobs.yml` | after every successful API run | Container Apps: moves the feeder job onto the API's new image (it runs the API's code) |
+| Test everything | `ci.yml` | automatically: push to `main`, every PR | Ruff, pytest (90% floor), integration, evaluation gate, Vitest (floor), build, Playwright, Bicep, manifests and hooks. Deploys nothing |
+| Infrastructure | `infra.yml` | manual | Bicep build + lint → what-if → **Provision** (no application code) |
+| API | `api.yml` | manual | API checks → **`azd deploy api`** → deployed integration tests. Enterprise: the deploy runs on the Managed DevOps Pool |
+| Frontend | `frontend.yml` | manual | Typecheck, Vitest, build → **`azd deploy web`** (Static Web Apps; `web` is the frontend's azd service name) |
+| Functions | `functions.yml` | manual | Dependencies resolve and the app registers its functions → **zip deploy with a remote build** (Flex Consumption) |
+| Container jobs | `jobs.yml` | manual | Container Apps: points the feeder job at the image the API runs (run it after an API deploy if the feeder should follow) |
 | Full environment | `azure-dev.yml` | manual | Everything in one run: Preview → Provision → Deploy (all services, Functions, the feeder job). For the first setup or a rebuild |
 
 The test steps are shared templates (`templates/api-tests.yml`, `frontend-tests.yml`, `infra-validate.yml`), so CI and the service pipelines run the same checks; the deploy steps too (`azd-steps.yml`, `functions-deploy.yml`, `jobs-update.yml`).
@@ -182,22 +183,24 @@ The format is `KEY=value` pairs separated by `;`. It's plain text because azd pa
 
 ## 3. Build and deploy the apps
 
-GitHub Actions mirrors the Azure DevOps pipelines: infrastructure and each part deploy separately, each after the same
-checks CI runs, and every deployment waits for the `production` environment's required reviewer.
+GitHub Actions mirrors the Azure DevOps pipelines, with the same names: each part is a separate, manual workflow
+(*Run workflow* in the Actions tab, or `gh workflow run`), runs CI's checks first, and waits for the `production`
+environment's required reviewer. Only *Test everything* runs automatically (push to `main`, pull requests).
 
-| Workflow | Runs on a change to (main) | What it does |
-|---|---|---|
-| `ci.yml` | anything, and every PR | API and frontend tests (reusable `_api-tests.yml`, `_frontend-tests.yml`), Playwright, Bicep, manifests and hooks |
-| `infra.yml` | `infra/`, `deploy/pipeline-env.txt` | What-if (summary on the run page) → **Provision** (Bicep only, keeps the running API image) |
-| `deploy-api.yml` | `services/api/`, `data/` | API tests → image built by **ACR Tasks** → new revision → deployed integration tests |
-| `deploy-frontend.yml` | `apps/web/` | Frontend tests → build with the API's address → **Static Web Apps** upload (token read through OIDC, never stored) → site and CORS check |
-| `deploy-functions.yml` | `services/functions/` | The app imports and registers its functions → **zip deploy with a remote build** (Flex Consumption) |
-| `deploy-jobs.yml` | after every successful *Deploy API* | Points the feeder Container Apps Job at the API's new image |
-| `deploy.yml` | manual | All of the above in one run, for the first deployment or a rebuild |
+| Workflow | File | Runs | What it does |
+|---|---|---|---|
+| Test everything | `ci.yml` | automatically: push to `main`, every PR | API and frontend tests (the shared `_api-tests.yml`, `_frontend-tests.yml`), Playwright, Bicep, manifests and hooks |
+| Infrastructure | `infra.yml` | manual | What-if (summary on the run page) → **Provision** (Bicep only, keeps the running API image) |
+| API | `deploy-api.yml` | manual | API tests → image built by **ACR Tasks** → new revision → deployed integration tests |
+| Frontend | `deploy-frontend.yml` | manual | Frontend tests → build with the API's address → **Static Web Apps** upload (token read through OIDC, never stored) → site and CORS check |
+| Functions | `deploy-functions.yml` | manual | The app imports and registers its functions → **zip deploy with a remote build** (Flex Consumption) |
+| Container jobs | `deploy-jobs.yml` | manual | Points the feeder Container Apps Job at the API's image |
+| Full environment | `deploy.yml` | manual | All of the above in one run, for the first deployment or a rebuild |
+| Foundry evaluations | `evals.yml` | manual | Groundedness, fact-check and safety evaluations against the deployed models (billed tokens) |
 
 ```bash
 gh workflow run infra.yml          # first: the infrastructure
-gh workflow run deploy.yml         # then everything once; afterwards each part deploys on its own
+gh workflow run deploy.yml         # then everything once; afterwards run each part's workflow when you choose
 gh run watch                       # approve each deployment in the Actions tab (production environment)
 ```
 

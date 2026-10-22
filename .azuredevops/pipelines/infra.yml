@@ -1,21 +1,9 @@
 # Regista infrastructure as code: what-if, then provision (Bicep through azd). No application code is deployed here;
 # each service has its own pipeline (api.yml, web.yml, functions.yml, jobs.yml).
-# Runs when the templates, the azd projects or the hooks change on main; Provision waits for approval on the
-# "regista-<profile>" environment after you have read the what-if.
+# Manual: run it when you change the infrastructure. Provision waits for approval on the "regista-<profile>"
+# environment after you have read the what-if.
 
-trigger:
-  branches:
-    include:
-      - main
-  paths:
-    include:
-      - infra
-      - azure.yaml
-      - deploy/aks/azure.yaml
-      - deploy/aks-enterprise/azure.yaml
-      - deploy/hooks
-      - deploy/pipeline-env.txt
-      - .azuredevops/pipelines/infra.yml
+trigger: none   # manual: run it when you choose to deploy this part
 pr: none
 
 parameters:

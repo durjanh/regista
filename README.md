@@ -253,7 +253,7 @@ parallelism has been purchased or granted*. Either request the free grant (https
 set *MS Hosted CI/CD* to 1 (about $40/month; set it back to 0 afterwards). The enterprise Deploy stage runs on the
 Managed DevOps Pool, which uses the organisation's free self-hosted parallel job; its VMs bill to your subscription.
 
-`.azuredevops/pipelines/ci.yml` mirrors GitHub CI. Each part then has its own pipeline, triggered only by its own changes on `main`: `infra.yml` (what-if → provision), `api.yml`, `frontend.yml`, `functions.yml` and `jobs.yml` (the feeder job follows each API deploy). `azure-dev.yml` deploys everything in one run, for the first setup. Every deployment waits for approval on the `regista-<profile>` environment ([details](docs/DEPLOYMENT.md#azure-devops-pipelines)). One-time setup (keyless service connection, variable group, all pipelines):
+`.azuredevops/pipelines/ci.yml` (*Test everything*) mirrors GitHub CI and is the only pipeline that runs automatically; it deploys nothing. Each part has its own manual, independent pipeline: `infra.yml` (what-if → provision), `api.yml`, `frontend.yml`, `functions.yml` and `jobs.yml` (the feeder job). `azure-dev.yml` (*Full environment*) deploys everything in one run, for the first setup. Every deployment waits for approval on the `regista-<profile>` environment ([details](docs/DEPLOYMENT.md#azure-devops-pipelines)). One-time setup (keyless service connection, variable group, all pipelines):
 
 ```bash
 az extension add --name azure-devops
@@ -268,10 +268,9 @@ Then add an approval check on the `regista-<profile>` environment and run **Regi
 
 ### 5. GitHub Actions (Container Apps)
 
-The same split as Azure DevOps: `infra.yml` (Bicep only), then `deploy-api.yml`, `deploy-frontend.yml`,
-`deploy-functions.yml` and `deploy-jobs.yml`, each triggered only by its own changes on `main`, each running CI's
-checks first and waiting for approval on the `production` environment. `deploy.yml` deploys everything once
-([details](docs/DEPLOYMENT.md#3-build-and-deploy-the-apps)).
+The same pipelines and names as Azure DevOps: *Infrastructure*, *API*, *Frontend*, *Functions*, *Container jobs* and
+*Full environment*, each manual and independent, each running CI's checks first and waiting for approval on the
+`production` environment. Only *Test everything* runs automatically ([details](docs/DEPLOYMENT.md#3-build-and-deploy-the-apps)).
 
 ```bash
 gh auth login
