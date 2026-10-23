@@ -39,7 +39,7 @@ Built for the Microsoft + Premier League *Inside the Game* Developer Hackathon w
 | **Air-ready overlays** (`/overlay/:id`) | Transparent 1920×1080 browser source for OBS / vMix driven by the cue contract (timecode, duration, priority, template, data, strings); data-only graphics fire even if AI text is slow. Add `?preview=1` to check it in a browser (checkerboard background and a "waiting for graphics" note) |
 | **Matchday** (`/match/:id`) | **Live broadcast** (one shared timeline for every viewer, fanned out by Azure Web PubSub) or a personal **replay** (own speed and seek). Five views that differ in layout and pace, not just wording: **Analyst** (dense: pitch, pulse, insight cards, event feed with pass difficulty / ball and shot speed / sprint tags, key battle), **Casual** (big moments only, unhurried), **Player focus** (one player's touches, distance, sprints, top speed), **Club focus** (one side's story) and **Single metric** (one huge live number for a second screen). Plus control vs chaos, freeze frames, seven personas, 12 languages, neural voice and audio description |
 | **Dugout** (`/match/:id/dugout`) | For the manager: form vs a player's own baseline, fatigue vs team-mates (altitude-aware), "replace X with Y" with predicted win-probability impact, chase/protect changes, danger men, opponent patterns, spoken assistant-coach briefing |
-| **Scouting** (`/scouting`) | Player DNA (REAL record + MODEL tendencies: favourite side, foot, penalty placement, keeper dives, distance, sprints), strengths and weaknesses vs peers, "how to stop him"; a team report for every scouted national team, with real home/away records and "how to play against them" |
+| **Scouting** (`/scouting`) | Player DNA (REAL record + MODEL tendencies: favourite side, foot, penalty placement, keeper dives, distance, sprints), strengths and weaknesses vs peers, "how to stop him"; a team report for every scouted national team (all of the Elo top 32), with real home/away records and "how to play against them" |
 | **Tactics, Ask, Recap** | Pass networks and profiles, shape changes, xG waterfalls; "Ask the match" via an agent using MCP tools; multi-agent recaps with run-sheets and social packs in every persona and language |
 | **Data Forge** (`/forge`) | Natural-language what-if matches, calibration report, truth score history; a full synthetic **season** generator with planted changes and a realism report for the Fabric Lakehouse |
 | **Ops** (`/ops`) | Narrative latency SLO (p50 / p95 vs target) and cost per match (model calls, tokens, estimated cost) |
@@ -78,7 +78,7 @@ Every push runs `python -m app.evals.run --mode offline` as a gate:
 | Win-probability Brier score on real outcomes | **0.469** (coin flip: 0.667) |
 | Tests | **API:** 155 unit tests, 96% statement coverage (CI floor 90%); 9 live-server integration tests over real HTTP, SSE and MCP (30 concurrent viewers, first event p95 320 ms); 6 deployed-environment tests incl. a Web PubSub round trip. **Web:** 145 Vitest tests (CI coverage floor); **17 Playwright end-to-end tests** in a real browser against the real API, incl. the hero moment, the overlay, axe accessibility scans and RTL Arabic |
 | Shape changes vs ground truth | 67% precision |
-| Scouting rediscovers player tendencies | foot 100%, penalty side 82%, keeper dive 100% |
+| Scouting rediscovers player tendencies (674 players, every Elo top-32 team) | foot 100%, penalty side 87%, keeper dive 83% |
 
 ## Enterprise controls
 

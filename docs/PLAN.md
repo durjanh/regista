@@ -63,7 +63,7 @@ Broadcasters want AI insight on screen, but one wrong stat on air costs trust, a
 | Real-result fidelity | **100%** (score, scorers, minutes) |
 | Calibration vs real fixtures and event ranges | **16/16**; goals-vs-Elo slope 0.0021 engine vs 0.0021 real; win-probability Brier **0.469** (coin flip 0.667) |
 | Shape changes vs ground truth | **67%** precision |
-| Scouting recovery | foot **100%**, penalty side **82%**, keeper dive **100%** |
+| Scouting recovery (674 players, Elo top 32) | foot **100%**, penalty side **87%**, keeper dive **83%** |
 
 Honest by design: scores come from seeds never used for tuning, split by difficulty and mechanism. Showcase misses (France's near-post corner routine, Mexico's tiring right-back) stay in the product as misses.
 

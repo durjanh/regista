@@ -89,25 +89,39 @@ class MatchStore:
 
     # ------------------------------------------------------------------ scouting corpus
 
-    def build_corpus(self, per_team: int | None = None) -> list[dict]:
-        """Simulated matches for every featured team (not listed in /api/matches) so scouting has enough minutes,
-        shots and penalties per player to rediscover tendencies."""
+    def build_corpus(self, per_team: int | None = None, others_per_team: int | None = None) -> list[dict]:
+        """Simulated matches (not listed in /api/matches) so scouting has enough minutes, shots and penalties per
+        player to rediscover tendencies: `per_team` for each featured team, and `others_per_team` for every other
+        team in the Elo top 32, so a top side never goes unscouted just because no featured fixture includes it."""
         if self.corpus:
             return self.corpus
         per_team = per_team if per_team is not None else int(os.environ.get("REGISTA_CORPUS_PER_TEAM", "6"))
+        others_per_team = (others_per_team if others_per_team is not None
+                           else int(os.environ.get("REGISTA_CORPUS_OTHERS_PER_TEAM", "4")))
         ref = reference()
         featured_teams = sorted({_slug(t) for _, h, a in FEATURED for t in (h, a)})
         top = [t["team_id"] for t in ref.ranking(limit=24)]
         docs = []
+
+        def simulate(home: str, away: str, seed: int, neutral: bool) -> None:
+            doc = build_what_if(home, away, seed=seed, max_tries=1, neutral=neutral, ref=ref)
+            if self.xt_grid:
+                xt.annotate(doc["events"], self.xt_grid)
+            docs.append(doc)
+
         for i, tid in enumerate(featured_teams):
             opponents = [t for t in featured_teams + top if t != tid]
             for k in range(per_team):
                 opp = opponents[(i * 3 + k * 5) % len(opponents)]
                 home, away = (tid, opp) if k % 2 == 0 else (opp, tid)
-                doc = build_what_if(home, away, seed=7000 + i * 100 + k, max_tries=1, neutral=(k % 3 == 0), ref=ref)
-                if self.xt_grid:
-                    xt.annotate(doc["events"], self.xt_grid)
-                docs.append(doc)
+                simulate(home, away, 7000 + i * 100 + k, neutral=(k % 3 == 0))
+        # The rest of the top 32, against the featured teams (their own seed range, so the games above don't change).
+        others = [t["team_id"] for t in ref.ranking(limit=32) if t["team_id"] not in featured_teams]
+        for j, tid in enumerate(others):
+            for k in range(others_per_team):
+                opp = featured_teams[(j * 3 + k * 5) % len(featured_teams)]
+                home, away = (tid, opp) if k % 2 == 0 else (opp, tid)
+                simulate(home, away, 9000 + j * 100 + k, neutral=(k % 3 == 0))
         self.corpus = docs
         return docs
 
