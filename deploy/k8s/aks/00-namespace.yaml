@@ -1,7 +1,0 @@
-# Regista on AKS. azd renders {{.Env.NAME}} from the environment (Bicep outputs + SERVICE_*_IMAGE_NAME).
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: regista
-  labels:
-    app.kubernetes.io/part-of: regista

@@ -1,0 +1,8 @@
+# Regista on AKS. azd renders Go-template placeholders (.Env.NAME in double braces) from the environment (Bicep
+# outputs + SERVICE_*_IMAGE_NAME), but only in files named *.tmpl.yaml: a plain .yaml file is applied unrendered.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: regista
+  labels:
+    app.kubernetes.io/part-of: regista

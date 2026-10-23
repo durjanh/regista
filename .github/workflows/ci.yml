@@ -108,7 +108,7 @@ jobs:
 
       - name: Shared manifests are identical in both AKS profiles
         run: |
-          for f in 00-namespace.yaml 01-serviceaccount.yaml 02-networkpolicy.yaml 10-deployment.yaml 11-service.yaml 20-feeder-cronjob.yaml; do
+          for f in 00-namespace.tmpl.yaml 01-serviceaccount.tmpl.yaml 02-networkpolicy.tmpl.yaml 10-deployment.tmpl.yaml 11-service.tmpl.yaml 20-feeder-cronjob.tmpl.yaml; do
             diff "deploy/k8s/aks/$f" "deploy/k8s/aks-enterprise/$f"
           done
 

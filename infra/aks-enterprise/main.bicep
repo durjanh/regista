@@ -382,7 +382,7 @@ output APPLICATIONINSIGHTS_CONNECTION_STRING string = platform.outputs.appInsigh
 output FUNCTION_APP_NAME string = deployFunctions ? dashed('func', environmentName, tok) : ''
 output FABRIC_CAPACITY_NAME string = platform.outputs.fabricCapacityName
 
-// The API's service-contract settings, for the Kubernetes manifests (deploy/k8s/*/10-deployment.yaml)
+// The API's service-contract settings, for the Kubernetes manifests (deploy/k8s/*/10-deployment.tmpl.yaml)
 var apiSettings = apiServiceSettings(parseApiServiceSettings(apiServiceSettingsOverrides))
 output AZURE_COGNITIVE_SCOPE string = apiSettings.AZURE_COGNITIVE_SCOPE
 output AZURE_TOKEN_REFRESH_MARGIN_S string = apiSettings.AZURE_TOKEN_REFRESH_MARGIN_S

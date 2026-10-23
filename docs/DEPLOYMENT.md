@@ -169,7 +169,7 @@ Main parameters (`infra/main.bicepparam`):
 
 The API reads every endpoint, REST path, API version, limit and timeout from its settings (`backend/api/app/config.py`). There are no keys: every Azure call uses a Microsoft Entra token.
 
-- **Deployment-specific values** (the Azure OpenAI, AI Services, Cosmos DB, Storage, Event Hubs, Web PubSub and App Insights endpoints, CORS, the API's own URL) come from the provisioned resources. Container Apps sets them as container app settings; on AKS they reach the pod through the provision outputs and `deploy/k8s/*/10-deployment.yaml`.
+- **Deployment-specific values** (the Azure OpenAI, AI Services, Cosmos DB, Storage, Event Hubs, Web PubSub and App Insights endpoints, CORS, the API's own URL) come from the provisioned resources. Container Apps sets them as container app settings; on AKS they reach the pod through the provision outputs and `deploy/k8s/*/10-deployment.tmpl.yaml`.
 - **Service-contract values** (the token scope, Speech URL and output format, Translator path and API version, Content Safety paths, API version, text limit and block severity, Azure OpenAI path, timeout and retries, the shared REST client's timeout, the OneLake DFS endpoint) are defined once in `infra/modules/api-settings.bicep` and applied by every profile.
 
 Change one per environment without touching code, then re-provision:
