@@ -55,10 +55,12 @@ services:
           printf 'VITE_API_BASE_URL=%s\n' "$API_URL" > .env.production.local
           # azd up packages before it provisions; rebuild if this bundle was built without the API's address.
           if [ -d dist ] && ! grep -rqs "${API_URL#https://}" dist/assets; then npm run build; fi
+# The shared hooks live in deploy/hooks, outside this project folder. azd 1.37+ refuses a hook *path* that leaves the
+# project ("escapes project root"), so each runs as an inline command instead (working directory: this folder).
 hooks:
   postprovision:
     shell: sh
-    run: ../hooks/postprovision.sh
+    run: sh ../hooks/postprovision.sh
   postdeploy:
     shell: sh
-    run: ../hooks/postdeploy.sh
+    run: sh ../hooks/postdeploy.sh
