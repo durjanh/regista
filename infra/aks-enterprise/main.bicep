@@ -53,8 +53,11 @@ param aksNodeVmSize string = 'Standard_D4ds_v6'
 param aksNodeMinCount string = '2'
 param aksNodeMaxCount string = '2'
 
-@description('Managed DevOps Pool agent size (v6: see aksNodeVmSize).')
-param agentVmSize string = 'Standard_D2ds_v6'
+// Not v6/v7: Azure Pipelines agent images don't support their disk controller (Microsoft Learn, Managed DevOps Pools
+// "Configure images"). Standard_D2ads_v5 is the Managed DevOps Pools default size. Pools have their own core quota
+// (Quotas > Managed DevOps Pools), separate from the subscription's compute quota.
+@description('Managed DevOps Pool agent size (not v6/v7: Azure Pipelines images do not support them).')
+param agentVmSize string = 'Standard_D2ads_v5'
 
 @allowed([
   'true'

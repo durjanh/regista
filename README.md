@@ -228,19 +228,85 @@ Set `LETSENCRYPT_EMAIL` first (`azd env set LETSENCRYPT_EMAIL you@example.com`):
 
 ### 3c. AKS enterprise (private, behind API Management)
 
+The cluster and registry are private: you **provision from your machine**, then **deploy the app from the Azure DevOps
+pipeline**, whose Deploy stage runs on a Managed DevOps Pool agent inside the VNet. About $1,000–1,400 a month while it
+runs (API Management Standard v2 is most of it), so tear it down when you're done.
+
+**1. Check capacity first (once per subscription and region).** Three separate limits apply:
+
+| What | Needed | Where to check or request |
+|---|---|---|
+| Compute vCPUs for the AKS nodes (`Standard Ddsv6 Family`) | 8 (2 nodes × 4), more for upgrade surge: request 20 | Portal → Quotas → Compute |
+| **Managed DevOps Pools** cores for the agent (`Standard DADSv5 Family`) | 2. New subscriptions can start at 0 for every family | Portal → Quotas → **Managed DevOps Pools** → Request adjustment (usually approved in moments) |
+| API Management **Standard v2** in the region | 1 instance | No quota page: if Azure has paused new Standard v2 instances in the region (`ApiServiceCreationDisabledForSubscription`), retry later or use another region for the whole profile (API Management and the VNet must share a region) |
+
+Model quota (`gpt-5-mini`) as in step 2b. The agent size is `Standard_D2ads_v5` on purpose: Azure Pipelines agent
+images don't support v6/v7 sizes.
+
+**Choosing the region.** Every service in this profile must be offered in the region, and API Management must share it
+with the VNet. As of October 2026 (re-check: [API Management v2 regions](https://learn.microsoft.com/azure/api-management/api-management-region-availability)):
+
+| Region | API Management Standard v2 | Dev Center (agent pool) | `gpt-5-mini` | Notes |
+|---|---|---|---|---|
+| UK South | paused for new instances | yes | yes | new subscriptions also start with 0 agent-pool cores |
+| UK West | yes | **no** | **no** | not usable for this profile |
+| **Sweden Central** | yes | yes | yes | works end to end; default agent-pool quota (5 cores); data stays in the EU |
+
+**2. Create the environment and provision** (30–45 minutes):
+
 ```bash
 cd deploy/aks-enterprise
-azd env new regent
+azd env new regent --location swedencentral                       # see "Choosing the region"
 azd env set AZURE_RESOURCE_GROUP rg-regista-ent
+azd env set CHAT_MODEL_NAME gpt-5-mini && azd env set CHAT_MODEL_VERSION 2025-08-07          # if gpt-5.4-mini quota is 0
+azd env set REASONING_MODEL_NAME gpt-5-mini && azd env set REASONING_MODEL_VERSION 2025-08-07
 azd env set APIM_PUBLISHER_EMAIL you@example.com
-azd env set AZURE_DEVOPS_ORG_URL https://dev.azure.com/<org>        # for the in-VNet Managed DevOps Pool
+azd env set AZURE_DEVOPS_ORG_URL https://dev.azure.com/<org>                                  # the in-VNet agent pool registers here
 azd env set DEVOPS_INFRASTRUCTURE_PRINCIPAL_ID "$(az ad sp list --display-name DevOpsInfrastructure --query '[0].id' -o tsv)"
+azd env set FABRIC_WORKSPACE_NAME Regista                                                     # optional (step 3d)
+azd env set BUDGET_EMAIL you@example.com                                                      # optional budget alert
 azd provision --preview
 (cd ../.. && scripts/preview-all.sh --profile aks-enterprise)       # full what-if + Fabric dry run (managed private endpoint)
 azd provision                                                       # API_URL = API Management gateway, WEB_URL = Static Web App
 ```
 
-The AKS API server and the registry are private, so **deploy from the Azure DevOps pipeline**: its Deploy stage runs on the Managed DevOps Pool inside the VNet. Development only: `azd env set AKS_PRIVATE_CLUSTER false` and `azd env set AKS_AUTHORIZED_IP_RANGES <your-ip>/32` make the API server public but IP-restricted. There is no WAF in this profile; for production, add Front Door Premium in front of API Management ([design and steps](docs/ARCHITECTURE.md#future-azure-front-door-in-front-of-api-management)).
+The postprovision hook grants roles and runs the Fabric setup; on this profile it also creates and approves a Fabric
+managed private endpoint to the private Event Hubs. Fabric tests a new connection from its shared service, which the
+private namespace may refuse: the hook then prints a one-line portal step instead of failing. It skips the `kubectl`
+steps because your machine can't reach the private cluster.
+
+**3. Connect Azure DevOps to the environment** (once): service connection, variable group `regista-aks-enterprise` and
+environment `regista-aks-enterprise`.
+
+```bash
+cd ../..
+az extension add --name azure-devops
+export AZURE_DEVOPS_EXT_PAT=<PAT: service connections, variable groups, environments, build>
+scripts/setup-azure-devops.sh --org https://dev.azure.com/<org> --project <project> \
+  --profile aks-enterprise --rg rg-regista-ent --location swedencentral --env regent \
+  --apim-email you@example.com --repo-type github --repo <owner>/<repo> --github-connection <github-service-connection>
+```
+
+Then add an **approval check** on the `regista-aks-enterprise` environment (Pipelines → Environments).
+
+**4. Deploy from the pipeline.** Commit and push first: the pipeline builds from the repository.
+
+```bash
+azd -C deploy/aks-enterprise env get-value AZURE_DEVOPS_POOL_NAME     # the agent pool's name
+```
+
+Run **Regista › Full environment** with **profile = `aks-enterprise`** and **managedPool = that name**. Its Deploy stage
+runs on the in-VNet agent: it builds the API image into the private registry and applies `deploy/k8s/aks-enterprise`.
+
+**5. Check it:** `azd -C deploy/aks-enterprise env get-value API_URL` (the API Management gateway, the only public entry
+point) and `WEB_URL` (the site). Open the site and run the judge-mode steps.
+
+**Tear down:** `azd down --purge` from `deploy/aks-enterprise` (it also purges the soft-deleted API Management and
+Foundry accounts).
+
+Development only: `azd env set AKS_PRIVATE_CLUSTER false` and `azd env set AKS_AUTHORIZED_IP_RANGES <your-ip>/32` make
+the API server public but IP-restricted. There is no WAF in this profile; for production, add Front Door Premium in front
+of API Management ([design and steps](docs/ARCHITECTURE.md#future-azure-front-door-in-front-of-api-management)).
 
 ### 3e. Live broadcast at scale (Web PubSub)
 
@@ -271,7 +337,7 @@ Managed DevOps Pool, which uses the organisation's free self-hosted parallel job
 az extension add --name azure-devops
 export AZURE_DEVOPS_EXT_PAT=<PAT: service connections, variable groups, environments, build>
 scripts/setup-azure-devops.sh --org https://dev.azure.com/<org> --project <project> \
-  --profile aks-enterprise --rg rg-regista-ent --location uksouth --env regent \
+  --profile aks-enterprise --rg rg-regista-ent --location swedencentral --env regent \
   --apim-email you@example.com --budget-email you@example.com \
   --repo-type github --repo <owner>/<repo> --github-connection <github-service-connection>
 ```
