@@ -147,7 +147,8 @@ if [[ -n "$REPO" ]]; then
   extra=()
   if [[ "$REPO_TYPE" == "github" ]]; then
     # az pipelines create wants the GitHub service connection's id, not its name.
-    GH_ID=$(ado devops service-endpoint list --query "[?name=='$GH_CONNECTION' && type=='github'].id | [0]" -o tsv)
+    # OAuth connections report type 'github'; Azure Pipelines (GitHub App) connections report 'GitHub'.
+    GH_ID=$(ado devops service-endpoint list --query "[?name=='$GH_CONNECTION' && (type=='github' || type=='GitHub')].id | [0]" -o tsv)
     [[ -n "$GH_ID" ]] || { echo "GitHub service connection '$GH_CONNECTION' not found: Project settings > Service connections > New > GitHub" >&2; exit 1; }
     ado devops service-endpoint update --id "$GH_ID" --enable-for-all true -o none
     extra=(--service-connection "$GH_ID")
