@@ -58,8 +58,15 @@ done
 
 echo "▶ Resource group $RG and the pipeline identity"
 az group create -n "$RG" -l "$LOCATION" -o none
-APP_ID=$(az ad app list --display-name "regista-pipeline-$PROFILE" --query "[0].appId" -o tsv)
+# Every pipeline signs in through the one service connection ($CONNECTION), whatever the profile. When it exists, its
+# identity *is* the pipeline identity, so that is the one this profile's resource group must grant roles to (a
+# per-profile identity would get the roles while the pipelines kept signing in as the connection's).
+APP_ID=""
+SE_ID=$(ado devops service-endpoint list --query "[?name=='$CONNECTION'].id | [0]" -o tsv)
+[[ -n "$SE_ID" ]] && APP_ID=$(ado devops service-endpoint show --id "$SE_ID" --query "authorization.parameters.serviceprincipalid" -o tsv)
+[[ -n "$APP_ID" ]] || APP_ID=$(az ad app list --display-name "regista-pipeline-$PROFILE" --query "[0].appId" -o tsv)
 [[ -n "$APP_ID" ]] || APP_ID=$(az ad app create --display-name "regista-pipeline-$PROFILE" --query appId -o tsv)
+echo "  identity $APP_ID ($(az ad sp show --id "$APP_ID" --query displayName -o tsv 2>/dev/null))"
 SP_ID=$(az ad sp show --id "$APP_ID" --query id -o tsv 2>/dev/null || az ad sp create --id "$APP_ID" --query id -o tsv)
 RG_ID=$(az group show -n "$RG" --query id -o tsv)
 # Contributor to create resources; RBAC Administrator because the templates assign roles (Contributor alone can't).
@@ -69,7 +76,6 @@ done
 
 echo "▶ Service connection $CONNECTION (workload identity federation, no secret)"
 PROJECT_ID=$(ado devops project show --query id -o tsv)
-SE_ID=$(ado devops service-endpoint list --query "[?name=='$CONNECTION'].id | [0]" -o tsv)
 if [[ -z "$SE_ID" ]]; then
   cfg=$(mktemp)
   cat > "$cfg" <<JSON
