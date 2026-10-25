@@ -91,7 +91,7 @@ scripts/setup-azure-devops.sh --org https://dev.azure.com/<org> --project <proje
   --repo-type github --repo <owner>/<repo> --github-connection <github-service-connection>
 ```
 
-The organisation needs billing set up (Organization settings → Billing → your subscription) for its free Microsoft-hosted parallel job. Add an approval check on the `regista-<profile>` environment, run *Regista › Full environment* once, then let the per-part pipelines take over. For the enterprise profile, pass the pool name (the `AZURE_DEVOPS_POOL_NAME` output) as `managedPool`.
+The organisation needs billing set up (Organization settings → Billing → your subscription) for its free Microsoft-hosted parallel job. Add an approval check on the `regista-<profile>` environment, run *Regista › Full environment* once, then let the per-part pipelines take over. For the enterprise profile, run *Infrastructure* first: it creates the in-VNet agent pool `regista-mdp` (the pipelines' default `managedPool`), which Azure DevOps must find before it starts *Full environment*.
 
 ## Idempotency: run it again, nothing changes
 

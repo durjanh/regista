@@ -289,14 +289,16 @@ scripts/setup-azure-devops.sh --org https://dev.azure.com/<org> --project <proje
 
 Then add an **approval check** on the `regista-aks-enterprise` environment (Pipelines → Environments).
 
-**4. Deploy from the pipeline.** Commit and push first: the pipeline builds from the repository.
+**4. Deploy from the pipeline, in two runs.** Commit and push first: the pipeline builds from the repository.
 
-```bash
-azd -C deploy/aks-enterprise env get-value AZURE_DEVOPS_POOL_NAME     # the agent pool's name
-```
+1. Run **Regista › Infrastructure** with **profile = `aks-enterprise`**. It creates everything, including the in-VNet
+   agent pool `regista-mdp`. (Skip this run if you already provisioned with `azd provision` from your machine.)
+2. Run **Regista › Full environment** with **profile = `aks-enterprise`** (managedPool keeps its default, `regista-mdp`).
+   Its Deploy stage runs on that agent: it builds the API image into the private registry and applies
+   `deploy/k8s/aks-enterprise`.
 
-Run **Regista › Full environment** with **profile = `aks-enterprise`** and **managedPool = that name**. Its Deploy stage
-runs on the in-VNet agent: it builds the API image into the private registry and applies `deploy/k8s/aks-enterprise`.
+Why two runs: Azure DevOps checks every pool a pipeline uses *before* any stage starts, so Full environment can't be the
+run that creates its own agent pool (error: "Could not find a pool with name regista-mdp").
 
 **5. Check it:** `azd -C deploy/aks-enterprise env get-value API_URL` (the API Management gateway, the only public entry
 point) and `WEB_URL` (the site). Open the site and run the judge-mode steps.
@@ -342,7 +344,7 @@ scripts/setup-azure-devops.sh --org https://dev.azure.com/<org> --project <proje
   --repo-type github --repo <owner>/<repo> --github-connection <github-service-connection>
 ```
 
-Then add an approval check on the `regista-<profile>` environment and run **Regista › Full environment** (for enterprise, set `managedPool` to the `AZURE_DEVOPS_POOL_NAME` output).
+Then add an approval check on the `regista-<profile>` environment and run **Regista › Full environment** (for enterprise, run **Infrastructure** first: it creates the `regista-mdp` agent pool the deploy uses).
 
 ### 5. GitHub Actions (Container Apps)
 

@@ -59,6 +59,11 @@ param aksNodeMaxCount string = '2'
 @description('Managed DevOps Pool agent size (not v6/v7: Azure Pipelines images do not support them).')
 param agentVmSize string = 'Standard_D2ads_v5'
 
+// The pool's name in Azure DevOps. Fixed, not per-environment: the pipelines reference it at queue time
+// (managedPool, default 'regista-mdp'), before any output exists. One enterprise environment per organisation.
+@description('Managed DevOps Pool name, as the pipelines refer to it (managedPool parameter).')
+param devOpsPoolName string = 'regista-mdp'
+
 @allowed([
   'true'
   'false'
@@ -336,7 +341,7 @@ module devOpsPool '../modules/devops-pool.bicep' = if (!empty(azureDevOpsOrganiz
     tags: allTags
     devCenterName: take(dashed('dc', environmentName, tok), 26)
     projectName: dashed('dcp', environmentName, tok)
-    poolName: dashed('mdp', environmentName, tok)
+    poolName: devOpsPoolName
     organizationUrl: azureDevOpsOrganizationUrl
     devOpsInfrastructurePrincipalId: devOpsInfrastructurePrincipalId
     vnetName: network.outputs.name
@@ -363,7 +368,7 @@ output APIM_ID string = apim.outputs.id
 output API_URL string = 'https://${apim.outputs.gatewayHost}'
 output WEB_URL string = staticWebApp.outputs.url
 output STATIC_WEB_APP_NAME string = staticWebApp.outputs.name
-output AZURE_DEVOPS_POOL_NAME string = (!empty(azureDevOpsOrganizationUrl) && !empty(devOpsInfrastructurePrincipalId)) ? dashed('mdp', environmentName, tok) : ''
+output AZURE_DEVOPS_POOL_NAME string = (!empty(azureDevOpsOrganizationUrl) && !empty(devOpsInfrastructurePrincipalId)) ? devOpsPoolName : ''
 output AZURE_CLIENT_ID string = platform.outputs.identityClientId
 output IDENTITY_NAME string = platform.outputs.identityName
 output WEBPUBSUB_ENDPOINT string = platform.outputs.webPubSubEndpoint
