@@ -213,7 +213,10 @@ Alternatives: Application Gateway WAF v2 in the VNet in front of API Management 
 | Log Analytics + Application Insights | Pay-as-you-go | Logs, OpenTelemetry traces (including Agent Framework spans), latency |
 | Microsoft Fabric | Trial capacity (or optional F2 via Bicep) | Lakehouse (OneLake), Eventstream, Eventhouse/KQL |
 
-Region: **UK South**. Both model versions are listed as Global Standard in `uksouth` on Microsoft Learn (region availability tables, October 2026).
+Region: **UK South** for Container Apps and AKS standard; models deploy as Global Standard (`gpt-5-mini` in this
+subscription, where the newer defaults have no quota). The enterprise profile runs in **Sweden Central**: as of October
+2026 Azure has paused new API Management Standard v2 instances in UK South, and UK West has no Dev Center (needed for
+the in-VNet Managed DevOps Pool) or `gpt-5-mini`. API Management must share the VNet's region, so the whole profile moves.
 
 ## Security model
 

@@ -269,6 +269,8 @@ Each message is `event: <name>\ndata: <json>\n\n`.
 | `APPLICATIONINSIGHTS_CONNECTION_STRING` | OpenTelemetry export |
 | `CORS_ORIGINS` | comma list, default `*` in dev. Deployments set it to the Static Web App's URL (the SPA calls the API cross-origin) |
 | `PUBLIC_BASE_URL` | the API's public URL, used by agents to reach the MCP server (default `http://localhost:8000`) |
+| `BROADCAST_VIEWER_COUNT_INTERVAL_S` / `BROADCAST_VIEWER_COUNT_MAX` | how often the live viewer count is refreshed from Web PubSub (default 5 s) and where it caps and shows "N+" (default 10,000) |
+| `REGISTA_VIDEO_SAFE` | `1` replaces trademarked competition names with generic labels in every response (recorded demos); default `0` |
 
 Every Azure dependency is optional. With none set, the API runs in `offline` mode with deterministic, data-grounded narratives so the demo never breaks.
 

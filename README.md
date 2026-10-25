@@ -321,6 +321,12 @@ azd env set WEBPUBSUB_UNITS 100 && azd provision      # 100,000 concurrent viewe
 
 ### 4. Azure DevOps pipelines (optional)
 
+**One command per environment** (after the one-time organisation setup below): `scripts/deploy-env.sh --profile
+containerapps|aks|aks-enterprise --email you@example.com [--fabric]` prepares the azd environment, runs
+`setup-azure-devops.sh`, grants the pipeline identity its Azure DevOps agent-pool rights (enterprise), runs the pipelines
+in the right order (enterprise: Infrastructure, then Full environment) waiting for each, and smoke-tests the result.
+`scripts/teardown-env.sh --profile …` deletes the environment and purges the recycle bin so the names can be reused.
+
 **Your Azure DevOps organisation.** `dev.azure.com` sends you to the Azure marketing/portal page when the browser's
 signed-in account has no organisation. Open https://aex.dev.azure.com/me signed in as the account of the subscription's
 tenant (the same one as `az account show --query user.name`): it lists your organisations, or *Create new organization*.
@@ -362,8 +368,11 @@ gh workflow run deploy.yml                                                      
 ### Tear down
 
 ```bash
-azd down --purge          # from the profile's folder; deletes the resource group and purges Foundry
+scripts/teardown-env.sh --profile containerapps   # or aks / aks-enterprise: azd down --purge + recycle-bin purge
 ```
+
+Or `azd down --purge` from the profile's folder. Soft-deleted Foundry and API Management accounts can outlive it and block
+reusing the same names for 48 hours; the script purges them.
 
 More detail (Fabric setup, troubleshooting): [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
 

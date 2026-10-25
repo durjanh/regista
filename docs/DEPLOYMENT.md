@@ -50,15 +50,27 @@ Set `azd env set LETSENCRYPT_EMAIL you@example.com` first. The postprovision hoo
 
 ### AKS enterprise (azd, deploy from inside the VNet)
 
+Check capacity first: VM cores for the nodes (`Standard Ddsv6 Family`), **Managed DevOps Pools** cores for the agent
+(`Standard DADSv5 Family`, its own quota page), and that API Management **Standard v2** accepts new instances in the
+region. As of October 2026 new v2 instances are paused in UK South and UK West lacks Dev Center, so this profile runs
+in **Sweden Central** (README §3c has the region table).
+
 ```bash
 cd deploy/aks-enterprise
-azd env new regent && azd env set AZURE_RESOURCE_GROUP rg-regista-ent
+azd env new regse --location swedencentral && azd env set AZURE_RESOURCE_GROUP rg-regista-ent-se
+azd env set CHAT_MODEL_NAME gpt-5-mini && azd env set CHAT_MODEL_VERSION 2025-08-07          # if gpt-5.4-mini quota is 0
+azd env set REASONING_MODEL_NAME gpt-5-mini && azd env set REASONING_MODEL_VERSION 2025-08-07
 azd env set APIM_PUBLISHER_EMAIL you@example.com
 azd env set AZURE_DEVOPS_ORG_URL https://dev.azure.com/<org>                       # for the Managed DevOps Pool
 azd env set DEVOPS_INFRASTRUCTURE_PRINCIPAL_ID "$(az ad sp list --display-name DevOpsInfrastructure --query '[0].id' -o tsv)"
 azd provision --preview
 azd provision      # one pass; API_URL is the API Management gateway, WEB_URL the Static Web App
 ```
+
+The Managed DevOps Pool is named `regista-mdp` (the pipelines' default `managedPool`) and runs `Standard_D2ads_v5`
+agents: the Azure Pipelines agent images don't support v6/v7 sizes. `azd provision` from your machine creates the
+pool as you; the azd note *"AKS cluster not available yet, skipping Kubernetes context setup"* is expected (your
+machine can't reach the private API server).
 
 Then deploy from the Azure DevOps pipeline (below): its Deploy stage runs on the Managed DevOps Pool inside `snet-agents`, the only place that can reach the private API server and the private registry. API Management is the only public endpoint: its gateway (HTTPS on `*.azure-api.net`, rate-limited per client IP) reaches the internal NGINX ingress on 10.40.4.10 through VNet integration. There is no WAF in this profile; for production, put Front Door Premium or Application Gateway WAF in front of the gateway. The Front Door design, with its pitfalls, is in [ARCHITECTURE.md: Future: Azure Front Door](ARCHITECTURE.md#future-azure-front-door-in-front-of-api-management). For development only, `azd env set AKS_PRIVATE_CLUSTER false` plus `AKS_AUTHORIZED_IP_RANGES` makes the API server public but IP-restricted; the registry and data services stay private, so `azd deploy` from a laptop still needs the in-VNet agent.
 
@@ -90,6 +102,27 @@ scripts/setup-azure-devops.sh --org https://dev.azure.com/<org> --project <proje
   --rg rg-regista --location uksouth --env regista \
   --repo-type github --repo <owner>/<repo> --github-connection <github-service-connection>
 ```
+
+**One command per environment.** `scripts/deploy-env.sh --profile containerapps|aks|aks-enterprise --email you@example.com [--fabric]`
+does all of this section for one environment: it prepares the azd environment (region, `gpt-5-mini`, video-safe mode,
+emails, a warm API instance for Container Apps), runs `setup-azure-devops.sh`, grants the enterprise permissions
+below, runs the pipelines in order (enterprise: *Infrastructure*, then *Full environment*) waiting for each (you
+approve the what-if in the browser), optionally runs the Fabric step, and smoke-tests the API. `--no-pipelines` stops
+after the setup. `scripts/teardown-env.sh --profile …` removes the environment and purges the recycle bin.
+
+**One pipeline identity for every profile.** All pipelines sign in through the one service connection
+(`regista-azure`), so its identity is the pipeline identity for every profile; `setup-azure-devops.sh` grants it
+*Contributor* and *Role Based Access Control Administrator* on each profile's resource group. Those roles live on the
+group, so they go when the group is deleted: re-run the setup script (or `deploy-env.sh`) after every teardown, or the
+pipeline signs in seeing no subscription. Both GitHub connection kinds work: OAuth (type `github`) and the Azure
+Pipelines GitHub App (type `GitHub`).
+
+**Enterprise: Azure DevOps rights for the agent pool.** When the pipeline provisions the enterprise profile, the
+pipeline identity creates the Managed DevOps Pool, so it must be a member of the organisation (Basic, project
+contributor), an **Administrator** of the project's agent pools, and an **Administrator** of the `regista-mdp` pool
+once it exists (later provisions *update* the pool). `deploy-env.sh` grants all three through the Azure DevOps REST
+API; by hand: Organization settings → Users; Project settings → Agent pools → Security; Organization settings →
+Agent pools → `regista-mdp` → Security.
 
 The organisation needs billing set up (Organization settings → Billing → your subscription) for its free Microsoft-hosted parallel job. Add an approval check on the `regista-<profile>` environment, run *Regista › Full environment* once, then let the per-part pipelines take over. For the enterprise profile, run *Infrastructure* first: it creates the in-VNet agent pool `regista-mdp` (the pipelines' default `managedPool`), which Azure DevOps must find before it starts *Full environment*.
 
@@ -170,7 +203,8 @@ Main parameters (`infra/main.bicepparam`):
 The API reads every endpoint, REST path, API version, limit and timeout from its settings (`backend/api/app/config.py`). There are no keys: every Azure call uses a Microsoft Entra token.
 
 - **Deployment-specific values** (the Azure OpenAI, AI Services, Cosmos DB, Storage, Event Hubs, Web PubSub and App Insights endpoints, CORS, the API's own URL) come from the provisioned resources. Container Apps sets them as container app settings; on AKS they reach the pod through the provision outputs and `deploy/k8s/*/10-deployment.tmpl.yaml`.
-- **Service-contract values** (the token scope, Speech URL and output format, Translator path and API version, Content Safety paths, API version, text limit and block severity, Azure OpenAI path, timeout and retries, the shared REST client's timeout, the OneLake DFS endpoint) are defined once in `infra/modules/api-settings.bicep` and applied by every profile.
+- **Service-contract values** (the token scope, Speech URL and output format, Translator path and API version, Content Safety paths, API version, text limit and block severity, Azure OpenAI path, timeout and retries, the shared REST client's timeout, the OneLake DFS endpoint, the live viewer-count refresh and cap, and `REGISTA_VIDEO_SAFE`) are defined once in `infra/modules/api-settings.bicep` and applied by every profile.
+- **Video-safe mode for recordings:** `azd env set API_SERVICE_SETTINGS 'REGISTA_VIDEO_SAFE=1'` replaces trademarked competition names with generic labels in every API response (the hackathon video may show no third-party marks). Default `0`.
 
 Change one per environment without touching code, then re-provision:
 
@@ -292,7 +326,7 @@ Fabric items (workspace, Lakehouse, Eventhouse, Eventstream) are not Azure Resou
 
 6. **From Azure Pipelines.** The hook runs as the pipeline's service principal. Add `FABRIC_WORKSPACE_NAME` (and, once
    you created the connection by hand, `FABRIC_EVENTHUB_CONNECTION_ID`) to the variable group, enable the Fabric tenant setting *Service principals
-   can call Fabric public APIs*, and add the service principal `regista-pipeline-<profile>` as **Admin** of the workspace
+   can call Fabric public APIs*, and add the pipeline identity (the service principal behind the `regista-azure` service connection) as **Admin** of the workspace
    (Workspace → Manage access). It can't see your personal trial capacity, so it reuses the capacity the workspace is
    already on. Connections belong to whoever creates them: once the Eventstream exists the hook skips the connection
    step, so a pipeline run never needs to see the one your account created.
@@ -351,11 +385,23 @@ In Copilot Chat (Agent mode), pick the custom agent **match-analyst** to analyse
 | `postdeploy`: `/api/health did not answer within 5 minutes` (Container Apps, first `azd up`) | The API still had the placeholder's port 80. Fixed by the first-rollout step in the hook; on an older checkout run `azd provision` (or `azd hooks run postdeploy`) once. Check with `az containerapp revision list -n regista-api -g <rg> -o table`: a revision in *ActivationFailed* with port 80 is this case. |
 | Fabric API returns 401/403 | Your account must be allowed to create workspaces (tenant setting) and must be an admin of the capacity. Service principals also need *Service principals can call Fabric public APIs* enabled. |
 | Cosmos DB 403 locally | Run `scripts/grant-dev-access.sh`. Cosmos data access uses its own RBAC, separate from Azure RBAC. |
+| azd: `hook script path "../hooks/…" escapes project root` (AKS profiles) | azd 1.37+ rejects hook script paths outside the azd project. The AKS projects run the shared hooks inline (`run: sh ../hooks/postprovision.sh`); update your checkout. |
+| Kubernetes: `Invalid value: "{{.Env.API_HOST}}"`, or pods pulling the image `{{.Env.SERVICE_API_IMAGE_NAME}}` | azd renders `{{.Env.X}}` only in manifests named `*.tmpl.yaml`; a plain `.yaml` is applied as written. The manifests in `deploy/k8s` use `.tmpl.yaml`. |
+| `ApiServiceCreationDisabledForSubscription: Creation of new StandardV2 API Management services in <region> is not available` | Azure has paused new v2 instances in that region. Deploy the enterprise profile in another region that also has Dev Center and your model (Sweden Central; README §3c). |
+| Managed DevOps Pool: `SkuNotCompatibleWithImageDiskControllerType` / `…ImageGeneration` | Azure Pipelines agent images don't support v6/v7 VM sizes. The pool uses `Standard_D2ads_v5`. |
+| Managed DevOps Pool: `InsufficientCoreQuota … limit of 0` | Pools have their own quota: Portal → Quotas → **Managed DevOps Pools** → the VM family → Request adjustment. |
+| Managed DevOps Pool: `PoolProvisioningFailed: The logged in user … was not found in the Azure DevOps organization` | The pipeline identity creates the pool, so it needs Azure DevOps rights: run `scripts/deploy-env.sh --profile aks-enterprise --email … --no-pipelines` (or the manual steps under *Azure DevOps pipelines*). |
+| Pipeline won't start: `Could not find a pool with name regista-mdp` | Azure DevOps checks pools before the first stage. Run *Infrastructure* (it creates the pool) before *Full environment*. |
+| Pipeline: `The subscription of '<id>' doesn't exist in cloud 'AzureCloud'` | The pipeline identity has no role in the subscription (its roles went with a deleted resource group). Re-run `setup-azure-devops.sh` (or `deploy-env.sh`) for the profile and wait a few minutes. |
+| `setup-azure-devops.sh`: `GitHub service connection '<name>' not found` although it exists | Fixed: the script accepts both GitHub connection types (`github` and `GitHub`). |
+| Functions: the app shows no functions; logs say `Worker failed to index functions` / `invalid non-type annotation list[…]` | The trigger must be annotated `typing.List[func.EventHubEvent]`. The deploy now fails if no functions register (`scripts/ci/check-functions-indexed.sh`). |
+| Feeder job execution `Failed` (`BackoffLimitExceeded`) before the container even started, then killed mid-match | A cold-start hiccup counted as a failed attempt. The job allows one retry (`replicaRetryLimit: 1`); start feeds with `scripts/run-feeder.sh` (`az containerapp job start --args` can't pass `--speed`). |
 
 ## Teardown
 
 ```bash
-az group delete -n rg-regista --yes --no-wait
+scripts/teardown-env.sh --profile containerapps      # or aks / aks-enterprise: azd down --purge, then purges the
+                                                     # soft-deleted Foundry and API Management left in the recycle bin
 # Fabric items live in Fabric, not the resource group. Delete the "Regista" workspace in the Fabric portal.
 # Optional: remove the GitHub OIDC app registration created by the bootstrap script
 az ad app delete --id "$(az ad app list --display-name 'gh-<owner>-<repo>-regista' --query '[0].appId' -o tsv)"
