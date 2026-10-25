@@ -25,6 +25,7 @@ func apiServiceSettingsDefaults() object => ({
   AZURE_CONTENT_SAFETY_BLOCK_SEVERITY: '4'   // a category at or above this severity flags the text
   BROADCAST_VIEWER_COUNT_INTERVAL_S: '5'   // how often the live broadcast's viewer count is refreshed
   BROADCAST_VIEWER_COUNT_MAX: '10000'   // the viewer count stops here and shows N+ (keeps 100,000 viewers cheap)
+  REGISTA_VIDEO_SAFE: '0'   // '1' replaces trademarked competition names with generic labels (recorded demos)
   ONELAKE_DFS_ENDPOINT: 'https://onelake.dfs.fabric.microsoft.com'   // Microsoft Fabric OneLake (ADLS Gen2 DFS)
 })
 
