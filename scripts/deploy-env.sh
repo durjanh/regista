@@ -56,6 +56,8 @@ if ! azd -C "$DIR" env list --output json 2>/dev/null | grep -q "\"Name\": \"$EN
 fi
 azd -C "$DIR" env select "$ENV"
 setenv() { azd -C "$DIR" env set "$1" "$2" >/dev/null && echo "  $1=$2"; }
+# Location and subscription every time, not only on `env new`: without them `azd env refresh` (step 5) can't run.
+setenv AZURE_LOCATION "$LOC"; setenv AZURE_SUBSCRIPTION_ID "$SUBSCRIPTION"
 setenv AZURE_RESOURCE_GROUP "$RG"
 setenv DEPLOYMENT_PROFILE "$PROFILE"
 # gpt-5-mini: the model this subscription has quota for (the template defaults have none). 150 units per environment.

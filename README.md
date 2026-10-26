@@ -4,7 +4,7 @@
 
 Built for the Microsoft + Premier League *Inside the Game* Developer Hackathon with Microsoft Foundry, Microsoft Agent Framework, MCP, Azure AI Services, Microsoft Fabric, Cosmos DB, Event Hubs, Azure Functions, Azure Container Apps, Azure Static Web Apps, Azure Web PubSub and GitHub Copilot. Category: **Best Enterprise Solution**.
 
-**Try it live:** https://black-beach-0613e390f.4.azurestaticapps.net (no login; [judge mode](#judge-mode) below). The API scales to zero between sessions, so the very first request can take up to 30 seconds.
+**Try it live:** https://lively-mushroom-048c7b70f.2.azurestaticapps.net (no login; [judge mode](#judge-mode) below). One API instance stays warm, so there's no cold start.
 
 ![Control room at 68': Argentina's planted press switch detected, the Verifier drill catching an overstated number (1.76 struck through, evidence says 0.82), and the truth panel scoring the detection in 286 seconds](docs/screenshots/studio-hero.png)
 
@@ -105,7 +105,7 @@ Diagrams (open in diagrams.net or the Draw.io VS Code extension): [Container App
 
 ## Judge mode
 
-No login. Open https://black-beach-0613e390f.4.azurestaticapps.net and:
+No login. Open https://lively-mushroom-048c7b70f.2.azurestaticapps.net and:
 1. **Hub → England v Argentina → Studio.** Turn on **Truth mode** and the **Verifier drill**, pick **Jump to → 58:00** and play at 10×, watch Argentina's press switch (planted at 63') get detected, the Verifier catch the overstated number, approve the lower-third, see the truth panel light up, then press **What did it change?**
 2. **Matchday** views: switch Analyst → Casual → Player focus to see the same match told at different pace and depth. Back in the Studio, **Start broadcast** and open the match on a second device: the viewer count goes up.
 3. **Dugout** on Argentina v Saudi Arabia at 70' for live manager advice; **Scouting** for Player DNA.
