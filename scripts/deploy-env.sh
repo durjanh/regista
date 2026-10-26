@@ -121,10 +121,23 @@ run_pipeline() {   # run_pipeline <name> <key=value parameters...>; waits for th
   local id; id=$(ado pipelines run --name "$name" --folder-path '\Regista' --parameters "$@" --query id -o tsv)
   echo "  queued '$name' (run $id): $ORG/$PROJECT/_build/results?buildId=$id"
   echo "  approve the what-if there when the run waits on the regista-$PROFILE environment"
-  local status="" result=""
+  local status="" result="" now="" last=""
   for _ in $(seq 1 240); do   # up to 2 hours
     read -r status result < <(ado pipelines runs show --id "$id" --query "[status, result]" -o tsv | tr '\t' ' ')
     [[ "$status" == "completed" ]] && break
+    # Say what the run is doing whenever that changes: the running stage, or an approval it waits for.
+    now=$(az devops invoke --org "$ORG" --detect false --area build --resource timeline \
+      --route-parameters project="$PROJECT" buildId="$id" --api-version 7.1 -o json 2>/dev/null | python3 -c '
+import sys, json
+recs = json.load(sys.stdin).get("records") or []
+if any(r["type"] == "Checkpoint.Approval" and r["state"] == "inProgress" for r in recs):
+    print("waiting for your approval (open the run above: Review > Approve)")
+else:
+    running = [r["name"] for r in recs if r["type"] == "Stage" and r["state"] == "inProgress"]
+    print("running: " + ", ".join(running) if running else "queued, waiting for an agent")
+' 2>/dev/null || true)
+    [[ -n "$now" && "$now" != "$last" ]] && echo "  $(date +%H:%M) $now"
+    last="$now"
     sleep 30
   done
   echo "  '$name': ${status:-unknown} ${result:-}"
