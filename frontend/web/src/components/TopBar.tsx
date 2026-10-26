@@ -38,26 +38,6 @@ export function LanguageSelect({ compact }: { compact?: boolean }) {
   );
 }
 
-export function EnginePill() {
-  const { health, t } = usePrefs();
-  if (!health)
-    return (
-      <span className="pill" title="API not reachable">
-        <span className="dot faint" /> API
-      </span>
-    );
-  const azure = health.mode === "azure";
-  const on = Object.entries(health.services)
-    .filter(([, v]) => v)
-    .map(([k]) => k)
-    .join(", ");
-  return (
-    <span className={azure ? "pill accent" : "pill warn"} title={azure ? `Azure services online: ${on || "none"}` : "Running the deterministic offline engine"}>
-      <span className="dot" /> {azure ? t("engine.azure") : t("engine.offline")}
-    </span>
-  );
-}
-
 export function TopBar() {
   const { t, theme, setTheme } = usePrefs();
   return (
@@ -85,9 +65,6 @@ export function TopBar() {
           <PersonaSelect compact />
         </span>
         <LanguageSelect compact />
-        <span className="hide-sm">
-          <EnginePill />
-        </span>
         <button className="btn icon ghost" onClick={() => setTheme(theme === "dark" ? "light" : "dark")} aria-label={t("theme.toggle")} title={t("theme.toggle")}>
           {theme === "dark" ? <IconLight /> : <IconDark />}
         </button>
