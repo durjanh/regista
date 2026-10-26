@@ -5,6 +5,7 @@ import { AdviceCards, ChannelArrows, GoalMouth, HalfPitchShots, PercentileBar, S
 import { InfoPop, ModelTag, RealTag } from "../components/SourceBadge";
 import { ErrorState, Skeleton, SkeletonCard } from "../components/States";
 import { useAsync } from "../hooks/useAsync";
+import { SHOT_COLORS } from "../lib/palette";
 import { teamReportPath } from "../lib/players";
 import { usePrefs } from "../lib/prefs";
 import { IconBack } from "../components/icons";
@@ -44,22 +45,22 @@ export function PlayerDNA() {
     <div className="stack">
       <div className="scout-head">
         <PlayerAvatar name={data.name} colors={team.data?.colors} size={64} square />
-        <div style={{ minWidth: 0 }}>
-          <h1 className="page-title" style={{ fontSize: "clamp(26px, 4vw, 38px)" }}>
+        <div className="min-w-0">
+          <h1 className="page-title fs-display-sm">
             <span className={placeholder ? "placeholder-name" : undefined}>{data.name}</span>
           </h1>
-          <div className="row small muted" style={{ gap: 8, flexWrap: "wrap" }}>
+          <div className="row small muted gap-8 wrap">
             <Link to={teamReportPath(data.team_id)} className="team-link">
               {data.team_name}
             </Link>
             <span>·</span>
-            <span className="pill" style={{ padding: "0 7px" }}>
+            <span className="pill py-0 px-7">
               {data.position}
             </span>
             {placeholder ? <span className="xs faint">No name in the dataset: shown by shirt number</span> : null}
           </div>
         </div>
-        <span style={{ flex: 1 }} />
+        <span className="grow" />
         <InfoPop text={data.disclosure} label="Where these numbers come from" />
         <Link to="/scouting" className="btn sm">
           <IconBack /> {t("scout.title")}
@@ -121,12 +122,12 @@ export function PlayerDNA() {
               </div>
               <SplitBar
                 parts={[
-                  { label: t("scout.home"), value: real.venue_split.home, color: "#5cc8ff" },
-                  { label: t("scout.away"), value: real.venue_split.away, color: "#c39bff" },
+                  { label: t("scout.home"), value: real.venue_split.home, color: "var(--data-blue)" },
+                  { label: t("scout.away"), value: real.venue_split.away, color: "var(--data-violet)" },
                   { label: t("scout.neutral"), value: real.venue_split.neutral, color: "var(--text-faint)" },
                 ]}
               />
-              <div className="xs muted" style={{ marginTop: 8 }}>
+              <div className="xs muted mt-8">
                 Goals: {real.venue_split.home} home · {real.venue_split.away} away · {real.venue_split.neutral} neutral
               </div>
             </section>
@@ -149,7 +150,7 @@ export function PlayerDNA() {
                         <td className="tnum">
                           {g.minute}'
                           {g.penalty ? (
-                            <span className="pill" style={{ marginInlineStart: 6, padding: "0 6px" }}>
+                            <span className="pill ms-6 py-0 px-6">
                               pen
                             </span>
                           ) : null}
@@ -225,23 +226,23 @@ export function PlayerDNA() {
               <span className="spacer" />
               <span className="xs muted">size = xG · filled = goal</span>
             </div>
-            <HalfPitchShots shots={m.shot_map} goals={m.goal_map} color={color.startsWith("#") ? color : "#22d68a"} label={`${data.name} shot map`} />
+            <HalfPitchShots shots={m.shot_map} goals={m.goal_map} color={color.startsWith("#") ? color : SHOT_COLORS.goal} label={`${data.name} shot map`} />
           </section>
           <section className="card">
             <div className="card-head">
               <h2 className="card-title">Where he shoots from</h2>
               <ModelTag />
             </div>
-            <ChannelArrows split={m.shot_channels} color={color.startsWith("#") ? color : "#22d68a"} label={`${data.name} shot channels`} unit="of his shots" />
-            <div style={{ marginTop: 12 }}>
-              <div className="xs muted" style={{ marginBottom: 6 }}>
+            <ChannelArrows split={m.shot_channels} color={color.startsWith("#") ? color : SHOT_COLORS.goal} label={`${data.name} shot channels`} unit="of his shots" />
+            <div className="mt-12">
+              <div className="xs muted mb-6">
                 Foot / head
               </div>
               <SplitBar
                 parts={[
-                  { label: "Right foot", value: m.foot.right, color: "#22d68a" },
-                  { label: "Left foot", value: m.foot.left, color: "#5cc8ff" },
-                  { label: "Head", value: m.foot.head, color: "#ffb224" },
+                  { label: "Right foot", value: m.foot.right, color: "var(--accent)" },
+                  { label: "Left foot", value: m.foot.left, color: "var(--data-blue)" },
+                  { label: "Head", value: m.foot.head, color: "var(--warn)" },
                 ]}
               />
             </div>
@@ -264,7 +265,7 @@ export function PlayerDNA() {
               title="Where he places his penalties"
               caption={`Seen from the taker. Placement modelled over ${m.penalties.modelled_taken} kicks; ${pct(m.penalties.conversion)} converted.`}
             />
-            <div className="kpis" style={{ alignContent: "start" }}>
+            <div className="kpis content-start">
               <div className="kpi">
                 <div className="label">
                   Penalty goals <RealTag />
@@ -276,7 +277,7 @@ export function PlayerDNA() {
                 <div className="label">
                   Favourite side <ModelTag />
                 </div>
-                <div className="value" style={{ fontSize: 22 }}>
+                <div className="value fs-22">
                   {favourite(m.penalties.placement)}
                 </div>
                 <div className="sub">keeper's best guess</div>

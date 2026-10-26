@@ -67,18 +67,18 @@ export function MatchLayout() {
   return (
     <div>
       <div className="match-header">
-        <div className="row" style={{ gap: 12, justifyContent: "space-between" }}>
-          <div className="row" style={{ gap: 10 }}>
+        <div className="row gap-12 justify-between">
+          <div className="row gap-10">
             <TeamSwatch team={match.home} />
-            <h1 className="display" style={{ fontSize: 26, fontWeight: 800, textTransform: "uppercase" }}>
+            <h1 className="display fs-26 fw-800 uppercase">
               <TeamLink team={match.home} /> <span className="faint">v</span> <TeamLink team={match.away} />
             </h1>
             <TeamSwatch team={match.away} />
           </div>
-          <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
+          <div className="row gap-8 wrap">
             <SourceBadge source={match.source} />
-            <span className="row xs" style={{ gap: 4 }}>
-              <span className="muted row" style={{ gap: 4 }}>
+            <span className="row xs gap-4">
+              <span className="muted row gap-4">
                 <IconReport width={14} height={14} /> {t("scout.teamReport")}:
               </span>
               <NavLink to={teamReportPath(match.home.team_id)} className="btn sm">
@@ -93,8 +93,8 @@ export function MatchLayout() {
             </NavLink>
           </div>
         </div>
-        <div className="row xs muted" style={{ gap: 8, marginTop: -4 }}>
-          <span style={{ fontWeight: 700, color: "var(--text)" }}>{match.source?.real?.tournament ?? match.competition}</span>
+        <div className="row xs muted gap-8 mt-n4">
+          <span className="fw-700 text-strong">{match.source?.real?.tournament ?? match.competition}</span>
           <span>·</span>
           <span className="tnum">{match.source?.real?.date ?? match.kickoff}</span>
           {match.source?.real?.city ? (

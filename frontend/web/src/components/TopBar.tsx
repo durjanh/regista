@@ -9,7 +9,7 @@ const PERSONAS: Persona[] = ["casual", "analyst", "kids", "fantasy", "accessible
 export function PersonaSelect({ compact }: { compact?: boolean }) {
   const { persona, setPersona, t } = usePrefs();
   return (
-    <label className="row" style={{ gap: 6 }}>
+    <label className="row gap-6">
       <span className={compact ? "sr-only" : "xs muted"}>{t("persona")}</span>
       <select className="select" value={persona} onChange={(e) => setPersona(e.target.value as Persona)} aria-label={t("persona")}>
         {PERSONAS.map((p) => (
@@ -25,7 +25,7 @@ export function PersonaSelect({ compact }: { compact?: boolean }) {
 export function LanguageSelect({ compact }: { compact?: boolean }) {
   const { language, setLanguage, t } = usePrefs();
   return (
-    <label className="row" style={{ gap: 6 }}>
+    <label className="row gap-6">
       <span className={compact ? "sr-only" : "xs muted"}>{t("language")}</span>
       <select className="select" value={language} onChange={(e) => setLanguage(e.target.value)} aria-label={t("language")}>
         {LANGUAGES.map((l) => (
@@ -43,7 +43,7 @@ export function EnginePill() {
   if (!health)
     return (
       <span className="pill" title="API not reachable">
-        <span className="dot" style={{ color: "var(--text-faint)" }} /> API
+        <span className="dot faint" /> API
       </span>
     );
   const azure = health.mode === "azure";

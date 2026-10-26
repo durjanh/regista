@@ -12,6 +12,7 @@ import { EmptyState, ErrorState, Skeleton, SkeletonCard } from "../components/St
 import { useAsync } from "../hooks/useAsync";
 import { MOMENT_ICON, clock, cx, describeEvent } from "../lib/format";
 import { playerMaps, teamColors } from "../lib/match";
+import { SHOT_COLORS } from "../lib/palette";
 import { PlayerLink } from "../components/ScoutViz";
 import { IconPause, IconPlay, IconStepBack, IconStepForward, IconToStart } from "../components/icons";
 
@@ -92,11 +93,11 @@ export function Tactics() {
 
   return (
     <div className="stack">
-      <div className="row" style={{ justifyContent: "space-between" }}>
+      <div className="row justify-between">
         <div className="seg" role="tablist" aria-label="Team">
           {(["home", "away"] as const).map((s) => (
             <button key={s} role="tab" aria-selected={side === s} className={cx(side === s && "on")} onClick={() => setSide(s)}>
-              <span className="swatch" style={{ background: s === "home" ? colors.home : colors.away, marginInlineEnd: 6 }} />
+              <span className="swatch me-6" style={{ background: s === "home" ? colors.home : colors.away }} />
               {s === "home" ? match.home.name : match.away.name}
             </button>
           ))}
@@ -142,7 +143,7 @@ export function Tactics() {
           <div className="card-head">
             <h2 className="card-title">Pass network · {team.short}</h2>
             <span className="spacer" />
-            <label className="row xs muted" style={{ gap: 6 }}>
+            <label className="row xs muted gap-6">
               Min passes
               <input type="range" min={1} max={10} value={minEdge} onChange={(e) => setMinEdge(Number(e.target.value))} aria-label="Minimum passes per link" />
               <b className="tnum">{minEdge}</b>
@@ -237,7 +238,7 @@ export function Tactics() {
                 {data.top_players.map((p) => (
                   <tr key={p.player_id}>
                     <td>
-                      <span className="swatch" style={{ background: p.team_id === match.home.team_id ? colors.home : colors.away, marginInlineEnd: 6 }} />
+                      <span className="swatch me-6" style={{ background: p.team_id === match.home.team_id ? colors.home : colors.away }} />
                       <span title={placeholders.has(p.player_id) ? "No player name in the dataset" : undefined}>
                         <PlayerLink name={p.name} playerKey={p.player_key ?? keys.get(p.player_id)} placeholder={placeholders.has(p.player_id)} />
                       </span>{" "}
@@ -267,10 +268,10 @@ export function Tactics() {
           </div>
           <ShotMap shots={data.shots} homeId={match.home.team_id} homeColor={colors.home} awayColor={colors.away} selected={shot?.event_id} onSelect={onShot} />
           <div className="pitch-legend">
-            <span><i className="swatch" style={{ background: "#22d68a" }} />Goal</span>
-            <span><i className="swatch" style={{ background: "#ffb224" }} />Saved / post</span>
-            <span><i className="swatch" style={{ background: "#9aa6bd" }} />Blocked</span>
-            <span><i className="swatch" style={{ background: "#ff5c5c" }} />Off target</span>
+            <span><i className="swatch" style={{ background: SHOT_COLORS.goal }} />Goal</span>
+            <span><i className="swatch" style={{ background: SHOT_COLORS.saved }} />Saved / post</span>
+            <span><i className="swatch" style={{ background: SHOT_COLORS.blocked }} />Blocked</span>
+            <span><i className="swatch" style={{ background: SHOT_COLORS.off_target }} />Off target</span>
             <span>Size = xG · {match.home.short} attack →</span>
           </div>
         </section>
@@ -279,7 +280,7 @@ export function Tactics() {
             <h2 className="card-title">Why that xG?</h2>
           </div>
           {shot ? (
-            <div className="stack" style={{ gap: 10 }}>
+            <div className="stack gap-10">
               <div className="small">
                 <b>{shot.minute}'</b> {shot.player_name} · {shot.situation?.replace("_", " ")} · {shot.body_part?.replace("_", " ")} ·{" "}
                 <b>{shot.outcome?.replace("_", " ")}</b>
@@ -324,7 +325,7 @@ export function Tactics() {
                     activeId={visible[visible.length - 1]?.id}
                   />
                 </Pitch>
-                <div className="stepper" style={{ marginTop: 10 }}>
+                <div className="stepper mt-10">
                   <button className="btn sm" onClick={() => { setPlaying(false); setStep(0); }} disabled={step === 0} aria-label="First event"><IconToStart /></button>
                   <button className="btn sm" onClick={() => { setPlaying(false); setStep((s) => Math.max(0, s - 1)); }} disabled={step === 0} aria-label="Previous event"><IconStepBack /></button>
                   <button
@@ -343,13 +344,13 @@ export function Tactics() {
                   <span className="small">{visible[visible.length - 1] ? describeEvent(visible[visible.length - 1]) : ""}</span>
                   <EventDetail e={visible[visible.length - 1]} />
                 </div>
-                <div className="note" style={{ marginTop: 10 }}>
+                <div className="note mt-10">
                   <b>{detail.moment.title}.</b> {detail.moment.explanation.why_it_matters}
                 </div>
                 {detail.xg_breakdown ? (
-                  <details className="disclosure" style={{ marginTop: 10 }}>
+                  <details className="disclosure mt-10">
                     <summary>xG model breakdown</summary>
-                    <div style={{ marginTop: 10 }}>
+                    <div className="mt-10">
                       <XgWaterfall breakdown={detail.xg_breakdown} />
                     </div>
                   </details>
@@ -376,11 +377,11 @@ export function Tactics() {
                   setMomentId(m.id);
                 }}
               >
-                <b className="tnum display" style={{ fontSize: 17, minWidth: 40 }}>
+                <b className="tnum display fs-17 min-w-40">
                   {clock(m.minute, m.added_minute)}
                 </b>
                 <span aria-hidden="true">{MOMENT_ICON[m.type]}</span>
-                <span className="small" style={{ flex: 1 }}>
+                <span className="small grow">
                   {m.title}
                 </span>
                 <span className="xs faint tnum">{Math.round(m.importance)}</span>
@@ -396,26 +397,26 @@ export function Tactics() {
 /** Brief features: how long, how risky and how successful a team's passing is, by difficulty band. */
 function PassProfileCard({ p, color }: { p: PassProfile; color: string }) {
   return (
-    <div className="stack" style={{ gap: 10 }}>
-      <div className="kpis" style={{ gridTemplateColumns: "repeat(3, minmax(0, 1fr))" }}>
+    <div className="stack gap-10">
+      <div className="kpis cols-3">
         <div className="kpi">
           <div className="label">Avg length</div>
-          <div className="value tnum" style={{ fontSize: 22 }}>{p.avg_length.toFixed(1)}m</div>
+          <div className="value tnum fs-22">{p.avg_length.toFixed(1)}m</div>
         </div>
         <div className="kpi">
           <div className="label">Long passes</div>
-          <div className="value tnum" style={{ fontSize: 22 }}>{Math.round(p.long_share * 100)}%</div>
+          <div className="value tnum fs-22">{Math.round(p.long_share * 100)}%</div>
         </div>
         <div className="kpi">
           <div className="label">Avg difficulty</div>
-          <div className="value tnum" style={{ fontSize: 22 }}>{Math.round(p.avg_difficulty * 100)}</div>
+          <div className="value tnum fs-22">{Math.round(p.avg_difficulty * 100)}</div>
           <div className="sub">/100</div>
         </div>
       </div>
-      <div className="stack" style={{ gap: 6 }}>
+      <div className="stack gap-6">
         {p.completion_by_difficulty.map((b) => (
           <div key={b.band} className="pp-row">
-            <span className="xs muted" style={{ textTransform: "capitalize" }}>{b.band}</span>
+            <span className="xs muted capitalize">{b.band}</span>
             <div className="pp-track" role="img" aria-label={`${b.band} passes: ${Math.round(b.completion * 100)}% completed of ${b.attempts}`}>
               <span style={{ width: `${Math.round(b.completion * 100)}%`, background: color }} />
             </div>

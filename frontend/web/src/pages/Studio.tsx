@@ -43,7 +43,7 @@ function CuePreview({ cue }: { cue: Cue }) {
         ⧉ Cue v{cue.version} · {cue.template} · {cue.timecode} · {langs.length} language{langs.length === 1 ? "" : "s"}
       </summary>
       {langs.length ? (
-        <div className="seg" role="tablist" aria-label="Cue language" style={{ marginTop: 8 }}>
+        <div className="seg mt-8" role="tablist" aria-label="Cue language">
           {langs.map((l) => (
             <button key={l} role="tab" aria-selected={lang === l} className={cx(lang === l && "on")} onClick={() => setLang(l)}>
               {langName(l)}
@@ -108,7 +108,7 @@ function GovernanceBar({ matchId }: { matchId: string }) {
   const off = draft === null;
   return (
     <div className="governance">
-      <label className="row" style={{ gap: 6 }}>
+      <label className="row gap-6">
         <span className="xs muted">{t("studio.profile")}</span>
         <select className="select" value={settings?.profile_id ?? ""} disabled={!settings}
           onChange={(e) => void save({ profile_id: e.target.value })} aria-label={t("studio.profile")}>
@@ -118,7 +118,7 @@ function GovernanceBar({ matchId }: { matchId: string }) {
         </select>
       </label>
       {profile ? (
-        <span className="row xs muted" style={{ gap: 6 }}>
+        <span className="row xs muted gap-6">
           <span className="swatch" style={{ background: profile.brand.primary }} />
           <span className="swatch" style={{ background: profile.brand.secondary }} />
           {profile.languages.map(langName).join(" · ")} · {profile.tone}
@@ -132,8 +132,8 @@ function GovernanceBar({ matchId }: { matchId: string }) {
       </label>
       <input type="range" min={0} max={100} step={1} value={draft ?? 85} disabled={off || !settings}
         onChange={(e) => setDraft(Number(e.target.value))} aria-label={t("studio.autoApprove")} />
-      <b className="tnum" style={{ minWidth: 34 }}>{off ? t("studio.off") : `≥${draft}`}</b>
-      {err ? <span className="xs" style={{ color: "var(--danger)" }}>{err}</span> : null}
+      <b className="tnum min-w-34">{off ? t("studio.off") : `≥${draft}`}</b>
+      {err ? <span className="xs text-danger">{err}</span> : null}
     </div>
   );
 }
@@ -148,7 +148,7 @@ function AuditLog({ matchId }: { matchId: string }) {
         <span className="spacer" />
         <span className="xs muted">{data?.length ?? 0}</span>
       </div>
-      {error && !data ? <div className="xs" style={{ color: "var(--danger)" }}>{error}</div> : null}
+      {error && !data ? <div className="xs text-danger">{error}</div> : null}
       {data?.length ? (
         <div className="audit">
           {data.slice(0, 60).map((a, i) => (
@@ -213,11 +213,11 @@ function GraphicCard({ item, onAction }: { item: StudioItem; onAction: ActionFn 
 
   return (
     <div className={cx("gfx", item.status)}>
-      <div className="row" style={{ justifyContent: "space-between" }}>
+      <div className="row justify-between">
         <span className="gfx-kind">
           {KIND_LABEL[item.kind]} · {item.minute}'
         </span>
-        <span className="row" style={{ gap: 4 }}>
+        <span className="row gap-4">
           {item.auto_approved ? <span className="pill accent" title="Approved automatically: priority above the producer's threshold">AUTO</span> : null}
           <span className={item.status === "on_air" ? "pill signal" : item.status === "approved" ? "pill accent" : item.status === "rejected" || item.status === "killed" ? "pill danger" : "pill warn"}>
             {item.status === "on_air" ? <span className="dot live" /> : null}
@@ -231,18 +231,18 @@ function GraphicCard({ item, onAction }: { item: StudioItem; onAction: ActionFn 
         </div>
       ) : null}
       {editing ? (
-        <div className="stack" style={{ gap: 8 }}>
+        <div className="stack gap-8">
           <input className="input" value={title} onChange={(e) => setTitle(e.target.value)} aria-label="Graphic title" />
           <textarea className="textarea" value={body} onChange={(e) => setBody(e.target.value)} aria-label="Graphic body" />
         </div>
       ) : (
         <>
-          <div style={{ fontWeight: 800, fontSize: 15 }}>{item.title}</div>
+          <div className="gfx-title fw-800 fs-15">{item.title}</div>
           <div className="small muted">{item.body}</div>
           {rows ? (
-            <div className="stack" style={{ gap: 4 }}>
+            <div className="stack gap-4">
               {rows.slice(0, 4).map((r, i) => (
-                <div key={i} className="row xs" style={{ justifyContent: "space-between" }}>
+                <div key={i} className="row xs justify-between">
                   <span className="muted">{r.label}</span>
                   <b className="tnum">{r.value}</b>
                 </div>
@@ -251,7 +251,7 @@ function GraphicCard({ item, onAction }: { item: StudioItem; onAction: ActionFn 
           ) : null}
         </>
       )}
-      <div className="row xs faint" style={{ justifyContent: "space-between" }}>
+      <div className="row xs faint justify-between">
         <span>Priority {Math.round(item.priority)}</span>
         <span>{item.duration_s}s on air</span>
       </div>
@@ -395,9 +395,9 @@ function StudioConsole({ match }: { match: MatchMeta }) {
 
   return (
     <div className="stack">
-      <div className="row" style={{ justifyContent: "space-between" }}>
+      <div className="row justify-between">
         <div className="row">
-          <h1 className="display row" style={{ fontSize: 28, fontWeight: 800, textTransform: "uppercase", gap: 10 }}>
+          <h1 className="display row fs-28 fw-800 uppercase gap-10">
             <IconStudio width={28} height={28} /> {t("nav.studio")}
           </h1>
           <SourceBadge source={match.source} />
@@ -420,9 +420,9 @@ function StudioConsole({ match }: { match: MatchMeta }) {
         live={state.status === "live"}
         statusLabel={state.status === "live" ? undefined : statusLabel(state, t)}
       />
-      <div className="card" style={{ padding: 12 }}>
+      <div className="card p-12">
         <LiveControls {...live} />
-        <div className="row" style={{ marginTop: 10, gap: 12 }}>
+        <div className="row mt-10 gap-12">
           <label className="toggle" title="Reveal the hidden planted changes and the Grader's verdicts">
             <input type="checkbox" checked={truthMode} onChange={(e) => setTruthMode(e.target.checked)} />
             {t("truth.mode")}
@@ -436,7 +436,7 @@ function StudioConsole({ match }: { match: MatchMeta }) {
         </div>
       </div>
 
-      <div className="card" style={{ padding: 12 }}>
+      <div className="card p-12">
         <GovernanceBar matchId={id} />
       </div>
 
@@ -497,7 +497,7 @@ function StudioConsole({ match }: { match: MatchMeta }) {
               <div className="queue">
                 {moments.map((m) => (
                   <div className="queue-item" key={m.id}>
-                    <b className="tnum display" style={{ fontSize: 16 }}>
+                    <b className="tnum display fs-16">
                       {clock(m.minute, m.added_minute)}
                     </b>
                     <span>
@@ -519,26 +519,26 @@ function StudioConsole({ match }: { match: MatchMeta }) {
             <div className="latency">
               <div className="kpi">
                 <div className="label">p50</div>
-                <div className="value tnum" style={{ fontSize: 24 }}>{latencies.length ? duration(median(latencies)) : "–"}</div>
+                <div className="value tnum fs-24">{latencies.length ? duration(median(latencies)) : "–"}</div>
               </div>
               <div className="kpi">
                 <div className="label">p95</div>
-                <div className="value tnum" style={{ fontSize: 24 }}>{latencies.length ? duration(percentile(latencies, 95)) : "–"}</div>
+                <div className="value tnum fs-24">{latencies.length ? duration(percentile(latencies, 95)) : "–"}</div>
               </div>
               <div className="kpi">
                 <div className="label">n</div>
-                <div className="value tnum" style={{ fontSize: 24 }}>{latencies.length}</div>
+                <div className="value tnum fs-24">{latencies.length}</div>
                 <div className="sub">narratives</div>
               </div>
             </div>
-            <div className="xs faint" style={{ marginTop: 8 }}>
+            <div className="xs faint mt-8">
               Event-to-narrative time, including agent orchestration and fact-checking.
             </div>
           </section>
         </div>
 
-        <section className="card studio-col" style={{ gap: 12 }}>
-          <div className="card-head" style={{ marginBottom: 0 }}>
+        <section className="card studio-col gap-12">
+          <div className="card-head mb-0">
             <h2 className="card-title">{t("studio.graphics")}</h2>
             <span className="spacer" />
             <div className="seg" role="tablist" aria-label="Filter graphics">
@@ -550,7 +550,7 @@ function StudioConsole({ match }: { match: MatchMeta }) {
               ))}
             </div>
           </div>
-          {actionErr ? <div className="xs" style={{ color: "var(--danger)" }}>{actionErr}</div> : null}
+          {actionErr ? <div className="xs text-danger">{actionErr}</div> : null}
           {shown.length ? (
             <div className="gfx-list">
               {shown.map((it) => (
@@ -576,7 +576,7 @@ function StudioConsole({ match }: { match: MatchMeta }) {
               </span>
             </div>
             <OverlayPreview matchId={id} />
-            <div className="xs faint" style={{ marginTop: 8 }}>
+            <div className="xs faint mt-8">
               Transparent 1920×1080 page; add <span className="kbd">/overlay/{id}</span> as a browser source in OBS or vMix.
             </div>
           </section>

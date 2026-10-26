@@ -143,7 +143,7 @@ export function MatchPulse({ momentum, winProb, goals, homeColor, awayColor, hom
         ) : null}
         {hover !== null ? <line x1={x(hover)} x2={x(hover)} y1={0} y2={wpTop + WP_H} stroke="var(--text)" strokeOpacity={0.6} /> : null}
       </svg>
-      <div className="row xs muted" style={{ justifyContent: "space-between", marginTop: 6 }}>
+      <div className="row xs muted justify-between mt-6">
         <span>
           {hover !== null ? `${Math.round(hover)}'` : "Now"} · Momentum{" "}
           <b style={{ color: (hoverMom?.value ?? 0) >= 0 ? homeColor : awayColor }}>

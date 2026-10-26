@@ -99,7 +99,7 @@ export function VerifierStrip({ v }: { v: Verification }) {
   };
   return (
     <div className={cx("verifier", caught ? "caught" : "missed")} role="group" aria-label={v.drill ? t("verifier.drill") : t("verifier.title")}>
-      <div className="row" style={{ justifyContent: "space-between", gap: 6 }}>
+      <div className="row justify-between gap-6">
         <span className="verifier-label">🛡 {v.drill ? t("verifier.drill") : t("verifier.title")}</span>
         <span className={cx("pill", caught ? "accent" : "danger")}>{caught ? `✓ ${t("verifier.caught")}` : `✕ ${t("verifier.missed")}`}</span>
       </div>
@@ -151,7 +151,7 @@ export function InsightCard({ insight, teamName, teamColor, plantedMinute, verdi
       style={{ "--team": teamColor ?? "var(--accent)" } as CSSProperties}>
       <div className="insight-head">
         <span className="insight-icon" aria-hidden="true">{mechanismIcon(insight.mechanism)}</span>
-        <div style={{ minWidth: 0, flex: 1 }}>
+        <div className="min-w-0 grow">
           <div className="insight-title">{insight.title}</div>
           <div className="xs muted">
             {mechanismLabel(insight.mechanism)}
@@ -172,7 +172,7 @@ export function InsightCard({ insight, teamName, teamColor, plantedMinute, verdi
       {n?.verification ? <VerifierStrip v={n.verification} /> : null}
 
       <FeatureChart feature={f} plantedMinute={plantedMinute} color={teamColor} />
-      <div className="row xs muted" style={{ justifyContent: "space-between" }}>
+      <div className="row xs muted justify-between">
         <span>{f.label}{f.unit ? ` (${f.unit})` : ""}</span>
         <span className="tnum">
           {f.before.toFixed(2)} → <b style={{ color: teamColor ?? "var(--accent)" }}>{f.after.toFixed(2)}</b>
@@ -196,13 +196,13 @@ export function InsightCard({ insight, teamName, teamColor, plantedMinute, verdi
       </details>
 
       {n ? (
-        <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
+        <div className="row gap-8 wrap">
           <FactCheckBadge fc={n.fact_check} />
           <EngineBadge engine={n.engine} ms={n.latency_ms} />
           <ModelTag />
         </div>
       ) : (
-        <div className="row" style={{ gap: 8 }}>
+        <div className="row gap-8">
           <ModelTag title="Detected from Regista's synthetic match events" />
         </div>
       )}

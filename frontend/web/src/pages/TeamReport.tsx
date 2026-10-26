@@ -10,6 +10,7 @@ import { useAsync } from "../hooks/useAsync";
 import { slugName } from "../lib/players";
 import { usePrefs } from "../lib/prefs";
 import { IconBack, IconDNA } from "../components/icons";
+import { cx } from "../lib/format";
 
 const pct = (v: number) => `${Math.round((v > 1 ? v / 100 : v) * 100)}%`;
 
@@ -47,13 +48,13 @@ export function TeamReport() {
 
   return (
     <div className="stack">
-      <div className="row" style={{ gap: 14, flexWrap: "wrap" }}>
+      <div className="row gap-14 wrap">
         <TeamSwatch team={data} size="lg" />
         <div>
-          <h1 className="page-title" style={{ fontSize: "clamp(28px, 4vw, 40px)" }}>
+          <h1 className="page-title fs-display">
             {data.name}
           </h1>
-          <div className="row xs muted" style={{ gap: 8 }}>
+          <div className="row xs muted gap-8">
             <span>{t("scout.teamReport")}</span>
             <span>·</span>
             <span className="tnum">
@@ -63,7 +64,7 @@ export function TeamReport() {
             <RealTag title="Elo computed from every real result since 1872" />
           </div>
         </div>
-        <span style={{ flex: 1 }} />
+        <span className="grow" />
         <InfoPop text={data.disclosure} label="Where these numbers come from" />
         <Link to={`/team/${encodeURIComponent(data.team_id)}`} className="btn sm">
           <IconDNA /> Team DNA
@@ -113,7 +114,7 @@ export function TeamReport() {
                       {s.penalties ? <span className="xs muted"> ({s.penalties} pen)</span> : null}
                     </span>
                     <span className="bar">
-                      <span style={{ width: `${(s.goals / max) * 100}%`, background: "#5cc8ff" }} />
+                      <span className="bg-data-blue" style={{ width: `${(s.goals / max) * 100}%` }} />
                     </span>
                   </div>
                 );
@@ -139,7 +140,7 @@ export function TeamReport() {
                   <tr key={i}>
                     <td className="mono faint">{m.date}</td>
                     <td>
-                      <span className={res === "W" ? "pill accent" : res === "L" ? "pill danger" : "pill"} style={{ padding: "0 7px", marginInlineEnd: 8 }}>
+                      <span className={cx(res === "W" ? "pill accent" : res === "L" ? "pill danger" : "pill", "py-0 px-7 me-8")}>
                         {res}
                       </span>
                       <b className="tnum">
@@ -192,15 +193,15 @@ export function TeamReport() {
               <RealTag /> <ModelTag />
             </span>
           </div>
-          <div className="stack" style={{ gap: 12 }}>
+          <div className="stack gap-12">
             <div>
-              <div className="xs muted" style={{ marginBottom: 6 }}>
+              <div className="xs muted mb-6">
                 Penalty takers
               </div>
               {data.model.penalty_takers.length ? (
                 <div className="bench-list">
                   {data.model.penalty_takers.map((p) => (
-                    <div key={p.player_key} className="bench-row" style={{ gridTemplateColumns: "minmax(0,1fr) auto auto" }}>
+                    <div key={p.player_key} className="bench-row no-avatar">
                       <PlayerLink name={p.name} playerKey={p.player_key} />
                       <span className="xs muted tnum" title="Real penalty goals from the dataset">
                         {p.real_scored} pen goals <RealTag />
@@ -217,7 +218,7 @@ export function TeamReport() {
             </div>
             {data.model.goalkeeper ? (
               <div>
-                <div className="xs muted" style={{ marginBottom: 6 }}>
+                <div className="xs muted mb-6">
                   Goalkeeper: <PlayerLink name={data.model.goalkeeper.name} playerKey={data.model.goalkeeper.player_key} /> · saves {pct(data.model.goalkeeper.save_pct)}
                 </div>
                 <GoalMouth
@@ -239,7 +240,7 @@ export function TeamReport() {
           <div className="advice-list">
             {data.danger_men.map((d) => (
               <article key={d.player_key} className="advice">
-                <div className="advice-icon" aria-hidden="true" style={{ background: "var(--danger-soft)" }}>
+                <div className="advice-icon bg-danger-soft" aria-hidden="true">
                   ⚠
                 </div>
                 <div>
@@ -271,7 +272,7 @@ function LeaderBoard({ title, rows, color }: { title: string; rows: Leader[]; co
   const max = Math.max(1e-6, ...rows.map((r) => r.value));
   return (
     <div>
-      <div className="xs muted" style={{ marginBottom: 6, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em" }}>
+      <div className="xs muted mb-6 fw-700 uppercase tracking-wide">
         {title}
       </div>
       {rows.length ? (

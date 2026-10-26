@@ -43,7 +43,7 @@ function Fixture({ m }: { m: MatchSummary }) {
             </span>
           </div>
         </div>
-        <div className="row" style={{ justifyContent: "center", gap: 6, marginTop: 8 }}>
+        <div className="row justify-center gap-6 mt-8">
           <SourceBadge source={m.source} compact />
           {m.headline_hint ? <span className="pill">{m.headline_hint}</span> : null}
           {m.planted_changes ? (
@@ -76,19 +76,19 @@ export function Hub() {
   const sorted = data ? [...data].sort((a, b) => (b.source?.real?.date ?? b.kickoff).localeCompare(a.source?.real?.date ?? a.kickoff)) : [];
 
   return (
-    <div className="stack" style={{ gap: 22 }}>
-      <section className="hub-hero" style={{ marginBottom: 0 }}>
+    <div className="stack gap-22">
+      <section className="hub-hero mb-0">
         <div className="card hero-copy">
-          <span className="pill signal" style={{ marginBottom: 12 }}>
+          <span className="pill signal mb-12">
             <span className="dot live" /> Inside the Game
           </span>
           <h1 className="page-title">{t("tagline")}</h1>
           <p>{t("hub.subtitle")}</p>
-          <p className="small" style={{ marginTop: -4 }}>
+          <p className="small mt-n4">
             Real international results, with every goal, scorer and minute from 150 years of records, rebuilt ball by ball as synthetic
             match events. Every insight cites its evidence.
           </p>
-          <div className="row" style={{ marginTop: 6 }}>
+          <div className="row mt-6">
             <span className="pill real">◉ Real results</span>
             <span className="pill">12 languages</span>
             <span className="pill">Audio described</span>
@@ -97,15 +97,15 @@ export function Hub() {
         </div>
         <Link to="/forge" className="card forge-cta">
           <div>
-            <div className="card-title" style={{ marginBottom: 8 }}>
+            <div className="card-title mb-8">
               <IconForge /> {t("hub.forge.title")} · What-if
             </div>
-            <div className="section-title" style={{ fontSize: 22, marginBottom: 6 }}>
+            <div className="section-title fs-22 mb-6">
               “Brazil v Japan, as of 2002, with a late red card”
             </div>
             <div className="muted small">{t("hub.forge.body")}</div>
           </div>
-          <span className="btn primary" style={{ alignSelf: "flex-start" }}>
+          <span className="btn primary self-start">
             {t("nav.forge")} <IconNext />
           </span>
         </Link>
@@ -114,7 +114,7 @@ export function Hub() {
       <ReferenceStrip />
 
       <section>
-        <div className="row" style={{ justifyContent: "space-between", marginBottom: 12 }}>
+        <div className="row justify-between mb-12">
           <h2 className="section-title">Fixtures</h2>
           {data ? <span className="xs muted">{data.length} matches</span> : null}
         </div>

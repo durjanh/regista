@@ -28,7 +28,7 @@ export function AgentTrace({ steps }: { steps: AgentStep[] }) {
           </div>
         );
       })}
-      <div className="xs faint" style={{ textAlign: "end" }}>
+      <div className="xs faint text-end">
         Total {duration(total)}
       </div>
     </div>

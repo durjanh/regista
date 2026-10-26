@@ -25,7 +25,7 @@ export function ReferenceStrip() {
     ["Shoot-outs", data.shootouts.toLocaleString()],
   ];
   return (
-    <div className="stack" style={{ gap: 8 }}>
+    <div className="stack gap-8">
       <div className="ref-strip">
         {items.map(([label, value]) => (
           <div className="kpi" key={label}>

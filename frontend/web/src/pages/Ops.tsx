@@ -18,9 +18,9 @@ export function Ops() {
   const sloState = slo.compliant === null ? "pill" : slo.compliant ? "pill accent" : "pill danger";
   return (
     <div className="stack">
-      <div className="row" style={{ justifyContent: "space-between" }}>
-        <h1 className="display" style={{ fontSize: 28, fontWeight: 800, textTransform: "uppercase" }}>📟 {t("ops.title")}</h1>
-        <div className="row" style={{ gap: 8 }}>
+      <div className="row justify-between">
+        <h1 className="display fs-28 fw-800 uppercase">📟 {t("ops.title")}</h1>
+        <div className="row gap-8">
           <span className={data.mode === "azure" ? "pill accent" : "pill warn"}>
             <span className="dot" /> {data.mode === "azure" ? t("engine.azure") : t("engine.offline")}
           </span>
@@ -37,7 +37,7 @@ export function Ops() {
               {slo.compliant === null ? "No samples yet" : slo.compliant ? "✔ Within SLO" : "✖ Breaching SLO"}
             </span>
           </div>
-          <div className="kpis" style={{ gridTemplateColumns: "repeat(4, minmax(0, 1fr))" }}>
+          <div className="kpis cols-4">
             <div className="kpi">
               <div className="label">Target p95</div>
               <div className="value tnum">{duration(slo.target_p95_ms)}</div>
@@ -59,10 +59,10 @@ export function Ops() {
           {slo.p95_ms !== null ? (
             <div className="slo-track" role="img" aria-label={`p95 ${duration(slo.p95_ms)} against a ${duration(slo.target_p95_ms)} target`}>
               <span style={{ width: `${Math.min(100, (slo.p95_ms / Math.max(1, slo.target_p95_ms)) * 100)}%`, background: slo.compliant ? "var(--accent)" : "var(--danger)" }} />
-              <i style={{ left: "100%" }} />
+              <i />
             </div>
           ) : null}
-          <div className="xs faint" style={{ marginTop: 8 }}>
+          <div className="xs faint mt-8">
             Event-to-narrative latency, including agent orchestration, fact-checking and content safety. Data-only graphics fire instantly; AI text follows.
           </div>
         </section>
@@ -71,7 +71,7 @@ export function Ops() {
           <div className="card-head">
             <h2 className="card-title">{t("ops.cost")}</h2>
           </div>
-          <div className="kpis" style={{ gridTemplateColumns: "repeat(4, minmax(0, 1fr))" }}>
+          <div className="kpis cols-4">
             <div className="kpi">
               <div className="label">Model calls</div>
               <div className="value tnum">{cost.model_calls}</div>
@@ -90,7 +90,7 @@ export function Ops() {
             </div>
           </div>
           {cost.per_match.length ? (
-            <div className="table-wrap" style={{ marginTop: 10 }}>
+            <div className="table-wrap mt-10">
               <table className="table">
                 <thead>
                   <tr>
@@ -115,7 +115,7 @@ export function Ops() {
           ) : (
             <EmptyState icon="💷">No model calls yet{data.mode === "offline" ? " (the offline engine costs nothing)" : ""}.</EmptyState>
           )}
-          <div className="xs faint" style={{ marginTop: 8 }}>{cost.price_note}</div>
+          <div className="xs faint mt-8">{cost.price_note}</div>
         </section>
       </div>
     </div>

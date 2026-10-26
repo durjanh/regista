@@ -75,11 +75,11 @@ export function Ask() {
     <div className="ask-layout">
       <section className="card chat" aria-label="Conversation">
         {turns.length === 0 ? (
-          <div className="state" style={{ flex: 1 }}>
+          <div className="state grow">
             <div className="icon" aria-hidden="true">✦</div>
             <div>
-              <strong style={{ fontSize: 18 }}>Ask Regista anything about {match.home.name} v {match.away.name}</strong>
-              <div className="small muted" style={{ maxWidth: "52ch", marginTop: 6 }}>
+              <strong className="fs-18">Ask Regista anything about {match.home.name} v {match.away.name}</strong>
+              <div className="small muted max-52ch mt-6">
                 Answers come from the match analyst agent, which calls the Regista MCP tools for every number, and are fact-checked
                 before you see them.
               </div>
@@ -98,19 +98,19 @@ export function Ask() {
             </Message>
           ) : (
             <Message key={i} from="assistant">
-              <div style={{ whiteSpace: "pre-wrap" }}>
+              <div className="pre-wrap">
                 <CitedText text={turn.res.answer} citations={turn.res.citations} />
               </div>
-              <div className="row" style={{ marginTop: 10, gap: 8 }}>
+              <div className="row mt-10 gap-8">
                 <EngineBadge engine={turn.res.engine} />
                 <FactCheckBadge fc={turn.res.fact_check} />
-                <span style={{ flex: 1 }} />
+                <span className="grow" />
                 <ListenButton small text={turn.res.answer} language={language} persona={persona} />
               </div>
               {turn.res.citations.length ? (
-                <div className="chips" style={{ marginTop: 10 }}>
+                <div className="chips mt-10">
                   {turn.res.citations.map((c) => (
-                    <span key={c.fact_id} className="chip" style={{ cursor: "default" }}>
+                    <span key={c.fact_id} className="chip cursor-default">
                       <span className="fid">{c.fact_id}</span>
                       {c.label}: <b>{c.value}</b>
                     </span>
@@ -118,9 +118,9 @@ export function Ask() {
                 </div>
               ) : null}
               {turn.res.tool_calls.length ? (
-                <details className="disclosure" style={{ marginTop: 10 }}>
+                <details className="disclosure mt-10">
                   <summary>MCP tool calls · {turn.res.tool_calls.length}</summary>
-                  <div className="stack" style={{ gap: 6, marginTop: 8 }}>
+                  <div className="stack gap-6 mt-8">
                     {turn.res.tool_calls.map((tc, j) => (
                       <div key={j} className="tool-call">
                         <span>
@@ -133,7 +133,7 @@ export function Ask() {
                 </details>
               ) : null}
               {turn.res.agent_trace.length ? (
-                <details className="disclosure" style={{ marginTop: 6 }}>
+                <details className="disclosure mt-6">
                   <summary>{t("feed.trace")}</summary>
                   <AgentTrace steps={turn.res.agent_trace} />
                 </details>
@@ -149,7 +149,7 @@ export function Ask() {
               <i />
               <i />
             </span>
-            <span className="xs muted" style={{ marginInlineStart: 8 }}>
+            <span className="xs muted ms-8">
               Analyst agent is querying the match…
             </span>
           </Message>
@@ -200,10 +200,10 @@ export function Ask() {
           </div>
         </section>
         <section className="card small muted">
-          <div className="card-title" style={{ marginBottom: 8 }}>
+          <div className="card-title mb-8">
             How answers are grounded
           </div>
-          <ol style={{ margin: 0, paddingInlineStart: "1.2em", display: "flex", flexDirection: "column", gap: 6 }}>
+          <ol className="m-0 ps-list d-flex flex-col gap-6">
             <li>The analyst agent plans which MCP tools to call: match state, key moments, xG breakdowns or tactics.</li>
             <li>Every number in the answer comes from a tool result, tagged with a fact ID.</li>
             <li>A fact-checker agent verifies each claim, and the Fair Commentary guardrail checks the wording.</li>

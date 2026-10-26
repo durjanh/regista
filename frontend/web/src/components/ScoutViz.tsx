@@ -124,15 +124,15 @@ export function ChannelArrows({ split, color, label, unit = "of attacks" }: { sp
 export function SplitBar({ parts }: { parts: { label: string; value: number; color: string }[] }) {
   const total = parts.reduce((a, p) => a + p.value, 0) || 1;
   return (
-    <div className="stack" style={{ gap: 6 }}>
+    <div className="stack gap-6">
       <div className="split-bar" aria-hidden="true">
         {parts.map((p) => (
           <span key={p.label} style={{ width: `${(p.value / total) * 100}%`, background: p.color }} />
         ))}
       </div>
-      <div className="row xs" style={{ gap: 12, flexWrap: "wrap" }}>
+      <div className="row xs gap-12 wrap">
         {parts.map((p) => (
-          <span key={p.label} className="row" style={{ gap: 5 }}>
+          <span key={p.label} className="row gap-5">
             <i className="swatch" style={{ background: p.color }} />
             {p.label} <b className="tnum">{pctLabel(p.value / total)}</b>
           </span>
@@ -185,7 +185,7 @@ export function RecordTable({ rows }: { rows: { label: string; rec: Rec }[] }) {
         <tbody>
           {rows.map(({ label, rec }) => (
             <tr key={label}>
-              <td style={{ fontWeight: 700 }}>{label}</td>
+              <td className="fw-700">{label}</td>
               <td className="tnum">{rec.played}</td>
               <td className="tnum">{rec.won}</td>
               <td className="tnum">{rec.drawn}</td>

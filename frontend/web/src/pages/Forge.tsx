@@ -100,8 +100,8 @@ export function Forge() {
   return (
     <div className="stack">
       <div>
-        <h1 className="page-title row" style={{ gap: 10 }}><IconForge width={30} height={30} /> {t("nav.forge")}</h1>
-        <p className="muted" style={{ maxWidth: "70ch" }}>
+        <h1 className="page-title row gap-10"><IconForge width={30} height={30} /> {t("nav.forge")}</h1>
+        <p className="muted max-70ch">
           Direct a <b>what-if</b> match between real national teams in plain English. The Scenario Director agent turns your brief into a
           simulator config, team strength comes from Elo built on 150 years of real results, and every generated match is checked against
           real-world distributions.
@@ -117,7 +117,7 @@ export function Forge() {
               <h2 className="card-title">{t("forge.prompt")}</h2>
             </div>
             <textarea className="textarea" value={prompt} onChange={(e) => setPrompt(e.target.value)} aria-label={t("forge.prompt")} />
-            <div className="row" style={{ marginTop: 10, justifyContent: "space-between" }}>
+            <div className="row mt-10 justify-between">
               <div className="chips">
                 {PROMPTS.slice(1).map((p) => (
                   <button key={p} className="chip" onClick={() => setPrompt(p)} title={p}>
@@ -130,9 +130,9 @@ export function Forge() {
               </button>
             </div>
             {explanation ? (
-              <div className="note" style={{ marginTop: 12 }}>
+              <div className="note mt-12">
                 <span className="ai-badge">✦ Scenario Director · {explanation.engine === "azure" ? "Azure AI" : "offline"}</span>
-                <div style={{ marginTop: 4 }}>{explanation.text}</div>
+                <div className="mt-4">{explanation.text}</div>
               </div>
             ) : null}
           </section>
@@ -159,7 +159,7 @@ export function Forge() {
                     const fkey = side === "home" ? "home_formation" : "away_formation";
                     const tm = teamById.get(config[key]);
                     return (
-                      <div className="stack" style={{ gap: 10 }} key={side}>
+                      <div className="stack gap-10" key={side}>
                         <div className="field">
                           <label htmlFor={`team-${side}`}>
                             {side === "home" ? "Home" : "Away"} <TeamSwatch team={tm} size="sm" />
@@ -219,23 +219,23 @@ export function Forge() {
                     />
                   </div>
                 </div>
-                {config.home_team_id === config.away_team_id ? <div className="xs" style={{ color: "var(--warn)" }}>Pick two different teams.</div> : null}
+                {config.home_team_id === config.away_team_id ? <div className="xs text-warn">Pick two different teams.</div> : null}
                 <button className="btn primary" onClick={generate} disabled={generating || config.home_team_id === config.away_team_id} aria-busy={generating}>
                   <IconSimulate /> {generating ? "Simulating…" : t("forge.generate")}
                 </button>
               </div>
             )}
-            {err ? <div className="xs" style={{ color: "var(--danger)", marginTop: 10 }}>{err}</div> : null}
+            {err ? <div className="xs text-danger mt-10">{err}</div> : null}
           </section>
 
           {result ? (
-            <section className="card" style={{ borderColor: "var(--accent)" }}>
+            <section className="card border-accent">
               <div className="card-head">
                 <h2 className="card-title">Generated</h2>
                 <span className="spacer" />
                 <SourceBadge source={result.match.source} compact />
               </div>
-              <div className="fixture-line" style={{ marginBottom: 12 }}>
+              <div className="fixture-line mb-12">
                 <div className="fixture-team home">
                   <span className="nm">{result.match.home.name}</span>
                   <TeamSwatch team={result.match.home} />
@@ -311,7 +311,7 @@ function TruthScoreBody({ s }: { s: TruthScore }) {
   const l = s.latest!;
   const bar = (label: string, recall: number, n: number) => (
     <div key={label} className="pp-row">
-      <span className="xs muted" style={{ textTransform: "capitalize" }}>{label}</span>
+      <span className="xs muted capitalize">{label}</span>
       <div className="pp-track" role="img" aria-label={`${label}: recall ${Math.round(recall * 100)}% over ${n} changes`}>
         <span style={{ width: `${Math.round(recall * 100)}%`, background: recall >= 0.7 ? "var(--accent)" : recall >= 0.4 ? "var(--warn)" : "var(--danger)" }} />
       </div>
@@ -320,8 +320,8 @@ function TruthScoreBody({ s }: { s: TruthScore }) {
     </div>
   );
   return (
-    <div className="stack" style={{ gap: 14 }}>
-      <div className="kpis" style={{ gridTemplateColumns: "repeat(3, minmax(0, 1fr))" }}>
+    <div className="stack gap-14">
+      <div className="kpis cols-3">
         <div className="kpi">
           <div className="label">Recall</div>
           <div className="value tnum">{Math.round(l.recall * 100)}%</div>
@@ -339,12 +339,12 @@ function TruthScoreBody({ s }: { s: TruthScore }) {
         </div>
       </div>
       <div className="two-col">
-        <div className="stack" style={{ gap: 6 }}>
-          <div className="card-title" style={{ marginBottom: 2 }}>By difficulty</div>
+        <div className="stack gap-6">
+          <div className="card-title mb-2">By difficulty</div>
           {l.by_difficulty.map((d) => bar(d.difficulty, d.recall, d.plants))}
         </div>
-        <div className="stack" style={{ gap: 6 }}>
-          <div className="card-title" style={{ marginBottom: 2 }}>By mechanism</div>
+        <div className="stack gap-6">
+          <div className="card-title mb-2">By mechanism</div>
           {l.by_mechanism.map((d) => bar(mechanismLabel(d.mechanism), d.recall, d.plants))}
         </div>
       </div>
@@ -362,7 +362,7 @@ function TruthHistory({ history }: { history: TruthScore["history"] }) {
   const line = history.map((h, i) => `${i ? "L" : "M"} ${x(i)} ${y(h.recall)}`).join(" ");
   return (
     <div>
-      <div className="card-title" style={{ marginBottom: 6 }}>Recall per commit</div>
+      <div className="card-title mb-6">Recall per commit</div>
       <svg className="chart-svg" viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`Truth score history over ${history.length} runs`}>
         {[0, 0.5, 1].map((v) => (
           <g key={v}>
@@ -389,17 +389,17 @@ function CalibrationReport({ c }: { c: Calibration }) {
     unit === "%" || unit === "ratio" ? `${(v * 100).toFixed(1)}%` : Math.abs(v) < 10 ? v.toFixed(2) : v.toFixed(0);
   return (
     <div className="stack">
-      <div className="row" style={{ gap: 14 }}>
-        <div className="kpi" style={{ flex: 1 }}>
+      <div className="row gap-14">
+        <div className="kpi grow">
           <div className="label">In range</div>
           <div className="value tnum" style={{ color: passes === c.metrics.length ? "var(--accent)" : "var(--warn)" }}>
             {passes}/{c.metrics.length}
           </div>
           <div className="sub">metrics within the real-world band</div>
         </div>
-        <div className="kpi" style={{ flex: 2 }}>
+        <div className="kpi grow-2">
           <div className="label">Reference</div>
-          <div style={{ fontWeight: 700 }}>{c.reference.name}</div>
+          <div className="fw-700">{c.reference.name}</div>
           <div className="sub">
             {c.reference.matches.toLocaleString()} matches · {c.reference.licence} ·{" "}
             <a className="team-link" href={sourceUrl(c.reference.source)} target="_blank" rel="noreferrer">
@@ -416,7 +416,7 @@ function CalibrationReport({ c }: { c: Calibration }) {
               <th>Metric</th>
               <th>Synthetic</th>
               <th>Reference</th>
-              <th style={{ minWidth: 110 }}>Band</th>
+              <th className="min-w-110">Band</th>
               <th />
             </tr>
           </thead>
@@ -424,7 +424,7 @@ function CalibrationReport({ c }: { c: Calibration }) {
             {c.metrics.map((m) => (
               <tr key={m.metric}>
                 <td>
-                  <div style={{ fontWeight: 600 }}>{m.metric}</div>
+                  <div className="fw-600">{m.metric}</div>
                   <div className="xs faint">{m.source}</div>
                 </td>
                 <td className="tnum">
@@ -434,7 +434,7 @@ function CalibrationReport({ c }: { c: Calibration }) {
                 <td>
                   <RangeBar low={m.low} high={m.high} reference={m.reference} simulated={m.simulated} />
                 </td>
-                <td className={`status-${m.status}`} style={{ fontWeight: 800 }} aria-label={m.status}>
+                <td className={`status-${m.status} fw-800`} aria-label={m.status}>
                   {m.status === "pass" ? "✓" : m.status === "warn" ? "!" : "✕"}
                 </td>
               </tr>
@@ -444,13 +444,13 @@ function CalibrationReport({ c }: { c: Calibration }) {
       </div>
 
       <div>
-        <div className="card-title" style={{ marginBottom: 8 }}>
+        <div className="card-title mb-8">
           When goals are scored
         </div>
         <DistributionChart labelKey="Goal minute distribution" data={c.goal_minute_distribution.map((d) => ({ label: d.bin, simulated: d.simulated, reference: d.reference }))} />
       </div>
       <div>
-        <div className="card-title" style={{ marginBottom: 8 }}>
+        <div className="card-title mb-8">
           Most common scorelines
         </div>
         <DistributionChart labelKey="Scoreline distribution" data={c.scoreline_distribution.slice(0, 10).map((d) => ({ label: d.score, simulated: d.simulated, reference: d.reference }))} />

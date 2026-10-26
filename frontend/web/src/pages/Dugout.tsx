@@ -112,15 +112,15 @@ export function Dugout() {
 
   return (
     <div className="stack">
-      <div className="row" style={{ gap: 12, justifyContent: "space-between", flexWrap: "wrap" }}>
-        <div className="row" style={{ gap: 8 }}>
+      <div className="row gap-12 justify-between wrap">
+        <div className="row gap-8">
           <span className="xs muted">{t("dugout.side")}</span>
           <div className="seg" role="group" aria-label={t("dugout.side")}>
             {(["home", "away"] as Side[]).map((s) => {
               const tm = s === "home" ? match.home : match.away;
               return (
                 <button key={s} className={cx(side === s && "on")} onClick={() => setSide(s)} aria-pressed={side === s}>
-                  <span className="row" style={{ gap: 6 }}>
+                  <span className="row gap-6">
                     <TeamSwatch team={tm} size="sm" />
                     {tm.name}
                   </span>
@@ -129,7 +129,7 @@ export function Dugout() {
             })}
           </div>
         </div>
-        <div className="row" style={{ gap: 8 }}>
+        <div className="row gap-8">
           <Link to={teamReportPath(opp.team_id)} className="btn sm">
             🔎 {t("scout.teamReport")}: {opp.short}
           </Link>
@@ -146,22 +146,22 @@ export function Dugout() {
         statusLabel={state.status === "live" ? undefined : statusLabel(state, t)}
       />
 
-      <div className="card" style={{ padding: 12 }}>
+      <div className="card p-12">
         <LiveControls {...live} />
       </div>
 
       {error && !data ? <ErrorState message={error} onRetry={() => void fetchDugout(side)} /> : null}
 
       {data ? (
-        <div className="card" style={{ padding: 12 }}>
+        <div className="card p-12">
           <div className="dugout-head">
-            <div className="stack" style={{ gap: 6 }}>
-              <div className="row xs muted" style={{ gap: 8 }}>
+            <div className="stack gap-6">
+              <div className="row xs muted gap-8">
                 <span>Win probability · {team.name}</span>
                 <ModelTag />
               </div>
               <WinStrip wp={data.win_prob} side={side} homeColor={colors.home} awayColor={colors.away} />
-              <div className="row xs" style={{ gap: 12, flexWrap: "wrap" }}>
+              <div className="row xs gap-12 wrap">
                 <span>
                   {match.home.short} <b className="tnum">{pct(data.win_prob.home)}</b>
                 </span>
@@ -173,7 +173,7 @@ export function Dugout() {
                 </span>
               </div>
             </div>
-            <div className="stack" style={{ gap: 6, alignItems: "flex-end" }}>
+            <div className="stack gap-6 items-end">
               <span className="pill" title={data.venue.note}>
                 📍 {data.venue.city}
                 {data.venue.altitude_m ? ` · ${data.venue.altitude_m.toLocaleString()} m altitude` : ""}
@@ -189,7 +189,7 @@ export function Dugout() {
               </span>
             </div>
           </div>
-          {data.venue.note ? <div className="note" style={{ marginTop: 10 }}>{data.venue.note}</div> : null}
+          {data.venue.note ? <div className="note mt-10">{data.venue.note}</div> : null}
         </div>
       ) : (
         !error && <Skeleton h={90} />
@@ -268,10 +268,10 @@ export function Dugout() {
                   <div className="bench-list">
                     {data.bench.map((b) => (
                       <div key={b.player_id} className="bench-row">
-                        <span className="pill" style={{ padding: "0 6px", justifyContent: "center" }}>
+                        <span className="pill py-0 px-6 justify-center">
                           {b.position}
                         </span>
-                        <div style={{ minWidth: 0 }}>
+                        <div className="min-w-0">
                           <PlayerLink name={b.name} playerKey={b.player_key} placeholder={index.byId.get(b.player_id)?.name_source === "placeholder"} />
                           <div className="xs muted">{b.fit}</div>
                         </div>
@@ -288,7 +288,7 @@ export function Dugout() {
                   <div className="bench-list">
                     {offPitch.map((p) => (
                       <div key={p.player_id} className="bench-row">
-                        <span className="pill" style={{ padding: "0 6px", justifyContent: "center" }}>
+                        <span className="pill py-0 px-6 justify-center">
                           {p.position}
                         </span>
                         <PlayerLink name={p.name} playerKey={p.player_key} />
@@ -315,11 +315,11 @@ export function Dugout() {
               </button>
             </div>
             {brief ? (
-              <div className="stack" style={{ gap: 10 }}>
-                <p className="small" style={{ margin: 0, lineHeight: 1.55 }}>
+              <div className="stack gap-10">
+                <p className="small m-0 lh-prose">
                   <CitedText text={brief.text} citations={brief.citations} />
                 </p>
-                <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
+                <div className="row gap-8 wrap">
                   <ListenButton text={brief.text.replace(/\[f\d+\]/g, "")} language={brief.language} persona="broadcaster" small />
                   <FactCheckBadge fc={brief.fact_check} />
                   <EngineBadge engine={brief.engine} ms={brief.latency_ms} />
@@ -341,10 +341,10 @@ export function Dugout() {
             {!data ? (
               <Skeleton h={90} />
             ) : data.danger_men.length ? (
-              <div className="stack" style={{ gap: 8 }}>
+              <div className="stack gap-8">
                 {data.danger_men.map((d) => (
                   <div key={d.player_id} className="advice">
-                    <div className="advice-icon" aria-hidden="true" style={{ background: "var(--danger-soft)" }}>
+                    <div className="advice-icon bg-danger-soft" aria-hidden="true">
                       ⚠
                     </div>
                     <div>
@@ -352,7 +352,7 @@ export function Dugout() {
                         <PlayerLink name={d.name} playerKey={index.byId.get(d.player_id)?.player_key} />
                       </div>
                       <div className="small">{d.why}</div>
-                      <div className="row xs muted" style={{ gap: 10, marginTop: 4 }}>
+                      <div className="row xs muted gap-10 mt-4">
                         <span>
                           xT <b className="tnum">{d.xt.toFixed(2)}</b>
                         </span>
@@ -393,9 +393,9 @@ export function Dugout() {
               <ModelTag />
             </div>
             {data ? (
-              <div className="stack" style={{ gap: 10 }}>
+              <div className="stack gap-10">
                 <ChannelArrows split={data.opponent_patterns.channels} color={oppColor} label={`${opp.name} attacking channels`} unit="of their final-third entries" />
-                <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
+                <div className="row gap-8 wrap">
                   <span className="chip">
                     PPDA <b>{data.opponent_patterns.ppda.toFixed(1)}</b>
                   </span>
@@ -419,7 +419,7 @@ function WinStrip({ wp, homeColor, awayColor }: { wp: WinProb; side: Side; homeC
   return (
     <div className="wp-strip" aria-hidden="true">
       <span style={{ width: pct(wp.home), background: homeColor }} />
-      <span style={{ width: pct(wp.draw), background: "var(--text-faint)" }} />
+      <span className="bg-text-faint" style={{ width: pct(wp.draw) }} />
       <span style={{ width: pct(wp.away), background: awayColor }} />
     </div>
   );
@@ -427,7 +427,7 @@ function WinStrip({ wp, homeColor, awayColor }: { wp: WinProb; side: Side; homeC
 
 function StatusLegend() {
   return (
-    <span className="row xs" style={{ gap: 6 }}>
+    <span className="row xs gap-6">
       {(["good", "ok", "watch", "struggling"] as const).map((s) => (
         <span key={s} className={cx("status-chip", s)}>
           {s}
@@ -467,7 +467,7 @@ function RecommendationCard({
   const icon = rec.type === "substitution" ? "🔁" : rec.type === "tactical" ? "♟" : "⚠";
   return (
     <article className={cx("rec", rec.type, state === "accepted" && "done")}>
-      <div className="row" style={{ gap: 8, justifyContent: "space-between" }}>
+      <div className="row gap-8 justify-between">
         <span className="rec-title">
           <span aria-hidden="true">{icon}</span> {rec.title}
         </span>
@@ -507,7 +507,7 @@ function RecommendationCard({
         </div>
       ) : null}
       {evidenceChips(rec.evidence)}
-      <div className="row" style={{ gap: 8 }}>
+      <div className="row gap-8">
         {state === "accepted" ? (
           <span className="pill accent">✓ {t("dugout.accepted")}</span>
         ) : (
@@ -537,11 +537,11 @@ function PlayerCard({ p, color, ink, placeholder }: { p: DugoutPlayer; color: st
         <span className="pcard-shirt" style={{ background: color, color: ink }}>
           {p.shirt}
         </span>
-        <div style={{ minWidth: 0 }}>
+        <div className="min-w-0">
           <div className="pcard-name">
             <PlayerLink name={p.name} playerKey={p.player_key} placeholder={placeholder} />
           </div>
-          <div className="row xs muted" style={{ gap: 6 }}>
+          <div className="row xs muted gap-6">
             <span>{p.position}</span>
             <span>·</span>
             <span className="tnum">{p.minutes}'</span>
@@ -565,15 +565,15 @@ function PlayerCard({ p, color, ink, placeholder }: { p: DugoutPlayer; color: st
         </span>
         <span className="tnum">{p.fatigue.drop_pct > 0 ? `−${Math.round(p.fatigue.drop_pct)}%` : p.fatigue.level}</span>
       </div>
-      <div className="row xs muted" style={{ gap: 10 }}>
+      <div className="row xs muted gap-10">
         <span>
-          <b className="tnum" style={{ color: "var(--text)" }}>{p.fatigue.distance_km.toFixed(1)}</b> km
+          <b className="tnum text-strong">{p.fatigue.distance_km.toFixed(1)}</b> km
         </span>
         <span>
-          <b className="tnum" style={{ color: "var(--text)" }}>{p.fatigue.sprints}</b> sprints
+          <b className="tnum text-strong">{p.fatigue.sprints}</b> sprints
         </span>
         {p.reasons.length ? (
-          <button className="btn ghost sm" style={{ marginInlineStart: "auto", minHeight: 0, padding: "0 6px" }} onClick={() => setOpen((o) => !o)} aria-expanded={open}>
+          <button className="btn ghost sm ms-auto min-h-0 py-0 px-6" onClick={() => setOpen((o) => !o)} aria-expanded={open}>
             {open ? "Hide" : "Why"}
           </button>
         ) : null}

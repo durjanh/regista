@@ -62,7 +62,7 @@ export function TruthPanel({ matchId, report, t, ended, teams, error }: Props) {
   };
 
   if (!report)
-    return error ? <div className="xs" style={{ color: "var(--danger)" }}>{error}</div> : <Skeleton h={120} />;
+    return error ? <div className="xs text-danger">{error}</div> : <Skeleton h={120} />;
 
   const s = report.score;
   return (
@@ -95,7 +95,7 @@ export function TruthPanel({ matchId, report, t, ended, teams, error }: Props) {
               <li key={plant.id} className={cx("plant", status, fresh.has(plant.id) && "just-detected")}>
                 <div className="plant-row">
                   <span className="plant-icon" aria-hidden="true">{mechanismIcon(plant.mechanism)}</span>
-                  <div style={{ flex: 1, minWidth: 0 }}>
+                  <div className="grow min-w-0">
                     <div className="plant-title">
                       <span className="swatch" style={{ background: team?.color }} /> {team?.short ?? plant.team_id} · {mechanismLabel(plant.mechanism)}
                       <span className="faint"> · {clock(plant.minute)} · {plant.difficulty}</span>
@@ -110,7 +110,7 @@ export function TruthPanel({ matchId, report, t, ended, teams, error }: Props) {
                   </span>
                 </div>
                 {status === "detected" && grade?.explanation_correct !== undefined ? (
-                  <div className="xs" style={{ marginTop: 4 }}>
+                  <div className="xs mt-4">
                     {grade.explanation_correct ? (
                       <span className="status-pass">✔ explanation correct (team, mechanism and direction)</span>
                     ) : (
@@ -119,7 +119,7 @@ export function TruthPanel({ matchId, report, t, ended, teams, error }: Props) {
                   </div>
                 ) : null}
                 {status === "detected" || status === "missed" || ended ? (
-                  <div style={{ marginTop: 8 }}>
+                  <div className="mt-8">
                     {c?.data ? (
                       <CounterfactualCard cf={c.data} color={team?.color} />
                     ) : (
@@ -127,8 +127,8 @@ export function TruthPanel({ matchId, report, t, ended, teams, error }: Props) {
                         <IconCounterfactual /> {c?.loading ? "Replaying the match without it…" : tr("truth.whatChanged")}
                       </button>
                     )}
-                    {c?.loading ? <div style={{ marginTop: 8 }}><Skeleton h={70} /></div> : null}
-                    {c?.error ? <div className="xs" style={{ color: "var(--danger)", marginTop: 6 }}>{c.error}</div> : null}
+                    {c?.loading ? <div className="mt-8"><Skeleton h={70} /></div> : null}
+                    {c?.error ? <div className="xs text-danger mt-6">{c.error}</div> : null}
                   </div>
                 ) : null}
               </li>
@@ -140,8 +140,8 @@ export function TruthPanel({ matchId, report, t, ended, teams, error }: Props) {
       )}
 
       {report.false_alarms.length ? (
-        <div className="stack" style={{ gap: 6 }}>
-          <div className="xs muted" style={{ fontWeight: 700 }}>{tr("truth.falseAlarms")}</div>
+        <div className="stack gap-6">
+          <div className="xs muted fw-700">{tr("truth.falseAlarms")}</div>
           {report.false_alarms.map((fa) => (
             <div key={fa.id} className="false-alarm-row xs">
               <span className="pill danger">✖</span> {clock(fa.detected_minute)} · {teams[fa.team_id]?.short ?? fa.team_id} · {mechanismLabel(fa.mechanism)}:{" "}
@@ -176,7 +176,7 @@ export function CounterfactualCard({ cf, color = "var(--accent)" }: { cf: Counte
   const unit = cf.metric.unit ? ` ${cf.metric.unit}` : "";
   return (
     <div className="cf-card">
-      <div className="row xs" style={{ justifyContent: "space-between" }}>
+      <div className="row xs justify-between">
         <b>{cf.metric.label}</b>
         <span className="faint">{cf.runs} paired re-runs · p10–p90</span>
       </div>

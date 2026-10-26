@@ -182,7 +182,7 @@ export function CasualView({ match, state, colors, narratives }: { match: MatchM
         {now ? (
           <article key={now.id} className="casual-moment">
             <div className="casual-icon" aria-hidden="true">{MOMENT_ICON[now.type] ?? "•"}</div>
-            <div className="stack" style={{ gap: 8 }}>
+            <div className="stack gap-8">
               <div className="casual-title">
                 <span className="tnum faint">{clock(now.minute, now.added_minute)}</span> {now.title}
               </div>
@@ -266,8 +266,8 @@ export function PlayerFocusView({ match, state, colors, playerId, onPlayer }: {
   return (
     <div className="stack">
       <section className="card player-focus" style={{ "--team": colors[side] } as CSSProperties}>
-        <div className="row" style={{ justifyContent: "space-between" }}>
-          <div className="row" style={{ gap: 10 }}>
+        <div className="row justify-between">
+          <div className="row gap-10">
             <PlayerAvatar name={player.name} colors={match[side].colors} size={44} />
             <div>
               <div className="pf-name">
@@ -277,7 +277,7 @@ export function PlayerFocusView({ match, state, colors, playerId, onPlayer }: {
               <div className="xs muted">{player.position} · {match[side].name}{st?.goals ? ` · ⚽ ${st.goals}` : ""}{st?.assists ? ` · 🅰 ${st.assists}` : ""}</div>
             </div>
           </div>
-          <label className="row" style={{ gap: 6 }}>
+          <label className="row gap-6">
             <span className="xs muted">{t("player.pick")}</span>
             <select className="select" value={pid} onChange={(e) => onPlayer(e.target.value)} aria-label={t("player.pick")}>
               {(["home", "away"] as Side[]).map((s) => (
@@ -292,7 +292,7 @@ export function PlayerFocusView({ match, state, colors, playerId, onPlayer }: {
             </select>
           </label>
         </div>
-        <div className="kpis" style={{ marginTop: 12 }}>
+        <div className="kpis mt-12">
           {kpis.map((k) => (
             <div className="kpi" key={k.label}>
               <div className="label">{k.label}</div>
@@ -302,7 +302,7 @@ export function PlayerFocusView({ match, state, colors, playerId, onPlayer }: {
           ))}
         </div>
         {player.player_key ? (
-          <div className="xs" style={{ marginTop: 8 }}>
+          <div className="xs mt-8">
             🧬 <PlayerLink name={t("player.dna")} playerKey={player.player_key} />
           </div>
         ) : null}
@@ -318,8 +318,8 @@ export function PlayerFocusView({ match, state, colors, playerId, onPlayer }: {
             <EventLayer events={mine.slice(-24)} homeId={match.home.team_id} homeColor={colors.home} awayColor={colors.away} shirts={shirts} names={names} />
           </Pitch>
           {by15.length ? (
-            <div style={{ marginTop: 12 }}>
-              <div className="xs muted" style={{ marginBottom: 6 }}>{t("player.by15")} (km)</div>
+            <div className="mt-12">
+              <div className="xs muted mb-6">{t("player.by15")} (km)</div>
               <div className="by15">
                 {by15.map((v, i) => (
                   <div key={i} className="by15-col" title={`${i * 15}–${(i + 1) * 15}': ${v.toFixed(2)} km`}>
@@ -400,8 +400,8 @@ export function ClubFocusView({ match, state, colors, side, onSide, narratives }
   return (
     <div className="stack">
       <section className="card club-head" style={{ "--team": colors[side] } as CSSProperties}>
-        <div className="row" style={{ justifyContent: "space-between" }}>
-          <div className="row" style={{ gap: 10 }}>
+        <div className="row justify-between">
+          <div className="row gap-10">
             <TeamSwatch team={team} size="lg" />
             <div>
               <div className="xs muted">{t("club.pick")}</div>
@@ -416,7 +416,7 @@ export function ClubFocusView({ match, state, colors, side, onSide, narratives }
             ))}
           </div>
         </div>
-        <div className="kpis" style={{ marginTop: 12 }}>
+        <div className="kpis mt-12">
           {kpis.map((k) => (
             <div className="kpi" key={k.label}>
               <div className="label">{k.label}</div>
@@ -425,8 +425,8 @@ export function ClubFocusView({ match, state, colors, side, onSide, narratives }
             </div>
           ))}
         </div>
-        <div style={{ marginTop: 12 }}>
-          <div className="xs muted" style={{ marginBottom: 4 }}>{t("club.trend")}</div>
+        <div className="mt-12">
+          <div className="xs muted mb-4">{t("club.trend")}</div>
           <Spark values={trend} color={colors[side]} label={t("club.trend")} />
         </div>
       </section>
@@ -482,7 +482,7 @@ export function SingleMetricView({ match, state, colors, metric, onMetric }: {
   const s = state.latest?.stats;
   return (
     <section className="card metric-view">
-      <div className="row" style={{ justifyContent: "space-between" }}>
+      <div className="row justify-between">
         <h2 className="card-title">{label[metric]}</h2>
         <div className="seg" role="group" aria-label={t("metric.pick")}>
           {METRICS.map((m) => (
@@ -558,7 +558,7 @@ export function KeyBattle({ match, state, colors }: { match: MatchMeta; state: L
   }, [a, state.events, match]);
 
   return (
-    <section className="card" style={{ gridArea: "battle" }}>
+    <section className="card area-battle">
       <div className="card-head">
         <h2 className="card-title">⚔ {t("battle.title")}</h2>
         <span className="spacer" />
@@ -567,7 +567,7 @@ export function KeyBattle({ match, state, colors }: { match: MatchMeta; state: L
       {!battle ? (
         a ? <EmptyState icon="⚔">{t("battle.empty")}</EmptyState> : <Skeleton h={90} />
       ) : (
-        <div className="stack" style={{ gap: 10 }}>
+        <div className="stack gap-10">
           <div className="battle">
             <div className="battle-side" style={{ "--team": colors[battle.side] } as CSSProperties}>
               <small>{battle.attacker.position}</small>
@@ -594,7 +594,7 @@ export function EventTicker({ match, state }: { match: MatchMeta; state: LiveSta
   const { t } = usePrefs();
   const recent = state.events.slice(-14).reverse();
   return (
-    <section className="card" style={{ gridArea: "ticker" }}>
+    <section className="card area-ticker">
       <div className="card-head">
         <h2 className="card-title">{t("ticker.title")}</h2>
         <span className="spacer" />

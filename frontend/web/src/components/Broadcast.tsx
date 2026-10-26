@@ -128,8 +128,8 @@ export function GoLivePanel({ matchId, currentT, homeId, awayId }: { matchId: st
         ) : null}
         {live ? <LiveBadge connection={bc.connection} latencyMs={bc.latencyMs} /> : null}
       </div>
-      <p className="xs muted" style={{ margin: "0 0 10px" }}>{t("bc.explain")}</p>
-      <div className="row" style={{ gap: 12, flexWrap: "wrap" }}>
+      <p className="xs muted m-0 mb-10">{t("bc.explain")}</p>
+      <div className="row gap-12 wrap">
         <label className="xs">
           {t("bc.speed")}{" "}
           <select className="select" value={speed} disabled={live} onChange={(e) => setSpeed(Number(e.target.value))} aria-label={t("bc.speed")}>
@@ -152,7 +152,7 @@ export function GoLivePanel({ matchId, currentT, homeId, awayId }: { matchId: st
         )}
       </div>
       {status ? (
-        <dl className="kv xs" style={{ marginTop: 10 }}>
+        <dl className="kv xs mt-10">
           <dt>{t("bc.source")}</dt><dd>{status.source}</dd>
           <dt>{t("bc.speed")}</dt><dd>{status.speed}×</dd>
           <dt aria-label="minute">⏱</dt><dd>{status.minute}'</dd>
@@ -160,7 +160,7 @@ export function GoLivePanel({ matchId, currentT, homeId, awayId }: { matchId: st
           <dt>{t("bc.bytes")}</dt><dd>{formatBytes(status.bytes_published)}</dd>
         </dl>
       ) : null}
-      {err ? <p className="xs" role="alert" style={{ color: "var(--danger)" }}>⚠ {err}</p> : null}
+      {err ? <p className="xs text-danger" role="alert">⚠ {err}</p> : null}
     </section>
   );
 }

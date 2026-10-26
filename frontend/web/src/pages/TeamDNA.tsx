@@ -10,6 +10,7 @@ import { PlayerLink } from "../components/ScoutViz";
 import { slugName, teamReportPath } from "../lib/players";
 import { useMemo } from "react";
 import { IconBack } from "../components/icons";
+import { cx } from "../lib/format";
 
 export function TeamDNA() {
   const { teamId = "" } = useParams();
@@ -33,13 +34,13 @@ export function TeamDNA() {
 
   return (
     <div className="stack">
-      <div className="row" style={{ gap: 14 }}>
+      <div className="row gap-14">
         <TeamSwatch team={data} size="lg" />
         <div>
-          <h1 className="page-title" style={{ fontSize: "clamp(28px, 4vw, 40px)" }}>
+          <h1 className="page-title fs-display">
             {data.name}
           </h1>
-          <div className="row xs muted" style={{ gap: 8 }}>
+          <div className="row xs muted gap-8">
             <span>Team DNA</span>
             <span>·</span>
             <span>
@@ -47,7 +48,7 @@ export function TeamDNA() {
             </span>
           </div>
         </div>
-        <span style={{ flex: 1 }} />
+        <span className="grow" />
         <Link to={teamReportPath(data.team_id)} className="btn sm primary">
           🔎 Scouting report
         </Link>
@@ -106,7 +107,7 @@ export function TeamDNA() {
                     <tr key={i}>
                       <td className="mono faint">{m.date}</td>
                       <td>
-                        <span className={res === "W" ? "pill accent" : res === "L" ? "pill danger" : "pill"} style={{ padding: "0 7px", marginInlineEnd: 8 }}>
+                        <span className={cx(res === "W" ? "pill accent" : res === "L" ? "pill danger" : "pill", "py-0 px-7 me-8")}>
                           {res}
                         </span>
                         <b className="tnum">
@@ -130,19 +131,19 @@ export function TeamDNA() {
             <h2 className="card-title">All-time top scorers</h2>
             <RealTag title="Goals recorded in the dataset's goalscorers table (coverage is incomplete for early years)" />
           </div>
-          <div className="stack" style={{ gap: 8 }}>
+          <div className="stack gap-8">
             {data.top_scorers.map((s, i) => (
-              <div key={s.name} className="row" style={{ gap: 10 }}>
-                <span className="tnum faint" style={{ width: 18 }}>
+              <div key={s.name} className="row gap-10">
+                <span className="tnum faint w-18">
                   {i + 1}
                 </span>
-                <span style={{ flex: "0 0 40%", fontWeight: 600 }}>
+                <span className="fw-600 basis-40">
                   <PlayerLink name={s.name} playerKey={known.has(`${data.team_id}:${slugName(s.name)}`) ? `${data.team_id}:${slugName(s.name)}` : undefined} />
                 </span>
-                <div style={{ flex: 1, height: 8, background: "var(--surface-3)", borderRadius: 99, overflow: "hidden" }}>
-                  <div style={{ width: `${(s.goals / maxGoals) * 100}%`, height: "100%", background: data.colors.primary }} />
+                <div className="bar-track grow bg-surface-3 rounded-full">
+                  <div className="h-full" style={{ width: `${(s.goals / maxGoals) * 100}%`, background: data.colors.primary }} />
                 </div>
-                <b className="tnum" style={{ width: 30, textAlign: "end" }}>
+                <b className="tnum text-end w-30">
                   {s.goals}
                 </b>
               </div>

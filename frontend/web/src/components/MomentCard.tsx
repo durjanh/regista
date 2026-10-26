@@ -39,9 +39,8 @@ export function MomentCard({ moment, narrative, teamColor, selected, activeFact,
         <span aria-hidden="true">{MOMENT_ICON[moment.type] ?? "•"}</span>
         <button
           type="button"
-          className="moment-title"
+          className={cx("moment-title bg-none border-0 p-0 text-inherit font-inherit fw-700 text-start", onSelect ? "cursor-pointer" : "cursor-default")}
           onClick={onSelect}
-          style={{ background: "none", border: 0, padding: 0, textAlign: "start", cursor: onSelect ? "pointer" : "default", color: "inherit", font: "inherit", fontWeight: 700 }}
         >
           {moment.title}
         </button>
@@ -81,7 +80,7 @@ export function MomentCard({ moment, narrative, teamColor, selected, activeFact,
         </div>
       ) : null}
 
-      <div className="row" style={{ gap: 8 }}>
+      <div className="row gap-8">
         {n ? <EngineBadge engine={n.engine} ms={n.latency_ms} /> : null}
         {n ? <FactCheckBadge fc={n.fact_check} /> : null}
         {!n && onNarrate ? (
@@ -89,13 +88,13 @@ export function MomentCard({ moment, narrative, teamColor, selected, activeFact,
             <IconAI /> {narrating ? "Writing…" : "Narrate"}
           </button>
         ) : null}
-        <span style={{ flex: 1 }} />
+        <span className="grow" />
         <ListenButton small text={speakText} language={n?.language ?? language} persona={persona} />
       </div>
 
       <details className="disclosure">
         <summary>{t("feed.why")}</summary>
-        <p className="small" style={{ margin: "8px 0 0" }}>
+        <p className="small m-0 mt-8">
           {moment.explanation.why_it_matters}
         </p>
         {moment.explanation.factors.length ? (
@@ -113,7 +112,7 @@ export function MomentCard({ moment, narrative, teamColor, selected, activeFact,
           </ul>
         ) : null}
         {moment.wp_before && moment.wp_after ? (
-          <div className="xs muted" style={{ marginTop: 8 }}>
+          <div className="xs muted mt-8">
             Win probability (home/draw/away): {pct(moment.wp_before.home)}/{pct(moment.wp_before.draw)}/{pct(moment.wp_before.away)} →{" "}
             <b>
               {pct(moment.wp_after.home)}/{pct(moment.wp_after.draw)}/{pct(moment.wp_after.away)}

@@ -69,7 +69,7 @@ test.describe("Broadcast overlay", () => {
     await studio.goto(`/studio/${HERO}`);
     const card = studio.locator(".gfx").filter({ has: studio.getByRole("button", { name: /Put on air/ }) }).first();
     await expect(card).toBeVisible({ timeout: 30_000 });
-    const title = (await card.locator("div[style*='font-weight: 800']").first().textContent())?.trim() ?? "";
+    const title = (await card.locator(".gfx-title").first().textContent())?.trim() ?? "";
     expect(title.length).toBeGreaterThan(0);
     await card.getByRole("button", { name: /Put on air/ }).click();
 

@@ -65,7 +65,7 @@ export function Recap() {
   return (
     <div className="stack">
       <section className="card">
-        <div className="row" style={{ gap: 12, alignItems: "flex-end" }}>
+        <div className="row gap-12 items-end">
           <div className="field">
             <label htmlFor="rp">{prefs.t("persona")}</label>
             <select id="rp" className="select" value={persona} onChange={(e) => setPersona(e.target.value as Persona)}>
@@ -89,7 +89,7 @@ export function Recap() {
           <button className="btn primary" onClick={generate} disabled={busy} aria-busy={busy}>
             <IconAI /> {busy ? prefs.t("recap.generating") : prefs.t("recap.generate")}
           </button>
-          <span className="xs muted" style={{ flex: 1, minWidth: 200 }}>
+          <span className="xs muted grow min-w-200">
             Analyst and Tactician agents run in parallel; the Narrator writes; the Fact-checker verifies every claim; the Localizer adapts the
             language.
           </span>
@@ -123,7 +123,7 @@ export function Recap() {
           <div className="state">
             <div className="icon" aria-hidden="true">📰</div>
             <strong>Full-time package in one click</strong>
-            <div className="small" style={{ maxWidth: "60ch" }}>
+            <div className="small max-60ch">
               Match report, social posts, a 60-second audio script and a highlight run-sheet with timecodes for editors. Every claim is
               cited back to the event log.
             </div>
@@ -135,14 +135,14 @@ export function Recap() {
         <div className="recap-grid" style={{ opacity: busy ? 0.55 : 1 }}>
           <div className="stack">
             <article className="card">
-              <div className="row" style={{ gap: 8, marginBottom: 12 }}>
+              <div className="row gap-8 mb-12">
                 <SourceBadge source={match.source} compact />
                 <EngineBadge engine={recap.engine} ms={recap.latency_ms} />
                 <FactCheckBadge fc={recap.fact_check} />
               </div>
               <h2 className="headline">{recap.headline}</h2>
               <p className="standfirst">{recap.standfirst}</p>
-              <div className="divider" style={{ margin: "18px 0" }} />
+              <div className="divider my-18" />
               <Markdown source={recap.report_md} citations={recap.citations} />
             </article>
 
@@ -197,7 +197,7 @@ export function Recap() {
                   ★
                 </div>
                 <div>
-                  <div style={{ fontWeight: 800, fontSize: 18 }}>
+                  <div className="fw-800 fs-18">
                     <PlayerLink
                       name={recap.player_of_match.name}
                       playerKey={[...match.home.players, ...match.away.players].find((pl) => pl.player_id === recap.player_of_match.player_id)?.player_key}
@@ -206,9 +206,9 @@ export function Recap() {
                   <div className="small muted">{recap.player_of_match.reason}</div>
                 </div>
               </div>
-              <div className="chips" style={{ marginTop: 12 }}>
+              <div className="chips mt-12">
                 {recap.player_of_match.metrics.map((m) => (
-                  <span key={m.fact_id} className="chip" style={{ cursor: "default" }}>
+                  <span key={m.fact_id} className="chip cursor-default">
                     <span className="fid">{m.fact_id}</span>
                     {m.label}: <b>{m.value}{m.unit ? ` ${m.unit}` : ""}</b>
                   </span>
@@ -222,7 +222,7 @@ export function Recap() {
                 <span className="spacer" />
                 <ListenButton small text={recap.audio_script} language={recap.language} persona={recap.persona} />
               </div>
-              <p className="small" style={{ margin: 0, whiteSpace: "pre-wrap", lineHeight: 1.6 }}>
+              <p className="small m-0 pre-wrap lh-prose">
                 {recap.audio_script.replace(/\s?\[f\d+\]/g, "")}
               </p>
             </section>
@@ -231,14 +231,14 @@ export function Recap() {
               <div className="card-head">
                 <h2 className="card-title">Social pack</h2>
               </div>
-              <div className="stack" style={{ gap: 10 }}>
+              <div className="stack gap-10">
                 {recap.social_posts.map((p, i) => (
                   <div key={i} className="social">
-                    <div className="row" style={{ justifyContent: "space-between" }}>
+                    <div className="row justify-between">
                       <span className="platform">{PLATFORM_LABEL[p.platform] ?? p.platform}</span>
                       <CopyButton text={p.text} />
                     </div>
-                    <div className="small" style={{ whiteSpace: "pre-wrap" }}>
+                    <div className="small pre-wrap">
                       {p.text}
                     </div>
                   </div>

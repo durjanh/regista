@@ -1,5 +1,21 @@
+import type { SyntheticEvent } from "react";
 import type { MatchSource } from "../api/types";
 import { sourceUrl } from "../lib/format";
+
+const EDGE = 8;
+
+/** On open, shift the popover sideways so it stays inside the viewport (a badge near either edge would push it off). */
+function keepPopInView(e: SyntheticEvent<HTMLDetailsElement>) {
+  const details = e.currentTarget;
+  const pop = details.querySelector<HTMLElement>(".source-pop");
+  if (!details.open || !pop) return;
+  pop.style.setProperty("--pop-shift", "0px");
+  const r = pop.getBoundingClientRect();
+  let dx = 0;
+  if (r.right > window.innerWidth - EDGE) dx = window.innerWidth - EDGE - r.right;
+  if (r.left + dx < EDGE) dx = EDGE - r.left;
+  pop.style.setProperty("--pop-shift", `${Math.round(dx)}px`);
+}
 
 /** "Real result · Synthetic match events" (or What-if) with the full disclosure on click. */
 export function SourceBadge({ source, compact }: { source: MatchSource | undefined; compact?: boolean }) {
@@ -7,7 +23,7 @@ export function SourceBadge({ source, compact }: { source: MatchSource | undefin
   const real = source.kind === "real_result";
   const label = real ? "Real result · Synthetic match events" : "What-if · Synthetic";
   return (
-    <details className="source-badge">
+    <details className="source-badge" onToggle={keepPopInView}>
       <summary className={real ? "pill real" : "pill warn"} aria-label={`${label}. Show data disclosure`}>
         <span aria-hidden="true">{real ? "◉" : "◌"}</span>
         {compact ? (real ? "Real result" : "What-if") : label}
@@ -48,7 +64,7 @@ export function ModelTag({ title = "Modelled from Regista's synthetic match even
 export function InfoPop({ text, label = "About this data" }: { text: string | undefined; label?: string }) {
   if (!text) return null;
   return (
-    <details className="source-badge info-pop">
+    <details className="source-badge info-pop" onToggle={keepPopInView}>
       <summary className="info-dot" aria-label={label} title={label}>
         ⓘ
       </summary>

@@ -34,6 +34,9 @@ export function EloChart({ history, color }: { history: { date: string; elo: num
   const line = pts.map((p, i) => `${i ? "L" : "M"} ${sx(p.x).toFixed(1)} ${sy(p.y).toFixed(1)}`).join(" ");
   const area = `${line} L ${sx(x1)} ${H - B} L ${sx(x0)} ${H - B} Z`;
   const peak = pts.reduce((a, b) => (b.y > a.y ? b : a));
+  // Keep the peak label inside the chart when the peak is near either end.
+  const peakAt = (sx(peak.x) - L) / (W - L - R);
+  const peakAnchor = peakAt > 0.8 ? "end" : peakAt < 0.2 ? "start" : "middle";
   const span = x1 - x0;
   const tickStep = span > 100 ? 25 : span > 40 ? 10 : span > 15 ? 5 : 1;
   const ticks: number[] = [];
@@ -77,7 +80,7 @@ export function EloChart({ history, color }: { history: { date: string; elo: num
         <path d={area} fill="url(#elo-fill)" />
         <path d={line} fill="none" stroke={color} strokeWidth={1.6} />
         <circle cx={sx(peak.x)} cy={sy(peak.y)} r={4} fill={color} stroke="var(--surface)" strokeWidth={2} />
-        <text className="chart-label-strong" x={sx(peak.x)} y={sy(peak.y) - 9} textAnchor="middle">
+        <text className="chart-label-strong" x={sx(peak.x)} y={sy(peak.y) - 9} textAnchor={peakAnchor}>
           Peak {Math.round(peak.y)} · {peak.date.slice(0, 4)}
         </text>
         {hp ? (
@@ -87,7 +90,7 @@ export function EloChart({ history, color }: { history: { date: string; elo: num
           </g>
         ) : null}
       </svg>
-      <div className="xs muted" style={{ textAlign: "end" }}>
+      <div className="xs muted text-end">
         {hp ? (
           <>
             {hp.date}: <b className="tnum">{Math.round(hp.y)}</b>

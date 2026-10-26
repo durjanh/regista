@@ -154,25 +154,25 @@ export function HalftimePack({ match, events, minute, ended, queue, onQueued }: 
           <IconHalftime /> {busy ? t("loading") : t("ht.build")}
         </button>
       </div>
-      {err ? <div className="xs" style={{ color: "var(--danger)" }}>{err}</div> : null}
+      {err ? <div className="xs text-danger">{err}</div> : null}
       {!pack ? (
         <div className="xs faint">{ready ? "Talking points and graphics for the break, from first-half data only." : t("ht.locked")}</div>
       ) : (
-        <div className="stack" style={{ gap: 12 }}>
+        <div className="stack gap-12">
           <div>
-            <div className="xs muted" style={{ marginBottom: 6 }}>{t("ht.points")}</div>
+            <div className="xs muted mb-6">{t("ht.points")}</div>
             <ol className="ht-points">
               {points.map((p, i) => (
                 <li key={i}><CitedText text={p} citations={pack.narrative.citations} /></li>
               ))}
             </ol>
-            <div className="row" style={{ gap: 8, marginTop: 6 }}>
+            <div className="row gap-8 mt-6">
               <FactCheckBadge fc={pack.narrative.fact_check} />
               <EngineBadge engine={pack.narrative.engine} ms={pack.narrative.latency_ms} />
             </div>
           </div>
           <div>
-            <div className="row" style={{ justifyContent: "space-between", marginBottom: 6 }}>
+            <div className="row justify-between mb-6">
               <span className="xs muted">{t("ht.graphics")}</span>
               <span className="xs faint">{t("ht.queueHint")}</span>
             </div>
@@ -182,7 +182,7 @@ export function HalftimePack({ match, events, minute, ended, queue, onQueued }: 
                 const cue = queued?.cue ?? toCue(g, pack.t, language, match);
                 return (
                 <div key={g.key} className={cx("gfx", queued?.status)}>
-                  <div className="row" style={{ justifyContent: "space-between" }}>
+                  <div className="row justify-between">
                     <span className="gfx-kind">{g.kind === "stat_card" ? "Stat card" : "Lower third"} · HT</span>
                     {queued ? (
                       <span className={cx("pill", queued.status === "proposed" ? "warn" : queued.status === "rejected" || queued.status === "killed" ? "danger" : "accent")}>
@@ -195,7 +195,7 @@ export function HalftimePack({ match, events, minute, ended, queue, onQueued }: 
                       ⚠ {t("ht.editorial")}: {queued.editorial.issues.join(" · ") || "see the queue"}
                     </div>
                   ) : null}
-                  <div style={{ fontWeight: 800, fontSize: 14 }}>{g.title}</div>
+                  <div className="fw-800 fs-14">{g.title}</div>
                   <div className="small muted">{g.body}</div>
                   {g.rows.length ? (
                     <table className="ht-table xs">
@@ -209,9 +209,9 @@ export function HalftimePack({ match, events, minute, ended, queue, onQueued }: 
                       </tbody>
                     </table>
                   ) : null}
-                  <div className="row" style={{ justifyContent: "space-between" }}>
+                  <div className="row justify-between">
                     <ModelTag title="From Regista's synthetic first-half events" />
-                    <span className="row" style={{ gap: 6 }}>
+                    <span className="row gap-6">
                       <button className="btn sm" onClick={() => copy(g, cue)}>{copied === g.key ? <><IconApprove /> {t("ht.copied")}</> : <><IconCopy /> {t("ht.copy")}</>}</button>
                       {queued ? null : (
                         <button className="btn sm primary" onClick={() => add(g)} disabled={adding !== null}>

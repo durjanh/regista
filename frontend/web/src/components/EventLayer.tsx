@@ -1,5 +1,6 @@
 import type { FreezeFramePlayer, MatchEvent } from "../api/types";
 import { readableOn } from "../lib/format";
+import { SHOT_COLORS } from "../lib/palette";
 import { eventDetailText } from "./ChaosMeter";
 import { PlayerDot, project } from "./Pitch";
 
@@ -14,14 +15,6 @@ type Props = {
   shirts?: Map<string, number>;
   names?: Map<string, string>;
   activeId?: string;
-};
-
-const SHOT_COLORS: Record<string, string> = {
-  goal: "#22d68a",
-  saved: "#ffb224",
-  post: "#ffb224",
-  blocked: "#9aa6bd",
-  off_target: "#ff5c5c",
 };
 
 /** Draws passes, carries, shots and a freeze frame of all players on top of <Pitch>. */
@@ -64,7 +57,7 @@ export function EventLayer({ events, homeId, homeColor, awayColor, freezeFrame, 
 
         if (e.type === "shot") {
           const [gx, gy] = project(e.end_x ?? 105, e.end_y ?? 34, isHome);
-          const sc = SHOT_COLORS[e.shot_outcome ?? "off_target"] ?? "#fff";
+          const sc = SHOT_COLORS[e.shot_outcome ?? "off_target"] ?? SHOT_COLORS.off_target;
           const r = 0.9 + Math.sqrt(e.xg ?? 0.05) * 3.2;
           return (
             <g key={e.id} opacity={opacity}>
@@ -85,12 +78,12 @@ export function EventLayer({ events, homeId, homeColor, awayColor, freezeFrame, 
                 y1={y1}
                 x2={x2}
                 y2={y2}
-                stroke={failed ? "#ff5c5c" : col}
+                stroke={failed ? SHOT_COLORS.off_target : col}
                 strokeWidth={e.type === "pass" ? 0.45 : 0.35}
                 strokeDasharray={e.type === "pass" ? undefined : "0.9 0.7"}
                 strokeLinecap="round"
               />
-              <circle cx={x2} cy={y2} r={0.55} fill={failed ? "#ff5c5c" : col} />
+              <circle cx={x2} cy={y2} r={0.55} fill={failed ? SHOT_COLORS.off_target : col} />
               <circle cx={x1} cy={y1} r={0.75} fill={col} stroke="rgba(0,0,0,0.5)" strokeWidth={0.2} />
             </g>
           );

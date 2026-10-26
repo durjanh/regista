@@ -181,9 +181,9 @@ export function Matchday() {
         statusLabel={state.status === "live" ? undefined : statusLabel(state, t)}
       />
 
-      <div className="card" style={{ padding: 12 }}>
+      <div className="card p-12">
         {onAir?.live ? (
-          <div className="row" style={{ marginBottom: 10, gap: 12 }}>
+          <div className="row mb-10 gap-12">
             <SourceSwitch source={usingBroadcast ? "broadcast" : "replay"} onChange={chooseSource} />
             {usingBroadcast ? <LiveBadge connection={bc.connection} latencyMs={bc.latencyMs} /> : null}
             <span className="xs muted">{usingBroadcast ? t("bc.liveHint") : t("bc.replayHint")}</span>
@@ -191,10 +191,10 @@ export function Matchday() {
           </div>
         ) : null}
         {usingBroadcast ? null : <LiveControls {...live} />}
-        <div className="row" style={{ marginTop: 10 }}>
+        <div className="row mt-10">
           <ViewSwitch view={view} onChange={setView} />
         </div>
-        <div className="row" style={{ marginTop: 10, gap: 14 }}>
+        <div className="row mt-10 gap-14">
           <span className="show-sm-only">
             <PersonaSelect />
           </span>
@@ -211,7 +211,7 @@ export function Matchday() {
             {t("truth.mode")}
           </label>
           {truthMode ? <span className="pill truth-pill">◎ {t("truth.mode")}</span> : null}
-          {state.status === "error" ? <span className="xs" style={{ color: "var(--danger)" }}>{state.error}</span> : null}
+          {state.status === "error" ? <span className="xs text-danger">{state.error}</span> : null}
         </div>
       </div>
 
@@ -279,7 +279,7 @@ export function Matchday() {
 
       {view === "analyst" ? (
         <div className="matchday-areas">
-          <section className="card" style={{ gridArea: "pulse" }}>
+          <section className="card area-pulse">
             <div className="card-head">
               <h2 className="card-title">{t("pulse.title")}</h2>
               <span className="spacer" />
@@ -312,7 +312,7 @@ export function Matchday() {
             {chaosSeries.length > 1 ? <ChaosBand series={chaosSeries} /> : null}
           </section>
 
-          <section className="card" style={{ gridArea: "feed" }} aria-labelledby="feed-title">
+          <section className="card area-feed" aria-labelledby="feed-title">
             <div className="card-head">
               <h2 className="card-title" id="feed-title">
                 {t("feed.title")}
@@ -347,7 +347,7 @@ export function Matchday() {
             )}
           </section>
 
-          <section className="card" style={{ gridArea: "pitch" }}>
+          <section className="card area-pitch">
             <div className="card-head">
               <h2 className="card-title">{evidence ? "Evidence on the pitch" : t("pitch.title")}</h2>
               <span className="spacer" />
@@ -381,7 +381,7 @@ export function Matchday() {
             </div>
           </section>
 
-          <section className="card" style={{ gridArea: "facts" }}>
+          <section className="card area-facts">
             <div className="card-head">
               <h2 className="card-title">Match facts</h2>
             </div>
@@ -389,7 +389,7 @@ export function Matchday() {
           </section>
 
           {match.h2h && match.h2h.played > 0 ? (
-            <section className="card" style={{ gridArea: "h2h" }}>
+            <section className="card area-h2h">
               <div className="card-head">
                 <h2 className="card-title">Head to head</h2>
               </div>
@@ -397,7 +397,7 @@ export function Matchday() {
             </section>
           ) : null}
 
-          <section className="card" style={{ gridArea: "stats" }}>
+          <section className="card area-stats">
             <div className="card-head">
               <h2 className="card-title">{t("stats.title")}</h2>
             </div>

@@ -11,18 +11,18 @@ export function MatchFacts({ match, homeColor, awayColor }: { match: MatchMeta; 
   const isWhatIf = match.source?.kind === "what_if";
   const { byName } = playerIndex(match);
   return (
-    <div className="stack" style={{ gap: 12 }}>
-      <div className="row" style={{ justifyContent: "space-between" }}>
+    <div className="stack gap-12">
+      <div className="row justify-between">
         <span className="small muted">
           {isWhatIf ? "Synthetic what-if score" : "Final score"} {isWhatIf ? null : <RealTag />}
         </span>
-        <b className="display tnum" style={{ fontSize: 26 }}>
+        <b className="display tnum fs-26">
           {match.final_score.home}–{match.final_score.away}
         </b>
       </div>
       {goals.length ? (
         <div>
-          <div className="xs muted" style={{ marginBottom: 6 }}>
+          <div className="xs muted mb-6">
             Goals <RealTag />
           </div>
           <ul className="goal-list">
@@ -37,8 +37,8 @@ export function MatchFacts({ match, homeColor, awayColor }: { match: MatchMeta; 
                     <b>
                       <PlayerLink name={g.scorer} playerKey={byName.get(g.scorer)?.player_key} />
                     </b>
-                    {g.penalty ? <span className="pill" style={{ marginInlineStart: 6, padding: "0 6px" }}>pen</span> : null}
-                    {g.own_goal ? <span className="pill danger" style={{ marginInlineStart: 6, padding: "0 6px" }}>OG</span> : null}
+                    {g.penalty ? <span className="pill ms-6 py-0 px-6">pen</span> : null}
+                    {g.own_goal ? <span className="pill danger ms-6 py-0 px-6">OG</span> : null}
                     <span className="muted"> · {home ? match.home.short : match.away.short}</span>
                     {g.assist ? (
                       <div className="xs muted">
@@ -56,7 +56,7 @@ export function MatchFacts({ match, homeColor, awayColor }: { match: MatchMeta; 
       ) : null}
       {match.elo ? (
         <div>
-          <div className="xs muted" style={{ marginBottom: 6 }}>
+          <div className="xs muted mb-6">
             Pre-match Elo <RealTag title="Computed from every prior real result since 1872" />
           </div>
           <EloCompare home={match.elo.home} away={match.elo.away} homeName={match.home.short} awayName={match.away.short} homeColor={homeColor} awayColor={awayColor} />
@@ -70,8 +70,8 @@ function EloCompare({ home, away, homeName, awayName, homeColor, awayColor }: { 
   // Elo expected score (no home advantage term: many fixtures are on neutral ground)
   const expHome = 1 / (1 + 10 ** ((away - home) / 400));
   return (
-    <div className="stack" style={{ gap: 6 }}>
-      <div className="row" style={{ justifyContent: "space-between" }}>
+    <div className="stack gap-6">
+      <div className="row justify-between">
         <span>
           <b className="tnum">{Math.round(home)}</b> <span className="muted small">{homeName}</span>
         </span>
@@ -96,16 +96,16 @@ export function HeadToHead({
 }: { h2h: H2H; home: MatchMeta["home"]; away: MatchMeta["away"]; homeColor: string; awayColor: string }) {
   const total = Math.max(1, h2h.played);
   return (
-    <div className="stack" style={{ gap: 12 }}>
-      <div className="row" style={{ justifyContent: "space-between" }}>
-        <span className="row" style={{ gap: 8 }}>
+    <div className="stack gap-12">
+      <div className="row justify-between">
+        <span className="row gap-8">
           <TeamSwatch team={home} size="sm" />
           <TeamLink team={home} />
         </span>
         <span className="xs muted">
           {h2h.played} meetings <RealTag />
         </span>
-        <span className="row" style={{ gap: 8 }}>
+        <span className="row gap-8">
           <TeamLink team={away} />
           <TeamSwatch team={away} size="sm" />
         </span>
@@ -126,10 +126,10 @@ export function HeadToHead({
       </div>
       <div className="h2h-bar" aria-hidden="true">
         <span style={{ width: `${(h2h.home_wins / total) * 100}%`, background: homeColor }} />
-        <span style={{ width: `${(h2h.draws / total) * 100}%`, background: "var(--text-faint)" }} />
+        <span className="bg-text-faint" style={{ width: `${(h2h.draws / total) * 100}%` }} />
         <span style={{ width: `${(h2h.away_wins / total) * 100}%`, background: awayColor }} />
       </div>
-      <div className="xs muted" style={{ textAlign: "center" }}>
+      <div className="xs muted text-center">
         Goals {h2h.home_goals}–{h2h.away_goals}
       </div>
       {h2h.last.length ? (

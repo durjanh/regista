@@ -51,12 +51,12 @@ export function Scouting() {
 
   return (
     <div className="stack">
-      <div className="row" style={{ gap: 10, flexWrap: "wrap" }}>
+      <div className="row gap-10 wrap">
         <div>
           <h1 className="page-title">{t("scout.title")}</h1>
           <div className="small muted">Player DNA and opposition reports for coaching staff.</div>
         </div>
-        <span style={{ flex: 1 }} />
+        <span className="grow" />
         <InfoPop text={INDEX_NOTE} label="Where these numbers come from" />
       </div>
 
@@ -84,8 +84,8 @@ export function Scouting() {
           <span className="spacer" />
           <span className="xs muted tnum">{rows.length}</span>
         </div>
-        <div className="row" style={{ gap: 10, flexWrap: "wrap", marginBottom: 12 }}>
-          <input className="input" style={{ flex: "1 1 220px" }} placeholder={t("scout.search")} value={q} onChange={(e) => setQ(e.target.value)} aria-label={t("scout.search")} />
+        <div className="row gap-10 wrap mb-12">
+          <input className="input search-input" placeholder={t("scout.search")} value={q} onChange={(e) => setQ(e.target.value)} aria-label={t("scout.search")} />
           <select className="select" value={team} onChange={(e) => setTeam(e.target.value)} aria-label="Team">
             <option value="">{t("scout.allTeams")}</option>
             {teams.map(([id, name]) => (
@@ -135,7 +135,7 @@ export function Scouting() {
                       </Link>
                     </td>
                     <td>
-                      <span className="pill" style={{ padding: "0 6px" }}>
+                      <span className="pill py-0 px-6">
                         {p.position}
                       </span>
                     </td>

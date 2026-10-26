@@ -186,7 +186,7 @@ export function Overlay() {
             }
             if (item.kind === "score_bug_alert" || item.kind === "replay_cue") {
               return (
-                <div key={item.id} className={`overlay-badge${item.leaving ? " out" : ""}`} style={{ animation: "scIn 0.4s both" }}>
+                <div key={item.id} className={`overlay-badge${item.leaving ? " out" : ""}`}>
                   <span className="dot" />
                   {item.kind === "replay_cue" ? `Replay · ${item.title}` : item.title}
                 </div>

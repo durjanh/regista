@@ -29,7 +29,7 @@ export function EngineBadge({ engine, ms }: { engine: Engine | undefined; ms?: n
 /** Full fact-check panel, including the Fair Commentary guardrail. */
 export function FactCheckPanel({ fc }: { fc: FactCheck }) {
   return (
-    <div className="stack" style={{ gap: 10 }}>
+    <div className="stack gap-10">
       <div className="check">
         <span className={`mark ${fc.passed ? "ok" : "bad"}`}>{fc.passed ? "✓" : "!"}</span>
         <div>

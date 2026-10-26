@@ -1,5 +1,6 @@
 import type { PassNetwork, Shot, Tactics, XgBreakdown } from "../api/types";
-import { readableOn } from "../lib/format";
+import { cx, readableOn } from "../lib/format";
+import { SHOT_COLORS } from "../lib/palette";
 import { Pitch, PlayerDot, project } from "./Pitch";
 
 /** Pass network in the team's own attacking frame (always attacking left→right). */
@@ -53,7 +54,6 @@ export function PassNetworkChart({ network, color, minCount = 3 }: { network: Pa
   );
 }
 
-const SHOT_FILL: Record<string, string> = { goal: "#22d68a", saved: "#ffb224", post: "#ffb224", blocked: "#9aa6bd", off_target: "#ff5c5c" };
 
 export function ShotMap({
   shots, homeId, homeColor, awayColor, selected, onSelect,
@@ -63,7 +63,7 @@ export function ShotMap({
       {shots.map((s) => {
         const [x, y] = project(s.x, s.y, s.team_id === homeId);
         const r = 0.8 + Math.sqrt(s.xg) * 4.2;
-        const fill = SHOT_FILL[s.outcome ?? "off_target"];
+        const fill = SHOT_COLORS[s.outcome ?? "off_target"];
         const team = s.team_id === homeId ? homeColor : awayColor;
         const isSel = selected === s.event_id;
         return (
@@ -91,8 +91,8 @@ export function ShotMap({
 export function XgWaterfall({ breakdown }: { breakdown: XgBreakdown }) {
   const maxAbs = Math.max(0.5, ...breakdown.factors.map((f) => Math.abs(f.contribution)));
   return (
-    <div className="stack" style={{ gap: 8 }}>
-      <div className="row small" style={{ justifyContent: "space-between" }}>
+    <div className="stack gap-8">
+      <div className="row small justify-between">
         <span className="muted">Base rate</span>
         <b className="tnum">{breakdown.base.toFixed(2)}</b>
       </div>
@@ -101,33 +101,26 @@ export function XgWaterfall({ breakdown }: { breakdown: XgBreakdown }) {
         const pos = f.contribution >= 0;
         return (
           <div className="waterfall-row" key={i}>
-            <span title={f.detail} style={{ fontWeight: 600 }}>
+            <span title={f.detail} className="fw-600">
               {f.name}
             </span>
-            <div style={{ position: "relative", height: 12, background: "var(--surface-3)", borderRadius: 99 }}>
-              <div style={{ position: "absolute", left: "50%", top: -2, bottom: -2, width: 1, background: "var(--border-strong)" }} />
+            <div className="xg-bar bg-surface-3 rounded-full">
+              <div className="xg-bar-zero bg-border-strong" />
               <div
-                style={{
-                  position: "absolute",
-                  top: 0,
-                  bottom: 0,
-                  borderRadius: 99,
-                  background: pos ? "var(--accent)" : "var(--danger)",
-                  left: pos ? "50%" : `${50 - w}%`,
-                  width: `${w}%`,
-                }}
+                className={cx("xg-bar-fill rounded-full", pos ? "bg-accent" : "bg-danger")}
+                style={{ left: pos ? "50%" : `${50 - w}%`, width: `${w}%` }}
               />
             </div>
-            <span className="tnum small" style={{ textAlign: "end", color: pos ? "var(--accent)" : "var(--danger)" }}>
+            <span className={cx("tnum small text-end", pos ? "text-accent" : "text-danger")}>
               {pos ? "+" : ""}
               {f.contribution.toFixed(2)}
             </span>
           </div>
         );
       })}
-      <div className="row" style={{ justifyContent: "space-between", borderTop: "1px solid var(--border)", paddingTop: 8 }}>
+      <div className="row justify-between border-top pt-8">
         <span className="muted small">Expected goals</span>
-        <b className="display tnum" style={{ fontSize: 28 }}>
+        <b className="display tnum fs-28">
           {breakdown.xg.toFixed(2)}
         </b>
       </div>
@@ -188,11 +181,11 @@ export function ChannelBars({ channels, color }: { channels: Tactics["channels"]
     ["Right", channels.right],
   ];
   return (
-    <div className="row" style={{ gap: 8, alignItems: "flex-end", height: 120 }} role="img" aria-label={`Attacking channels: left ${Math.round(channels.left * 100)}%, centre ${Math.round(channels.center * 100)}%, right ${Math.round(channels.right * 100)}%`}>
+    <div className="channel-bars row gap-8 items-end" role="img" aria-label={`Attacking channels: left ${Math.round(channels.left * 100)}%, centre ${Math.round(channels.center * 100)}%, right ${Math.round(channels.right * 100)}%`}>
       {items.map(([label, v]) => (
-        <div key={label} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 6, height: "100%", justifyContent: "flex-end" }}>
+        <div key={label} className="grow d-flex flex-col items-center gap-6 h-full justify-end">
           <b className="tnum">{Math.round(v * 100)}%</b>
-          <div style={{ width: "100%", height: `${Math.max(4, v * 100)}%`, background: color, borderRadius: "8px 8px 2px 2px", opacity: 0.4 + v }} />
+          <div className="channel-bar" style={{ height: `${Math.max(4, v * 100)}%`, background: color, opacity: 0.4 + v }} />
           <span className="xs muted">{label}</span>
         </div>
       ))}
@@ -239,13 +232,13 @@ export function DistributionChart({ data, labelKey, height = 170 }: { data: { la
           );
         })}
       </svg>
-      <div className="legend" style={{ marginTop: 4 }}>
+      <div className="legend mt-4">
         <span>
-          <i style={{ background: "var(--text-faint)" }} />
+          <i className="bg-text-faint" />
           Real-world reference
         </span>
         <span>
-          <i style={{ background: "var(--accent)" }} />
+          <i className="bg-accent" />
           Regista synthetic
         </span>
       </div>
