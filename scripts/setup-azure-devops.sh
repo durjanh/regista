@@ -179,4 +179,7 @@ Done. In Azure DevOps:
   2. First time: run Regista > "Full environment" with profile=$PROFILE (everything). After that, run the pipeline
      of the part you want to deploy: Infrastructure, API, Frontend, Functions, Container jobs (each independent).
 EOF
-[[ "$PROFILE" == "aks-enterprise" ]] && echo "  3. After the first Provision, the pool's name is the AZURE_DEVOPS_POOL_NAME output; pass it as managedPool."
+# An if, not `[[ ]] && echo`: as the last command, a false test would make the script exit 1 (and stop deploy-env.sh).
+if [[ "$PROFILE" == "aks-enterprise" ]]; then
+  echo "  3. Run Infrastructure before Full environment: it creates the agent pool regista-mdp the deploy stages use."
+fi
