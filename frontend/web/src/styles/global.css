@@ -345,11 +345,11 @@ h1, h2, h3 { margin: 0; line-height: 1.15; }
 
 /* ---------- Agent trace ---------- */
 .trace { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
-.trace-row { display: grid; grid-template-columns: 120px 1fr 56px; gap: 8px; align-items: center; font-size: 12.5px; }
+.trace-row { display: grid; grid-template-columns: 120px 1fr 76px; gap: 8px; align-items: center; font-size: 12.5px; }
 .trace-row .agent { font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .trace-bar { height: 8px; background: var(--surface-3); border-radius: 99px; overflow: hidden; position: relative; }
 .trace-bar span { position: absolute; top: 0; bottom: 0; border-radius: 99px; background: linear-gradient(90deg, var(--signal), #a855f7); }
-.trace-row .ms { text-align: end; color: var(--text-dim); font-variant-numeric: tabular-nums; }
+.trace-row .ms { text-align: end; color: var(--text-dim); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .trace-row .action { grid-column: 2 / 4; color: var(--text-faint); font-size: 11.5px; margin-top: -4px; }
 
 /* ---------- Pitch ---------- */

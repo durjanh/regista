@@ -26,9 +26,9 @@ describe("TruthPanel", () => {
     renderWithPrefs(<TruthPanel matchId={HERO} report={truthReport()} t={4200} ended={false} teams={teams} />);
     const score = screen.getByLabelText("Truth score");
     expect(within(score).getAllByText("100%")).toHaveLength(2);
-    expect(within(score).getByText("286s")).toBeInTheDocument();
+    expect(within(score).getByText("4m 46s")).toBeInTheDocument();
     expect(screen.getByText(/ARG · Press switch/)).toBeInTheDocument();
-    expect(screen.getByText(/Detected/)).toHaveTextContent("in 286s");
+    expect(screen.getByText(/Detected/)).toHaveTextContent("in 4m 46s");
     expect(screen.getByText(/explanation correct/)).toBeInTheDocument();
     expect(screen.getByText(/Not yet reached/)).toBeInTheDocument(); // full-back planted at 4290, clock at 4200
   });

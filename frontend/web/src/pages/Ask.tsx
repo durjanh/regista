@@ -9,6 +9,7 @@ import { ListenButton } from "../components/ListenButton";
 import { CitedText } from "../components/Markdown";
 import { ErrorState } from "../components/States";
 import { quietly } from "../lib/activity";
+import { duration } from "../lib/format";
 import { usePrefs } from "../lib/prefs";
 import { IconAgent, IconSend, IconUser } from "../components/icons";
 
@@ -125,7 +126,7 @@ export function Ask() {
                         <span>
                           <b>{tc.tool}</b>({Object.entries(tc.args).map(([k, v]) => `${k}=${JSON.stringify(v)}`).join(", ")})
                         </span>
-                        <span className="faint">{Math.round(tc.ms)} ms</span>
+                        <span className="faint">{duration(tc.ms)}</span>
                       </div>
                     ))}
                   </div>

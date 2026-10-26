@@ -8,7 +8,7 @@ import { SourceBadge } from "../components/SourceBadge";
 import { ErrorState, Skeleton, SkeletonCard } from "../components/States";
 import { TeamSwatch } from "../components/TeamSwatch";
 import { useAsync } from "../hooks/useAsync";
-import { sourceUrl } from "../lib/format";
+import { durationS, sourceUrl } from "../lib/format";
 import { usePrefs } from "../lib/prefs";
 import { mechanismLabel } from "../lib/truth";
 import { IconDirect, IconForge, IconPlay, IconSimulate, IconStudio } from "../components/icons";
@@ -334,7 +334,7 @@ function TruthScoreBody({ s }: { s: TruthScore }) {
         </div>
         <div className="kpi">
           <div className="label">Median time to detect</div>
-          <div className="value tnum">{l.median_seconds_to_detect === null ? "–" : `${Math.round(l.median_seconds_to_detect)}s`}</div>
+          <div className="value tnum">{durationS(l.median_seconds_to_detect)}</div>
           <div className="sub">after the change began</div>
         </div>
       </div>

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { broadcastService, studioService } from "../api";
 import type { BroadcastStatus } from "../api/types";
 import { useBroadcast } from "../hooks/useBroadcast";
+import { duration } from "../lib/format";
 import { usePrefs } from "../lib/prefs";
 import type { RealtimeStatus } from "../lib/webpubsub";
 import { IconGoLive, IconMatchday, IconPlay, IconStop, IconViewers } from "./icons";
@@ -13,7 +14,7 @@ export type LiveSource = "broadcast" | "replay";
 export function LiveBadge({ connection, latencyMs }: { connection: RealtimeStatus; latencyMs: number | null }) {
   const { t } = usePrefs();
   const text =
-    connection === "live" ? `● ${t("bc.badge")}${latencyMs !== null ? ` · ${latencyMs} ms` : ""}`
+    connection === "live" ? `● ${t("bc.badge")}${latencyMs !== null ? ` · ${duration(latencyMs)}` : ""}`
       : connection === "reconnecting" ? `↻ ${t("bc.reconnecting")}`
         : connection === "connecting" ? `… ${t("bc.connecting")}`
           : connection === "disabled" ? `○ ${t("bc.unavailable")}`
@@ -21,7 +22,7 @@ export function LiveBadge({ connection, latencyMs }: { connection: RealtimeStatu
   if (!text) return null;
   return (
     <span className={connection === "live" ? "pill accent" : "pill"} role="status" aria-live="polite"
-      title={latencyMs !== null ? `${t("bc.latency")}: ${latencyMs} ms` : undefined}>
+      title={latencyMs !== null ? `${t("bc.latency")}: ${duration(latencyMs)}` : undefined}>
       {text}
     </span>
   );

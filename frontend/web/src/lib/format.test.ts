@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  clock, clockFromT, cx, describeEvent, distinctAway, importanceTier, median, num, pct, percentile, readableOn, sourceUrl, svgY,
+  clock, clockFromT, cx, describeEvent, duration, durationS, distinctAway, importanceTier, median, num, pct, percentile, readableOn, sourceUrl, svgY,
   teamColor, toHomeFrame,
 } from "./format";
 import { event, match } from "../test/fixtures";
@@ -11,6 +11,21 @@ describe("format helpers", () => {
     expect(clock(45, 2)).toBe("45+2'");
     expect(clockFromT(3914.4)).toBe("65:14");
     expect(clockFromT(5)).toBe("00:05");
+  });
+
+  it("formats durations in their two largest units", () => {
+    expect(duration(0)).toBe("0 ms");
+    expect(duration(812.4)).toBe("812 ms");
+    expect(duration(1022)).toBe("1s 22ms");
+    expect(duration(1000)).toBe("1s");
+    expect(duration(23838)).toBe("23s 838ms");
+    expect(duration(98360)).toBe("1m 38s");
+    expect(duration(120000)).toBe("2m");
+    expect(duration(3_900_000)).toBe("1h 5m");
+    expect(duration(null)).toBe("–");
+    expect(duration(Number.NaN)).toBe("–");
+    expect(durationS(286)).toBe("4m 46s");
+    expect(durationS(null)).toBe("–");
   });
 
   it("formats percentages and numbers, with a dash for non-finite values", () => {

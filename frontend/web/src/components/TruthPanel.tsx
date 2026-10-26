@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { truthService } from "../api";
 import type { Counterfactual, Plant, Range3, TruthReport } from "../api/types";
-import { clock, cx, pct } from "../lib/format";
+import { clock, cx, durationS, pct } from "../lib/format";
 import { usePrefs } from "../lib/prefs";
 import { mechanismIcon, mechanismLabel, plantStatus, type PlantStatus } from "../lib/truth";
 import { Skeleton } from "./States";
@@ -78,7 +78,7 @@ export function TruthPanel({ matchId, report, t, ended, teams, error }: Props) {
         </div>
         <div className="kpi">
           <div className="label">{tr("truth.median")}</div>
-          <div className="value tnum">{s.median_seconds_to_detect === null ? "–" : `${Math.round(s.median_seconds_to_detect)}s`}</div>
+          <div className="value tnum">{durationS(s.median_seconds_to_detect)}</div>
         </div>
         <div className="kpi">
           <div className="label">{tr("truth.explanation")}</div>
@@ -105,7 +105,7 @@ export function TruthPanel({ matchId, report, t, ended, teams, error }: Props) {
                   <span className={cx("plant-status", status)} aria-live="polite">
                     {status === "detected" ? "✔" : status === "missed" ? "✖" : status === "waiting" ? "…" : "◌"} {STATUS_LABEL[status]}
                     {status === "detected" && grade?.seconds_to_detect !== undefined ? (
-                      <b className="tnum"> in {Math.round(grade.seconds_to_detect)}s</b>
+                      <b className="tnum"> in {durationS(grade.seconds_to_detect)}</b>
                     ) : null}
                   </span>
                 </div>

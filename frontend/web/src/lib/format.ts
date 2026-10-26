@@ -16,6 +16,28 @@ export function clockFromT(t: number): string {
 export const pct = (v: number, digits = 0) => `${(v * 100).toFixed(digits)}%`;
 export const num = (v: number, digits = 2) => (Number.isFinite(v) ? v.toFixed(digits) : "–");
 
+/** A duration in its two largest units: 812 ms, 1s 22ms, 4m 46s, 1h 5m. */
+export function duration(ms: number | null | undefined): string {
+  if (ms === null || ms === undefined || !Number.isFinite(ms)) return "–";
+  const total = Math.max(0, Math.round(ms));
+  if (total < 1000) return `${total} ms`;
+  const units: [string, number][] = [
+    ["h", Math.floor(total / 3_600_000)],
+    ["m", Math.floor(total / 60_000) % 60],
+    ["s", Math.floor(total / 1000) % 60],
+    ["ms", total % 1000],
+  ];
+  const first = units.findIndex(([, v]) => v > 0);
+  return units
+    .slice(first, first + 2)
+    .filter(([, v]) => v > 0)
+    .map(([u, v]) => `${v}${u}`)
+    .join(" ");
+}
+
+/** The same for a duration in seconds (time to detect, match clock spans). */
+export const durationS = (s: number | null | undefined) => duration(s === null || s === undefined ? s : s * 1000);
+
 /** Map an event's coordinates (acting team's attacking frame) onto a pitch where home attacks left→right. */
 export function toHomeFrame(x: number, y: number, isHome: boolean): [number, number] {
   return isHome ? [x, y] : [PITCH_W - x, PITCH_H - y];

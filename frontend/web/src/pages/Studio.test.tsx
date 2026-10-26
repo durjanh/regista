@@ -77,7 +77,7 @@ describe("Studio control room", () => {
     expect(screen.getByText("67'")).toBeInTheDocument();
     expect(screen.getByText("GOAL: Gordon 55'")).toBeInTheDocument();
     expect(document.querySelector(".whisper-line")).toHaveTextContent(/^55' Gordon finishes it\.$/);
-    expect(screen.getAllByText("840")).toHaveLength(2); // p50 and p95 of one narrative
+    expect(screen.getAllByText("840 ms")).toHaveLength(2); // p50 and p95 of one narrative
     expect(screen.getByRole("group", { name: /Verifier drill/ })).toBeInTheDocument();
     expect(screen.getByLabelText("flagged: 1.76")).toBeInTheDocument();
     // the half-time pack appears in the second half
@@ -89,7 +89,7 @@ describe("Studio control room", () => {
     await screen.findByText("Win probability swing", { selector: ".gfx div" });
     await push("event", event({ minute: 67, t: 4200 }));
     await userEvent.click(screen.getByRole("checkbox", { name: /Truth mode/ }));
-    expect(await screen.findByLabelText("Truth score")).toHaveTextContent("286s");
+    expect(await screen.findByLabelText("Truth score")).toHaveTextContent("4m 46s");
     expect(localStorage.getItem("regista.truthMode")).toBe("1");
     expect(fetch.mock.calls.some(([u]) => String(u).includes("/truth?upto_t="))).toBe(true);
 

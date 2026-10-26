@@ -1,4 +1,5 @@
 import type { AgentStep } from "../api/types";
+import { duration } from "../lib/format";
 
 /** Waterfall of the agents that produced a piece of content, laid out sequentially. */
 export function AgentTrace({ steps }: { steps: AgentStep[] }) {
@@ -19,7 +20,7 @@ export function AgentTrace({ steps }: { steps: AgentStep[] }) {
             <div className="trace-bar" aria-hidden="true">
               <span style={{ left: `${left}%`, width: `${width}%` }} />
             </div>
-            <span className="ms">{Math.round(s.ms)} ms</span>
+            <span className="ms">{duration(s.ms)}</span>
             <span className="action">
               {s.action}
               {s.detail ? ` — ${s.detail}` : ""}
@@ -28,7 +29,7 @@ export function AgentTrace({ steps }: { steps: AgentStep[] }) {
         );
       })}
       <div className="xs faint" style={{ textAlign: "end" }}>
-        Total {Math.round(total)} ms
+        Total {duration(total)}
       </div>
     </div>
   );

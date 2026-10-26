@@ -12,7 +12,7 @@ import { SourceBadge } from "../components/SourceBadge";
 import { EmptyState, ErrorState, Skeleton } from "../components/States";
 import { useAsync } from "../hooks/useAsync";
 import { useLiveMatch } from "../hooks/useLiveMatch";
-import { MOMENT_ICON, clock, cx, importanceTier, median, percentile } from "../lib/format";
+import { MOMENT_ICON, clock, cx, duration, importanceTier, median, percentile } from "../lib/format";
 import { quietly } from "../lib/activity";
 import { usePrefs } from "../lib/prefs";
 import { usePoll, useTruthMode, useVerifierDrill } from "../lib/truth";
@@ -519,13 +519,11 @@ function StudioConsole({ match }: { match: MatchMeta }) {
             <div className="latency">
               <div className="kpi">
                 <div className="label">p50</div>
-                <div className="value tnum" style={{ fontSize: 24 }}>{latencies.length ? Math.round(median(latencies)) : "–"}</div>
-                <div className="sub">ms</div>
+                <div className="value tnum" style={{ fontSize: 24 }}>{latencies.length ? duration(median(latencies)) : "–"}</div>
               </div>
               <div className="kpi">
                 <div className="label">p95</div>
-                <div className="value tnum" style={{ fontSize: 24 }}>{latencies.length ? Math.round(percentile(latencies, 95)) : "–"}</div>
-                <div className="sub">ms</div>
+                <div className="value tnum" style={{ fontSize: 24 }}>{latencies.length ? duration(percentile(latencies, 95)) : "–"}</div>
               </div>
               <div className="kpi">
                 <div className="label">n</div>

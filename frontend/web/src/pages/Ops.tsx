@@ -2,14 +2,9 @@ import { Link } from "react-router-dom";
 import { systemService } from "../api";
 import type { Ops as OpsT } from "../api/types";
 import { EmptyState, ErrorState, Skeleton } from "../components/States";
+import { duration, durationS } from "../lib/format";
 import { usePrefs } from "../lib/prefs";
 import { usePoll } from "../lib/truth";
-
-function uptime(s: number): string {
-  const h = Math.floor(s / 3600);
-  const m = Math.floor((s % 3600) / 60);
-  return h ? `${h}h ${m}m` : `${m}m ${Math.floor(s % 60)}s`;
-}
 
 /** Production view: latency SLO for live narratives and the model cost of covering a match. */
 export function Ops() {
@@ -29,7 +24,7 @@ export function Ops() {
           <span className={data.mode === "azure" ? "pill accent" : "pill warn"}>
             <span className="dot" /> {data.mode === "azure" ? t("engine.azure") : t("engine.offline")}
           </span>
-          <span className="pill">up {uptime(data.uptime_s)}</span>
+          <span className="pill">up {durationS(data.uptime_s)}</span>
         </div>
       </div>
 
@@ -45,18 +40,15 @@ export function Ops() {
           <div className="kpis" style={{ gridTemplateColumns: "repeat(4, minmax(0, 1fr))" }}>
             <div className="kpi">
               <div className="label">Target p95</div>
-              <div className="value tnum">{slo.target_p95_ms}</div>
-              <div className="sub">ms</div>
+              <div className="value tnum">{duration(slo.target_p95_ms)}</div>
             </div>
             <div className="kpi">
               <div className="label">p50</div>
-              <div className="value tnum">{slo.p50_ms ?? "–"}</div>
-              <div className="sub">ms</div>
+              <div className="value tnum">{duration(slo.p50_ms)}</div>
             </div>
             <div className="kpi">
               <div className="label">p95</div>
-              <div className="value tnum" style={{ color: slo.compliant === false ? "var(--danger)" : undefined }}>{slo.p95_ms ?? "–"}</div>
-              <div className="sub">ms</div>
+              <div className="value tnum" style={{ color: slo.compliant === false ? "var(--danger)" : undefined }}>{duration(slo.p95_ms)}</div>
             </div>
             <div className="kpi">
               <div className="label">Samples</div>
@@ -65,7 +57,7 @@ export function Ops() {
             </div>
           </div>
           {slo.p95_ms !== null ? (
-            <div className="slo-track" role="img" aria-label={`p95 ${slo.p95_ms} ms against a ${slo.target_p95_ms} ms target`}>
+            <div className="slo-track" role="img" aria-label={`p95 ${duration(slo.p95_ms)} against a ${duration(slo.target_p95_ms)} target`}>
               <span style={{ width: `${Math.min(100, (slo.p95_ms / Math.max(1, slo.target_p95_ms)) * 100)}%`, background: slo.compliant ? "var(--accent)" : "var(--danger)" }} />
               <i style={{ left: "100%" }} />
             </div>
