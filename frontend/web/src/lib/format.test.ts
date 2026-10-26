@@ -54,13 +54,13 @@ describe("format helpers", () => {
   });
 
   it("describes events in plain words", () => {
-    expect(describeEvent(event({ type: "shot", shot_outcome: "off_target", xg: 0.12 }))).toBe("Harry Kane shoots — off target (xG 0.12)");
+    expect(describeEvent(event({ type: "shot", shot_outcome: "off_target", xg: 0.12 }))).toBe("Harry Kane shoots, off target (xG 0.12)");
     expect(describeEvent(event({ type: "pass", pass_type: "through_ball", outcome: "fail" }))).toBe("Harry Kane through ball (misplaced)");
     expect(describeEvent(event({ type: "pass" }))).toBe("Harry Kane pass");
     expect(describeEvent(event({ type: "carry" }))).toBe("Harry Kane carries");
     expect(describeEvent(event({ type: "dribble", outcome: "fail" }))).toBe("Harry Kane takes on (dispossessed)");
-    expect(describeEvent(event({ type: "card", card: "red" }))).toBe("Harry Kane — red card");
-    expect(describeEvent(event({ type: "card", card: "yellow" }))).toBe("Harry Kane — yellow card");
+    expect(describeEvent(event({ type: "card", card: "red" }))).toBe("Harry Kane, red card");
+    expect(describeEvent(event({ type: "card", card: "yellow" }))).toBe("Harry Kane, yellow card");
     expect(describeEvent(event({ type: "substitution" }))).toBe("Substitution");
     expect(describeEvent(event({ type: "goal_kick", player_name: undefined }))).toBe("goal kick");
   });

@@ -1,6 +1,6 @@
 """Regista evaluation suite: runs in CI (offline) and nightly against Azure (azure).
 
-Measures what the judges and a broadcaster would ask about:
+Measures what a broadcaster would ask about:
 1. Grounding: share of generated narratives and recaps that pass the deterministic fact-checker (no unsupported
    numbers, no broken citations) and the fair-commentary guardrail.
 2. Real-result fidelity: rebuilt real matches reproduce the real score, scorers and goal minutes.

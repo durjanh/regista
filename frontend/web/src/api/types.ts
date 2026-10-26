@@ -700,7 +700,7 @@ export type Insight = {
   direction: string;
   /** Detected change point. */
   start_minute: number;
-  /** First minute the detector was confident (live-honest). */
+  /** First minute the detector was confident (no look-ahead). */
   detected_minute: number;
   detected_t: number;
   confidence: number;

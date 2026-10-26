@@ -88,7 +88,7 @@ describe("Markdown and fact-check badges", () => {
     expect(screen.getByRole("button", { name: /Unverified reference/ })).toBeInTheDocument();
   });
 
-  it("summarises fact-check results honestly", () => {
+  it("summarises fact-check results, failures included", () => {
     mockApi([HEALTH]);
     const fc = { passed: true, checked_claims: 4, issues: [], bias_flags: [] };
     const { rerender } = render(<FactCheckBadge fc={fc} />, { wrapper });

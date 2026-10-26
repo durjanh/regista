@@ -11,17 +11,17 @@ pool:
 
 jobs:
   - job: api
-    displayName: API — lint, tests (coverage ≥ 90%), evaluation gate
+    displayName: API: lint, tests (coverage ≥ 90%), evaluation gate
     steps:
       - template: templates/api-tests.yml
 
   - job: web
-    displayName: Frontend — typecheck, tests (coverage floor), build
+    displayName: Frontend: typecheck, tests (coverage floor), build
     steps:
       - template: templates/frontend-tests.yml
 
   - job: e2e
-    displayName: Frontend — Playwright end-to-end (real browser, real API)
+    displayName: Frontend: Playwright end-to-end (real browser, real API)
     steps:
       - task: UsePythonVersion@0
         inputs:

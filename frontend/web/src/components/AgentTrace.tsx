@@ -23,7 +23,7 @@ export function AgentTrace({ steps }: { steps: AgentStep[] }) {
             <span className="ms">{duration(s.ms)}</span>
             <span className="action">
               {s.action}
-              {s.detail ? ` — ${s.detail}` : ""}
+              {s.detail ? `: ${s.detail}` : ""}
             </span>
           </div>
         );

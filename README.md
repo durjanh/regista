@@ -15,14 +15,14 @@ Built for the Microsoft + Premier League *Inside the Game* Developer Hackathon w
 ![Truth score per commit](docs/truth-score.svg)
 
 1. **Plant.** A hidden scenario script changes a team's behaviour at an exact time: a switch to a high press, a tiring full-back, a hot streak, a near-post corner routine, a chaos spell or a change of shape. The label is stored where no agent can see it.
-2. **Detect.** Code detects, AI explains: per-minute features (pressing actions per opponent build-up pass, share of attacks down a flank, sprint rate, possession flips) feed a change-point test (the same idea as KQL `series_fit_2lines`). Detection is live-honest: it only fires once the evidence after the change exists.
+2. **Detect.** Code detects, AI explains: per-minute features (pressing actions per opponent build-up pass, share of attacks down a flank, sprint rate, possession flips) feed a change-point test (the same idea as KQL `series_fit_2lines`). Detection has no look-ahead: it only fires once the evidence after the change exists.
 3. **Explain and verify.** The Analyst writes the line from structured fields (team, mechanism, direction, before/after, change minute). The Verifier re-checks every number against the evidence and sends failures back. Each card shows its working: the feature trend, the change point and the KQL receipt. Switch on the **Verifier drill** and we plant claim errors too: the headline number in each draft is overstated on purpose, and you watch the Verifier catch it and the Analyst correct it before anything airs.
 4. **Approve.** The Producer agent proposes a lower-third; a human approves (or auto-approve above a threshold the producer sets); it airs in the broadcaster profile's languages.
 5. **Grade.** The truth panel lights up: detected or missed, seconds to detect, explanation right or wrong, false alarms. A counterfactual replay then re-runs the match with and without the change to measure what it really did.
 
 **Showcase (England 1–2 Argentina, World Cup 2026 semi-final):** Argentina's planted switch to a high press at 63' is detected **4 m 46 s** later; England's tiring left-back at 69' in **3 m 30 s**; both explanations correct; no false alarms. Counterfactual: the press produced **+5.5 regains** in England's half (p10 1, p90 11, 16 paired re-runs).
 
-**Honest score on fresh seeds (48 matches, 12 of them unplanted controls; 63 observable planted changes):** recall **41%**, **0.92** false alarms per match, median **8.5 min** to detect, explanation accuracy **100%** when detected. Scored on every commit; reported by difficulty (obvious / moderate / subtle) and mechanism in the CI job summary. This is evaluation-driven development, made visible.
+**Score on fresh seeds (48 matches, 12 of them unplanted controls; 63 observable planted changes):** recall **41%**, **0.92** false alarms per match, median **8.5 min** to detect, explanation accuracy **100%** when detected. Scored on every commit; reported by difficulty (obvious / moderate / subtle) and mechanism in the CI job summary.
 
 ## Real results, synthetic events
 
@@ -92,7 +92,7 @@ Every push runs `python -m app.evals.run --mode offline` as a gate:
 
 ## Architecture
 
-Diagrams (open in diagrams.net or the Draw.io VS Code extension): [Container Apps](docs/architecture.drawio) · [AKS standard](docs/architecture-aks.drawio) · [AKS enterprise: API Management, private endpoints](docs/architecture-aks-enterprise.drawio). Details: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) · API: [docs/API_CONTRACT.md](docs/API_CONTRACT.md) · Deploy: [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) · Strategy, hero moment and video script: [docs/PLAN.md](docs/PLAN.md)
+Diagrams (open in diagrams.net or the Draw.io VS Code extension): [Container Apps](docs/architecture.drawio) · [AKS standard](docs/architecture-aks.drawio) · [AKS enterprise: API Management, private endpoints](docs/architecture-aks-enterprise.drawio). Details: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) · API: [docs/API_CONTRACT.md](docs/API_CONTRACT.md) · Deploy: [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)
 
 - **API** (`backend/api`, Python/FastAPI): match engine with planted scenarios, detectors and Grader, analytics (xG, xT, win probability, PPDA, shapes), live engine (SSE), Agent Framework agents, MCP server at `/mcp`, guardrails, ops.
 - **Web** (`frontend/web`, React + TypeScript, hosted on **Azure Static Web Apps**): control room, overlay, matchday, dugout, scouting, tactics, ask, recap, forge, ops. It calls the API directly; the API's CORS allows only the Static Web App.
@@ -376,7 +376,11 @@ reusing the same names for 48 hours; the script purges them.
 
 More detail (Fabric setup, troubleshooting): [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
 
-## Licence and disclaimer
+## How it was built
+
+I designed Regista, chose the architecture and the trade-offs, and reviewed and tested every change. AI coding assistants wrote much of the code with me, and the repo carries the GitHub Copilot setup used day to day: [instructions](.github/copilot-instructions.md), [custom agents](.github/agents/), [prompt files](.github/prompts/) and MCP servers in [.vscode/mcp.json](.vscode/mcp.json). The code is held to the same rule as the product's AI: every number comes from code, and the tests and evaluation gates above run on every change.
+
+## Licence and data
 
 Code: MIT ([LICENSE](LICENSE)). Reference data: CC0-1.0 ([martj42/international_results](https://github.com/martj42/international_results)).
-Regista is a hackathon project. It is not affiliated with, endorsed by or sponsored by the Premier League, FIFA, UEFA or any national association, and uses no logos, crests or footage. Match events are synthetic reconstructions.
+Match results are real; every event below the result is a synthetic reconstruction. Regista uses no logos, crests or footage.

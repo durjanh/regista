@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   frontend:
-    name: Frontend — typecheck, tests (coverage floor), build
+    name: Frontend: typecheck, tests (coverage floor), build
     runs-on: ubuntu-latest
     defaults:
       run:

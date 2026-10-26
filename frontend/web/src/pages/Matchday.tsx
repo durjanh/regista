@@ -377,7 +377,7 @@ export function Matchday() {
             <div className="pitch-legend">
               <span><i className="swatch" style={{ background: colors.home }} />{match.home.name}</span>
               <span><i className="swatch" style={{ background: colors.away }} />{match.away.name}</span>
-              <span>— pass · - - carry · ○ shot (size = xG)</span>
+              <span>─ pass · - - carry · ○ shot (size = xG)</span>
             </div>
           </section>
 

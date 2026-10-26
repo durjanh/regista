@@ -1,4 +1,4 @@
-/* Regista design tokens — dark-first broadcast theme. */
+/* Regista design tokens: dark-first broadcast theme. */
 :root,
 :root[data-theme="dark"] {
   --bg: #060a13;

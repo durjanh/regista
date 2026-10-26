@@ -1,4 +1,4 @@
-// Regista — AI match intelligence platform. Resource-group scoped, keyless, idempotent.
+// Regista: AI match intelligence platform. Resource-group scoped, keyless, idempotent.
 //
 //   az deployment group what-if -g <rg> -f infra/main.bicep -p infra/main.bicepparam
 //   az deployment group create  -g <rg> -f infra/main.bicep -p infra/main.bicepparam
@@ -84,7 +84,7 @@ param fabricAdminEmail string = ''
 
 param tags object = {}
 
-@description('API minimum replicas. 0 = scale to zero (pay nothing while idle; ~20-40 s cold start on the first request). Set 1 while judging or recording.')
+@description('API minimum replicas. 0 = scale to zero (pay nothing while idle; ~20-40 s cold start on the first request). Set 1 for a public demo or a recording.')
 @minValue(0)
 @maxValue(1)
 param apiMinReplicas int = 0

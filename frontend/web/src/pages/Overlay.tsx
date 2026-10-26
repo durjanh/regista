@@ -7,9 +7,9 @@ import { connectRealtime } from "../lib/webpubsub";
 type Live = StudioItem & { leaving?: boolean };
 
 const DEMO: Omit<StudioItem, "id" | "created_at">[] = [
-  { match_id: "demo", kind: "lower_third", priority: 92, title: "Goal — 67'", body: "Third goal in six minutes · xG 0.41 from the cut-back", data: { tag: "GOAL", color: "#22d68a" }, status: "on_air", t: 4020, minute: 67, duration_s: 6 },
+  { match_id: "demo", kind: "lower_third", priority: 92, title: "Goal 67'", body: "Third goal in six minutes · xG 0.41 from the cut-back", data: { tag: "GOAL", color: "#22d68a" }, status: "on_air", t: 4020, minute: 67, duration_s: 6 },
   { match_id: "demo", kind: "stat_card", priority: 80, title: "Momentum swing", body: "Field tilt since the 60th minute", data: { rows: [{ label: "Field tilt", value: "71%" }, { label: "xT added", value: "0.94" }, { label: "PPDA", value: "6.2" }] }, status: "on_air", t: 4100, minute: 68, duration_s: 7 },
-  { match_id: "demo", kind: "talking_point", priority: 70, title: "Shape change", body: "Back three after the 58' substitution — wing-backs now 9m higher", data: { tag: "TACTICS" }, status: "on_air", t: 4200, minute: 70, duration_s: 6 },
+  { match_id: "demo", kind: "talking_point", priority: 70, title: "Shape change", body: "Back three after the 58' substitution: wing-backs now 9m higher", data: { tag: "TACTICS" }, status: "on_air", t: 4200, minute: 70, duration_s: 6 },
   { match_id: "demo", kind: "score_bug_alert", priority: 60, title: "Win probability 63%", body: "", data: {}, status: "on_air", t: 4300, minute: 71, duration_s: 5 },
 ];
 

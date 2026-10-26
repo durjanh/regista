@@ -252,7 +252,7 @@ def test_truth_mode_grades_planted_changes(client):
     assert ins["feature"]["series"] and "series_fit_2lines" in ins["feature"]["query"] or ins["feature"]["query"]
 
 
-def test_truth_is_live_honest(client):
+def test_truth_detection_has_no_look_ahead(client):
     early = client.get(f"/api/matches/{HERO}/truth", params={"upto_t": 50 * 60}).json()
     assert all(g.get("pending") for g in early["grades"])          # plants not reached yet are pending, not missed
     assert not [i for i in early["insights"] if i["mechanism"] == "press_switch" and i["team_id"] == "argentina"]

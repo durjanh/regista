@@ -1,7 +1,7 @@
 # Regista full environment: provision and deploy everything for a profile in one run (first setup, or a rebuild).
 # Day to day, each part has its own pipeline: infra.yml, api.yml, frontend.yml, functions.yml, jobs.yml.
 #
-#   containerapps   Azure Container Apps (default; the live judge demo)
+#   containerapps   Azure Container Apps (default; the public live demo)
 #   aks             AKS standard: public ingress, keyless PaaS
 #   aks-enterprise  private AKS behind API Management Standard v2 (VNet integration), private endpoints;
 #                   the deploy stage runs on the Managed DevOps Pool inside the VNet

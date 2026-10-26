@@ -19,7 +19,7 @@ export function TeamSwatch({ team, size = "md" }: { team: Pick<TeamRef, "colors"
 /** Team name linking to its Team DNA page. */
 export function TeamLink({ team, className, short }: { team: Pick<TeamRef, "team_id" | "name" | "short">; className?: string; short?: boolean }) {
   return (
-    <Link to={`/team/${encodeURIComponent(team.team_id)}`} className={cx("team-link", className)} title={`${team.name} — Team DNA`}>
+    <Link to={`/team/${encodeURIComponent(team.team_id)}`} className={cx("team-link", className)} title={`${team.name}: Team DNA`}>
       {short ? team.short : team.name}
     </Link>
   );

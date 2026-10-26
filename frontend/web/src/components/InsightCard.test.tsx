@@ -59,7 +59,7 @@ describe("VerifierStrip", () => {
     expect(strip.textContent).not.toContain("[f1]");
   });
 
-  it("is honest about a missed drill: shows what was planted and that the clean draft aired", () => {
+  it("shows a missed drill: shows what was planted and that the clean draft aired", () => {
     renderWithPrefs(<VerifierStrip v={{ ...drillCaught, issues: [], caught: false }} />);
     const strip = screen.getByRole("group", { name: /Verifier drill/ });
     expect(within(strip).getByText(/Missed/)).toBeInTheDocument();

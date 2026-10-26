@@ -90,7 +90,7 @@ type Moment = {
   type: "goal"|"big_chance"|"save"|"penalty"|"red_card"|"yellow_card"|"substitution"
       | "momentum_swing"|"tactical_shift"|"turning_point"|"pressing_spell"|"wp_swing";
   team_id?: string; player_id?: string;
-  title: string;                // e.g. "GOAL — Okafor 67'"
+  title: string;                // e.g. "GOAL: Okafor 67'"
   summary: string;              // deterministic one-liner, always grounded
   importance: number;           // 0..100
   confidence: number;           // 0..1
@@ -254,13 +254,13 @@ Each message is `event: <name>\ndata: <json>\n\n`.
 |---|---|
 | `REGISTA_DATA_DIR` | folder with match JSON (default `data/matches`, generated on first start if empty) |
 | `AZURE_CLIENT_ID` | client id of the user-assigned managed identity (used by `DefaultAzureCredential`) |
-| `AZURE_OPENAI_ENDPOINT` | `https://<ai-account>.openai.azure.com` — enables the LLM path |
+| `AZURE_OPENAI_ENDPOINT` | `https://<ai-account>.openai.azure.com`: enables the LLM path |
 | `AZURE_OPENAI_CHAT_DEPLOYMENT` | fast model deployment name (default `chat`) |
 | `AZURE_OPENAI_REASONING_DEPLOYMENT` | stronger model deployment name for recaps/agents (default `reasoning`, falls back to chat) |
-| `FOUNDRY_PROJECT_ENDPOINT` | `https://<ai-account>.services.ai.azure.com/api/projects/<project>` — enables Agent Framework agents |
-| `AZURE_AI_SERVICES_ENDPOINT` | `https://<ai-account>.cognitiveservices.azure.com/` — Translator (custom domain) and Content Safety |
-| `AZURE_AI_SERVICES_REGION` | e.g. `uksouth` — Speech and Translator region |
-| `AZURE_AI_SERVICES_RESOURCE_ID` | full ARM id of the AI Services account — Speech Entra token format |
+| `FOUNDRY_PROJECT_ENDPOINT` | `https://<ai-account>.services.ai.azure.com/api/projects/<project>`: enables Agent Framework agents |
+| `AZURE_AI_SERVICES_ENDPOINT` | `https://<ai-account>.cognitiveservices.azure.com/`: Translator (custom domain) and Content Safety |
+| `AZURE_AI_SERVICES_REGION` | e.g. `uksouth`: Speech and Translator region |
+| `AZURE_AI_SERVICES_RESOURCE_ID` | full ARM id of the AI Services account: Speech Entra token format |
 | `COSMOS_ENDPOINT` / `COSMOS_DATABASE` | Cosmos DB (NoSQL) for narratives, studio items, fan profiles (default db `regista`) |
 | `STORAGE_ACCOUNT_URL` | blob storage for generated datasets and audio |
 | `EVENTHUB_FQDN` / `EVENTHUB_NAME` / `EVENTHUB_CONSUMER_GROUP` | Event Hubs for the live pipeline (`match-events`, consumer group `api`) |
@@ -392,7 +392,7 @@ type FeaturePoint = { minute: number; value: number };
 type Insight = {
   id: string; match_id: string; team_id: string; mechanism: Mechanism; direction: string;
   start_minute: number;                 // detected change point
-  detected_minute: number; detected_t: number;   // first minute the detector was confident (live-honest)
+  detected_minute: number; detected_t: number;   // first minute the detector was confident (no look-ahead)
   confidence: number; title: string; text: string;   // sentence written from the structured fields
   player_id?: string; player_name?: string;
   feature: { name: string; label: string; unit?: string; series: FeaturePoint[]; change_minute: number;

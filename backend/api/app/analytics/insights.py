@@ -2,7 +2,7 @@
 
 Code detects, AI explains. Each detector builds a per-minute feature series, finds the change point with a
 two-segment fit (the same idea as KQL `series_fit_2lines`), and only reports a change once enough evidence has
-accumulated *after* it, so `detected_minute` is honest for live use. Every insight carries the series, the change
+accumulated *after* it, so `detected_minute` has no look-ahead and holds for live use. Every insight carries the series, the change
 point, before/after levels and the KQL a Verifier would re-run on the Eventhouse.
 
 Mechanisms: press_switch, shape_change, tiring_fullback, hot_streak, set_piece_routine, chaos_spell.
@@ -58,7 +58,7 @@ def two_segment(v: list[float], min_seg: int = MIN_SEG) -> tuple[int, float, flo
 def detections(raw: list[float], direction: int, min_abs: float, min_rel: float, t_min: float,
                start_after: int = 24, window: int = 8, skip: tuple[int, int] | None = None,
                cooldown: int = 14) -> list[tuple[int, int, float, float, float]]:
-    """Live-honest detection: at each minute L compare the last `window` minutes with the baseline before them
+    """Detection without look-ahead: at each minute L compare the last `window` minutes with the baseline before them
     (z-test on the difference of means). Every confident shift is reported once (then a cooldown), with its change
     point refined by a two-segment fit over the surrounding half hour. Returns [(detected_index, change_index, before, after, z)]."""
     n = len(raw)

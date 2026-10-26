@@ -87,7 +87,7 @@ function markFlagged(draft: string, flagged: string[]): ReactNode[] {
 
 /**
  * What the Verifier caught in the Analyst's draft before the line aired. In a drill the error was planted on purpose,
- * the claim-level twin of a planted tactical change, so the catch (or an honest miss) is visible on screen.
+ * the claim-level twin of a planted tactical change, so the catch (or a miss) is visible on screen.
  */
 export function VerifierStrip({ v }: { v: Verification }) {
   const { t } = usePrefs();

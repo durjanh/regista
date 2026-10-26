@@ -6,7 +6,7 @@ Modes, chosen automatically:
 - "openai": only AZURE_OPENAI_ENDPOINT is set. The same agents run as plain chat completions with function calling.
 - "offline": no Azure AI configured. Callers use the deterministic offline engine.
 
-Every run returns an agent trace (agent, action, ms) that the UI shows, so judges and producers can see who did what.
+Every run returns an agent trace (agent, action, ms) that the UI shows, so producers and reviewers can see who did what.
 """
 
 from __future__ import annotations

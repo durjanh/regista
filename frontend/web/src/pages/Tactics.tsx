@@ -171,7 +171,7 @@ export function Tactics() {
                 ))}
               </div>
             ) : (
-              <EmptyState icon="♟">No shape change detected — {team.short} held a {tactics.formation.detected} throughout.</EmptyState>
+              <EmptyState icon="♟">No shape change detected: {team.short} held a {tactics.formation.detected} throughout.</EmptyState>
             )}
           </section>
           <section className="card">

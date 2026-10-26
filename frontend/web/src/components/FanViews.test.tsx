@@ -132,7 +132,7 @@ describe("PlayerFocusView", () => {
     expect(screen.getByText("31.2")).toBeInTheDocument();
     expect(screen.getByText(/1 ⚡ ≥25 km\/h · MODEL/)).toBeInTheDocument();
     expect(screen.getByText("82%")).toBeInTheDocument();
-    expect(screen.getByText(/Harry Kane shoots — saved/)).toBeInTheDocument();
+    expect(screen.getByText(/Harry Kane shoots, saved/)).toBeInTheDocument();
     expect(screen.queryByText(/Lionel Messi pass/)).toBeNull();
     await userEvent.selectOptions(screen.getByRole("combobox", { name: "Player" }), "argentina-10");
     expect(onPlayer).toHaveBeenCalledWith("argentina-10");

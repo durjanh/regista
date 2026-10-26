@@ -115,7 +115,7 @@ export function describeEvent(e: MatchEvent): string {
   const who = e.player_name ?? "";
   switch (e.type) {
     case "shot":
-      return `${who} shoots${e.shot_outcome ? ` — ${e.shot_outcome.replace("_", " ")}` : ""}${e.xg !== undefined ? ` (xG ${e.xg.toFixed(2)})` : ""}`;
+      return `${who} shoots${e.shot_outcome ? `, ${e.shot_outcome.replace("_", " ")}` : ""}${e.xg !== undefined ? ` (xG ${e.xg.toFixed(2)})` : ""}`;
     case "pass":
       return `${who} ${e.pass_type && e.pass_type !== "short" ? e.pass_type.replace("_", " ") : "pass"}${e.outcome === "fail" ? " (misplaced)" : ""}`;
     case "carry":
@@ -123,7 +123,7 @@ export function describeEvent(e: MatchEvent): string {
     case "dribble":
       return `${who} takes on${e.outcome === "fail" ? " (dispossessed)" : ""}`;
     case "card":
-      return `${who} — ${e.card === "red" || e.card === "second_yellow" ? "red card" : "yellow card"}`;
+      return `${who}, ${e.card === "red" || e.card === "second_yellow" ? "red card" : "yellow card"}`;
     case "substitution":
       return `Substitution`;
     default:

@@ -84,5 +84,5 @@ cat <<DONE
   Web:  $WEB_URL
   API:  $API_URL/docs
   MCP:  $API_URL/mcp
-  Judge mode: open $WEB_URL — no login; replays are read-only.
+  Judge mode: open $WEB_URL (no login; replays are read-only).
 DONE

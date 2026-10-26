@@ -68,7 +68,7 @@ setenv BUDGET_EMAIL "$EMAIL"
 setup_args=()
 case "$PROFILE" in
   containerapps)
-    setenv API_MIN_REPLICAS 1 ;;   # one warm API instance: no cold start for judges
+    setenv API_MIN_REPLICAS 1 ;;   # one warm API instance: no cold start for visitors
   aks)
     setenv LETSENCRYPT_EMAIL "$EMAIL"; setup_args+=(--letsencrypt-email "$EMAIL") ;;
   aks-enterprise)

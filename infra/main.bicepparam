@@ -39,7 +39,7 @@ param deployFabricCapacity = false
 param fabricAdminEmail = readEnvironmentVariable('FABRIC_ADMIN_EMAIL', '')
 
 // Cost guardrail: a monthly budget with e-mail alerts at 50% / 90% actual and 100% forecast.
-// Fixed start month so redeploys during judging (October-November 2026) never try to move the period.
+// Fixed start month so redeploys during October-November 2026 never try to move the period.
 param budgetContactEmail = readEnvironmentVariable('BUDGET_EMAIL', '')
 param budgetAmount = int(readEnvironmentVariable('BUDGET_AMOUNT', '150'))
 param budgetStartDate = '2026-10-01'
@@ -48,7 +48,7 @@ param budgetStartDate = '2026-10-01'
 param staticWebAppLocation = readEnvironmentVariable('STATIC_WEB_APP_LOCATION', 'eastus2')
 param staticWebAppSku = readEnvironmentVariable('STATIC_WEB_APP_SKU', 'Free')   // Free tier unless overridden
 
-// Pay only when used: the API scales to zero by default. `azd env set API_MIN_REPLICAS 1` keeps one warm (judging, video).
+// Pay only when used: the API scales to zero by default. `azd env set API_MIN_REPLICAS 1` keeps one warm (public demo, recordings).
 param apiMinReplicas = int(readEnvironmentVariable('API_MIN_REPLICAS', '0'))
 param logDailyCapGb = int(readEnvironmentVariable('LOG_DAILY_CAP_GB', '1'))
 // The API's service-contract settings: defaults in modules/api-settings.bicep, overrides as KEY=value;KEY=value.

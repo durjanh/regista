@@ -92,10 +92,10 @@ Order of magnitude for a real match (estimates; confirm in the pricing calculato
 
 ### Truth loop
 
-Code detects, AI explains, and a grader keeps everyone honest.
+Code detects, AI explains, and a deterministic grader scores both.
 
 1. **Plant.** A scenario script (`press_switch`, `shape_change`, `tiring_fullback`, `hot_streak`, `set_piece_routine`, `chaos_spell`) moves a team's knobs at an exact minute and writes a label: team, mechanism, direction, minute and difficulty (obvious, moderate or subtle). Labels live in `meta.truth` and are stripped from every normal endpoint, fact sheet and MCP tool.
-2. **Detect.** `analytics/insights.py` computes per-minute features from the event stream alone (pressing actions per opponent build-up pass, share of attacks down a flank, sprint rate, shot quality, near-post corners, possession flips, formation template). It runs a two-segment change-point fit (the same idea as KQL `series_fit_2lines`) and a two-proportion test against the pre-change baseline. A detection fires only once the post-change evidence exists (live-honest).
+2. **Detect.** `analytics/insights.py` computes per-minute features from the event stream alone (pressing actions per opponent build-up pass, share of attacks down a flank, sprint rate, shot quality, near-post corners, possession flips, formation template). It runs a two-segment change-point fit (the same idea as KQL `series_fit_2lines`) and a two-proportion test against the pre-change baseline. A detection fires only once the post-change evidence exists (no look-ahead).
 3. **Explain and verify.** The Analyst writes the line from the structured insight (team, mechanism, direction, before, after, change minute). The Verifier re-checks every number against the evidence and sends failures back for a rewrite. The **Verifier drill** plants an overstated number in a draft to show the catch on screen; it is also an eval gate.
 4. **Approve.** The Producer proposes cues; the human producer approves, edits or kills them (or auto-approve above their threshold); editorial rules and Content Safety apply; every decision lands in the audit log.
 5. **Grade.** `analytics/grader.py` matches insights to plants (right team, mechanism and direction in a window from 4 minutes before to 12 after). It reports recall on observable plants, false alarms (including unplanted control matches), seconds to detect and explanation accuracy. Natural changes the engine produced on its own (for example a press driven by game state) are labelled too, so they are not counted as false alarms.
@@ -195,9 +195,9 @@ Alternatives: Application Gateway WAF v2 in the VNet in front of API Management 
 
 | Resource | SKU / plan | Purpose |
 |---|---|---|
-| User-assigned managed identity | — | Single workload identity for the API, feeder and Function |
+| User-assigned managed identity | n/a | Single workload identity for the API, feeder and Function |
 | Microsoft Foundry (`Microsoft.CognitiveServices/accounts`, kind `AIServices`) | S0, local auth disabled | Models, Speech, Translator, Content Safety on one endpoint |
-| Foundry project | — | Agents, evaluations, tracing |
+| Foundry project | n/a | Agents, evaluations, tracing |
 | Model deployment `chat` | gpt-5.4-mini `2026-03-17`, GlobalStandard, 100K TPM | Live narration, translation polish, fact-check passes |
 | Model deployment `reasoning` | gpt-5.5 `2026-04-24`, GlobalStandard, 50K TPM | Recaps, analyst, Scenario Director |
 | Container Apps environment | Consumption workload profile | Hosts the API and the feeder job |
@@ -265,7 +265,7 @@ the in-VNet Managed DevOps Pool) or `gpt-5-mini`. API Management must share the 
 | Azure Functions Flex Consumption | ~$0–5 (free grant) |
 | Foundry tokens + Speech + Translator (demo volume) | ~$10–50 |
 | **Total without Fabric** | **~$80 idle; ~$90–150 with demo traffic** |
-| Fabric F2 if left running 24/7 (optional) | ~$260 — use the free Fabric trial, or pause between demos |
+| Fabric F2 if left running 24/7 (optional) | ~$260; use the free Fabric trial, or pause between demos |
 
 A monthly **budget alert** (`infra/modules/budget.bicep`, actual and forecast thresholds) emails `BUDGET_EMAIL`. Pay for use by default: the API scales to zero (the first request after idle waits ~20–40 s for a cold start; `azd env set API_MIN_REPLICAS 1` and `azd provision` keep one replica warm for judging and recording), Cosmos DB is serverless, Functions are Flex Consumption, the Static Web App is Free, and Log Analytics stops ingesting at 1 GB/day (`LOG_DAILY_CAP_GB`). Only Web PubSub (~$49, one Standard unit), Event Hubs (~$22) and ACR Basic (~$5) bill while idle. AKS profiles bill for their nodes whenever the cluster runs: `az aks stop -g <rg> -n <cluster>` between demos stops that. In the enterprise profile API Management stays Standard v2: its Consumption tier can't do the VNet integration that reaches the private ingress. Pause a paid Fabric capacity when you're not using it.
 
