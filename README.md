@@ -22,7 +22,7 @@ Built for the Microsoft + Premier League *Inside the Game* Developer Hackathon w
 
 **Showcase (England 1–2 Argentina, World Cup 2026 semi-final):** Argentina's planted switch to a high press at 63' is detected **4 m 46 s** later; England's tiring left-back at 69' in **3 m 30 s**; both explanations correct; no false alarms. Counterfactual: the press produced **+5.5 regains** in England's half (p10 1, p90 11, 16 paired re-runs).
 
-**Score on fresh seeds (48 matches, 12 of them unplanted controls; 63 observable planted changes):** recall **41%**, **0.92** false alarms per match, median **8.5 min** to detect, explanation accuracy **100%** when detected. Scored on every commit; reported by difficulty (obvious / moderate / subtle) and mechanism in the CI job summary.
+**Score on fresh seeds (48 matches, 12 of them unplanted controls; 63 observable planted changes):** recall **41%**, **0.92** false alarms per match, median **8.5 min** to detect, explanation accuracy **100%** when detected. Scored in every *Test everything* run; reported by difficulty (obvious / moderate / subtle) and mechanism in the CI job summary.
 
 ## Real results, synthetic events
 
@@ -66,7 +66,7 @@ Screenshots are from the running app with `REGISTA_VIDEO_SAFE=1` (competition na
 
 ## Evidence
 
-Every push runs `python -m app.evals.run --mode offline` as a gate:
+Every *Test everything* run (Azure DevOps or GitHub Actions) runs `python -m app.evals.run --mode offline` as a gate:
 
 | Gate | Result |
 |---|---|
@@ -85,7 +85,7 @@ Every push runs `python -m app.evals.run --mode offline` as a gate:
 - **Humans decide:** nothing airs without approval unless the producer sets an auto-approve threshold; kill switch; audit log persisted to Cosmos DB.
 - **Every claim checked:** deterministic Verifier on every number and citation (proven by the Verifier drill), fair-commentary lint, Azure AI Content Safety on output, Prompt Shields on user questions, editorial rules on graphics. Known limit: the Verifier checks that a number is in the evidence, not yet that it is attached to the right claim.
 - **Keyless:** one user-assigned managed identity and Entra ID everywhere; local and key auth disabled on Foundry, Cosmos DB, Event Hubs and Storage.
-- **Quality gates in CI:** truth score, Verifier drill, grounding, fidelity, calibration and scouting recovery block regressions; Foundry evaluations nightly.
+- **Quality gates in CI:** truth score, Verifier drill, grounding, fidelity, calibration and scouting recovery block regressions; Foundry evaluations of the deployed models on demand.
 - **Built for a broadcast audience:** the API publishes each live update once; Azure Web PubSub fans it out (1,000 concurrent viewers per unit, 100 units = 100,000; Premium P2 to 1,000,000). Narration and detection cost don't grow with viewers. `scripts/loadtest-realtime.py` measures delivery latency at N concurrent viewers.
 - **Observability and cost:** OpenTelemetry to Application Insights with Agent Framework spans (prompt text excluded), SLO and cost-per-match dashboard, a monthly budget alert in Bicep.
 - **Brand safety:** `REGISTA_VIDEO_SAFE=1` replaces trademarked competition names with generic labels for recorded demos.
@@ -100,7 +100,8 @@ Diagrams (open in diagrams.net or the Draw.io VS Code extension): [Container App
   - **Container Apps** (`infra/main.bicep`): API and feeder job. The cheapest; runs the live demo.
   - **AKS standard** (`infra/aks`): Entra-only AKS with workload identity, Cilium, app routing and Kubernetes manifests in `deploy/k8s`.
   - **AKS enterprise** (`infra/aks-enterprise`): API Management Standard v2 (the only public endpoint) → VNet integration → internal NGINX → private AKS; every PaaS service behind a private endpoint; deploys from a Managed DevOps Pool inside the VNet.
-- **Microsoft Fabric as code** (`scripts/fabric-setup.py`, run by the azd postprovision hook): workspace, Lakehouse with the CC0 results, Eventhouse and KQL table, workspace identity, the keyless Event Hubs connection and the Eventstream into the Eventhouse. Every item is find-or-create, so re-runs change nothing; on the enterprise profile it adds a managed private endpoint to the private Event Hubs.
+- **Microsoft Fabric as code** (`scripts/fabric-setup.py`, run by the azd postprovision hook): workspace, Lakehouse with the CC0 results, Eventhouse and KQL table, workspace identity, the keyless Event Hubs connection and the Eventstream into the Eventhouse. Every item is find-or-create, so re-runs change nothing (a rebuilt environment's new Event Hubs namespace re-points the Eventstream); on the enterprise profile it adds a managed private endpoint to the private Event Hubs.
+- **Where the data lives**: real results ship with the API (CC0 CSVs, also in the Lakehouse under `Files/reference/`); match events are generated from them, deterministically, in memory. **Cosmos DB** holds the studio queue, audit log, recaps and broadcaster profiles; **Blob Storage** the what-if matches, audio and recaps; **Event Hubs → Eventstream → Eventhouse** the live events (KQL in [docs/kql](docs/kql)); the **Lakehouse** each Data Forge match (`Files/regista/matches/`) and the synthetic season (`Files/regista/season/`).
 - **CI/CD**: **azd** for every profile (`azure.yaml`, `deploy/aks`, `deploy/aks-enterprise`); **GitHub Actions** (`.github/workflows`) and **Azure Pipelines** (`.azuredevops/pipelines`) with lint, coverage floors, evaluation gates with the truth score in the job summary, Bicep what-if, approvals and smoke tests. GitHub OIDC; bootstrap with the GitHub CLI. GitHub Copilot agent mode: `.github/copilot-instructions.md`, custom agents and `.vscode/mcp.json` (Regista MCP, Azure MCP, Fabric Eventhouse MCP).
 
 ## Judge mode
@@ -256,8 +257,8 @@ with the VNet. As of October 2026 (re-check: [API Management v2 regions](https:/
 
 ```bash
 cd deploy/aks-enterprise
-azd env new regent --location swedencentral                       # see "Choosing the region"
-azd env set AZURE_RESOURCE_GROUP rg-regista-ent
+azd env new regse --location swedencentral                        # see "Choosing the region"
+azd env set AZURE_RESOURCE_GROUP rg-regista-ent-se
 azd env set CHAT_MODEL_NAME gpt-5-mini && azd env set CHAT_MODEL_VERSION 2025-08-07          # if gpt-5.4-mini quota is 0
 azd env set REASONING_MODEL_NAME gpt-5-mini && azd env set REASONING_MODEL_VERSION 2025-08-07
 azd env set APIM_PUBLISHER_EMAIL you@example.com
@@ -283,7 +284,7 @@ cd ../..
 az extension add --name azure-devops
 export AZURE_DEVOPS_EXT_PAT=<PAT: service connections, variable groups, environments, build>
 scripts/setup-azure-devops.sh --org https://dev.azure.com/<org> --project <project> \
-  --profile aks-enterprise --rg rg-regista-ent --location swedencentral --env regent \
+  --profile aks-enterprise --rg rg-regista-ent-se --location swedencentral --env regse \
   --apim-email you@example.com --repo-type github --repo <owner>/<repo> --github-connection <github-service-connection>
 ```
 
@@ -345,7 +346,7 @@ Managed DevOps Pool, which uses the organisation's free self-hosted parallel job
 az extension add --name azure-devops
 export AZURE_DEVOPS_EXT_PAT=<PAT: service connections, variable groups, environments, build>
 scripts/setup-azure-devops.sh --org https://dev.azure.com/<org> --project <project> \
-  --profile aks-enterprise --rg rg-regista-ent --location swedencentral --env regent \
+  --profile aks-enterprise --rg rg-regista-ent-se --location swedencentral --env regse \
   --apim-email you@example.com --budget-email you@example.com \
   --repo-type github --repo <owner>/<repo> --github-connection <github-service-connection>
 ```

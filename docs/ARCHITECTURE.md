@@ -2,7 +2,7 @@
 
 Regista rebuilds **real international matches** from the public CC0 results dataset ([martj42/international_results](https://github.com/martj42/international_results): 49,945 results 1872–2026, goalscorers with minutes, shootouts). It then generates **synthetic, football-realistic ball-by-ball events** conditioned on those real goals, and turns them into explainable match intelligence: live narratives, studio graphics and automated recaps. Teams, scores, scorers and goal minutes are real. Everything below the result (passes, carries, shots, positions, xG) is a reconstruction and is labelled as such.
 
-One loop sits beside the product that the agents never see: the generator **secretly plants** tactical changes (a press pushed higher, a tiring full-back, a switch of shape) and a **Grader** scores whether the agents detected and explained each one, how fast and how accurately, live in the control room and on every commit in CI.
+One loop sits beside the product that the agents never see: the generator **secretly plants** tactical changes (a press pushed higher, a tiring full-back, a switch of shape) and a **Grader** scores whether the agents detected and explained each one, how fast and how accurately, live in the control room and in every CI test run.
 
 Everything runs on Azure, is deployed from GitHub with Bicep, and is **keyless**: every service-to-service call uses Microsoft Entra ID through one user-assigned managed identity.
 
@@ -248,7 +248,7 @@ the in-VNet Managed DevOps Pool) or `gpt-5-mini`. API Management must share the 
 - **SLO and cost per match** (`/api/ops`, the Ops page): narrative latency p50/p95 against a target (`SLO_NARRATIVE_P95_MS`, default 3,000 ms), plus model calls, tokens and estimated cost for each match. Prices come from `PRICE_INPUT_PER_1M` / `PRICE_OUTPUT_PER_1M` and are labelled as estimates.
 - **Truth score** in the GitHub Actions job summary on every run, with the results JSON uploaded as an artifact.
 - Latency: event-to-insight time appears in the UI (`latency_ms` on every narrative). `docs/kql/ingest-latency.kql` gives p50/p95/p99 of feeder → Event Hubs → Eventhouse.
-- Quality: `.github/workflows/evals.yml` runs Foundry evaluations nightly. CI runs the offline evaluation gate on every PR.
+- Quality: `.github/workflows/evals.yml` runs Foundry evaluations of the deployed models on demand (they bill tokens). *Test everything* runs the offline evaluation gate.
 
 ## Cost estimate
 
