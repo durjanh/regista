@@ -76,7 +76,7 @@ Every push runs `python -m app.evals.run --mode offline` as a gate:
 | Real-result fidelity (score, scorers, minutes) | **100%** |
 | Calibration vs real fixtures and event benchmarks | **16/16** |
 | Win-probability Brier score on real outcomes | **0.469** (coin flip: 0.667) |
-| Tests | **API:** 155 unit tests, 96% statement coverage (CI floor 90%); 9 live-server integration tests over real HTTP, SSE and MCP (30 concurrent viewers, first event p95 320 ms); 6 deployed-environment tests incl. a Web PubSub round trip. **Web:** 145 Vitest tests (CI coverage floor); **17 Playwright end-to-end tests** in a real browser against the real API, incl. the hero moment, the overlay, axe accessibility scans and RTL Arabic |
+| Tests | **API:** 155 unit tests, 96% statement coverage (CI floor 90%); 9 live-server integration tests over real HTTP, SSE and MCP (30 concurrent viewers, first event p95 320 ms); 6 deployed-environment tests incl. a Web PubSub round trip. **Web:** 148 Vitest tests (CI coverage floor); **18 Playwright end-to-end tests** in a real browser against the real API, incl. the hero moment, the overlay, axe accessibility scans and RTL Arabic |
 | Shape changes vs ground truth | 67% precision |
 | Scouting rediscovers player tendencies (674 players, every Elo top-32 team) | foot 100%, penalty side 87%, keeper dive 83% |
 

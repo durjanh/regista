@@ -31,6 +31,10 @@ PER90_METRICS = [
     ("sprints", "Sprints", True),
 ]
 
+# How each position family is named in strengths and weaknesses ("top 9% of goalkeepers").
+PEER_LABEL = {"GK": "goalkeepers", "DEF": "defenders", "WB": "wing-backs", "MID": "midfielders", "AM": "attacking midfielders",
+              "WIDE": "wingers", "FWD": "strikers"}
+
 
 def _new_agg() -> dict:
     return {"matches": 0, "minutes": 0.0, "sum": Counter(), "passes_att": 0, "passes_ok": 0, "shots": [], "pens": [],
@@ -189,7 +193,10 @@ class ScoutingIndex:
         for metric, label, higher in PER90_METRICS:
             vals = sorted(v[metric] for v in p90.values())
             below = sum(1 for v in vals if v < mine[metric])
-            pct = round(100 * below / max(1, len(vals) - 1)) if len(vals) > 1 else 50
+            ties = sum(1 for v in vals if v == mine[metric]) - 1
+            # Mid-rank: tied peers share the middle rank, so a metric every peer has at 0 (goals for goalkeepers) sits at
+            # the 50th percentile instead of reading as "bottom 1%".
+            pct = round(100 * (below + ties / 2) / max(1, len(vals) - 1)) if len(vals) > 1 else 50
             out.append({"metric": metric, "label": label, "value": mine[metric], "percentile": pct if higher else 100 - pct,
                         "peers": len(vals), "higher_is_better": higher})
         return out
@@ -291,14 +298,15 @@ class ScoutingIndex:
 
     def _strengths(self, model: dict, real: dict | None, pos: str) -> tuple[list[str], list[str]]:
         s, w = [], []
+        peers = PEER_LABEL.get(POSITION_FAMILY.get(pos, "MID"), "")
         for p in model["percentiles"]:
             if p["peers"] < 5:
                 continue
             if p["percentile"] >= 80 and p["value"] > 0:
-                s.append(f"{p['label']}: top {100 - p['percentile']}% of {POSITION_FAMILY.get(pos, 'MID').lower()} peers ({p['value']} per 90)" if p["metric"] != "pass_completion"
-                         else f"Pass completion {round(p['value'] * 100)}%: top {100 - p['percentile']}% of peers")
+                s.append(f"{p['label']}: top {100 - p['percentile']}% of {peers} ({p['value']} per 90)" if p["metric"] != "pass_completion"
+                         else f"Pass completion {round(p['value'] * 100)}%: top {100 - p['percentile']}% of {peers}")
             elif p["percentile"] <= 20:
-                w.append(f"{p['label']}: bottom {p['percentile'] + 1}% of peers ({p['value']}{'' if p['metric'] == 'pass_completion' else ' per 90'})")
+                w.append(f"{p['label']}: bottom {p['percentile'] + 1}% of {peers} ({p['value']}{'' if p['metric'] == 'pass_completion' else ' per 90'})")
         if real and real["international_goals"] >= 10:
             s.insert(0, f"Proven international scorer: {real['international_goals']} goals (REAL)")
         return s[:6], w[:5]

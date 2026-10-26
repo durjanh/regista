@@ -53,10 +53,14 @@ export function Dugout() {
   const tRef = useRef(state.t);
   tRef.current = state.t;
   const callId = useRef(0);
+  // A poll waits for the previous request: when the API answers slower than POLL_MS, starting a new call each tick
+  // would discard every response as stale and the dashboard would never render.
+  const inFlight = useRef(false);
 
   const fetchDugout = useCallback(
     async (s: Side) => {
       const call = ++callId.current;
+      inFlight.current = true;
       try {
         const d = await dugoutService.dashboard(id, s, Math.max(1, tRef.current));
         if (call === callId.current) {
@@ -65,6 +69,8 @@ export function Dugout() {
         }
       } catch (e) {
         if (call === callId.current) setError(e instanceof Error ? e.message : String(e));
+      } finally {
+        if (call === callId.current) inFlight.current = false;
       }
     },
     [id],
@@ -76,7 +82,9 @@ export function Dugout() {
   useEffect(() => {
     void fetchDugout(side);
     if (!running) return;
-    const h = window.setInterval(() => void fetchDugout(side), POLL_MS);
+    const h = window.setInterval(() => {
+      if (!inFlight.current) void fetchDugout(side);
+    }, POLL_MS);
     return () => window.clearInterval(h);
   }, [fetchDugout, side, running]);
 

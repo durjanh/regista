@@ -291,7 +291,10 @@ def ensure_eventstream_reads(fabric: Fabric, ws: str, stream: dict, namespace: s
         print(f"⚠ Eventstream {EVENTSTREAM_NAME} not re-pointed; fix its source in the portal or delete it and re-run.")
         return
     source["properties"]["dataConnectionId"] = connection_id
-    keep = [dict(p, payload=b64(json.dumps(spec))) if p["path"] == "eventstream.json" else p
+    # Without its id the source counts as new, so Fabric starts a fresh reader. Kept, the source keeps its reader for
+    # the old namespace and stays at "Warning" with nothing ingested (seen 26 Oct; a pause and resume didn't clear it).
+    source.pop("id", None)
+    keep =[dict(p, payload=b64(json.dumps(spec))) if p["path"] == "eventstream.json" else p
             for p in parts if p["path"] != ".platform"]   # .platform is item metadata, not part of the topology
     try:
         fabric.create_item(f"/workspaces/{ws}/eventstreams/{stream['id']}/updateDefinition", {"definition": {"parts": keep}},

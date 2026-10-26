@@ -50,6 +50,10 @@ def mode() -> str:
 _client = None
 
 
+# Low reasoning effort for broadcast-speed latency, as in clients.chat (gpt-5 models default to medium).
+AF_OPTIONS = {"reasoning": {"effort": "low"}}
+
+
 def _foundry_client(deployment: str | None = None):
     global _client
     from agent_framework.foundry import FoundryChatClient
@@ -97,11 +101,11 @@ async def _run_af(spec: AgentSpec, prompt: str, *, use_mcp: bool, t0: float) -> 
     if spec.tools and use_mcp:
         from agent_framework import MCPStreamableHTTPTool
         async with MCPStreamableHTTPTool(name="regista", url=settings.mcp_url, description="Regista match intelligence") as mcp:
-            agent = Agent(client=client, name=spec.name, instructions=spec.instructions, tools=mcp)
+            agent = Agent(client=client, name=spec.name, instructions=spec.instructions, tools=mcp, default_options=AF_OPTIONS)
             response = await agent.run(prompt)
     else:
         tools = list(READ_ONLY_TOOLS) if spec.tools else None
-        agent = Agent(client=client, name=spec.name, instructions=spec.instructions, tools=tools)
+        agent = Agent(client=client, name=spec.name, instructions=spec.instructions, tools=tools, default_options=AF_OPTIONS)
         response = await agent.run(prompt)
     ms = int((time.perf_counter() - t0) * 1000)
     calls = _extract_tool_calls(response)
@@ -145,7 +149,7 @@ async def run_concurrent(specs: list[AgentSpec], prompt: str) -> list[AgentResul
             from agent_framework import Agent
             from agent_framework.orchestrations import ConcurrentBuilder
             agents = [Agent(client=_foundry_client(s.deployment), name=s.name, instructions=s.instructions,
-                            tools=list(READ_ONLY_TOOLS) if s.tools else None) for s in specs]
+                            tools=list(READ_ONLY_TOOLS) if s.tools else None, default_options=AF_OPTIONS) for s in specs]
             workflow = ConcurrentBuilder(participants=agents).build()
             result = await workflow.run(prompt)
             texts = _workflow_texts(result, [s.name for s in specs])

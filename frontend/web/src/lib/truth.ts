@@ -84,8 +84,12 @@ export function usePoll<T>(fn: () => Promise<T>, ms: number, active: boolean, de
     if (!active) return;
     let alive = true;
     let loaded = false;
+    let busy = false;
     // The first fetch shows the loading indicator; refreshes of data already on screen stay in the background.
-    const run = () =>
+    // A tick is skipped while the previous call is still running, so a slow API never piles up overlapping requests.
+    const run = () => {
+      if (busy) return;
+      busy = true;
       (loaded ? quietly(fnRef.current) : fnRef.current())
         .then((d) => {
           if (!alive) return;
@@ -93,7 +97,11 @@ export function usePoll<T>(fn: () => Promise<T>, ms: number, active: boolean, de
           setData(d);
           setError(null);
         })
-        .catch((e) => alive && setError(e instanceof Error ? e.message : String(e)));
+        .catch((e) => alive && setError(e instanceof Error ? e.message : String(e)))
+        .finally(() => {
+          busy = false;
+        });
+    };
     run();
     const iv = window.setInterval(run, ms);
     return () => {

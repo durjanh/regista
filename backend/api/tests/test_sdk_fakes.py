@@ -455,8 +455,11 @@ class FakeAgent:
     def __class_getitem__(cls, item):
         return cls
 
-    def __init__(self, client=None, name="", instructions="", tools=None):
+    options: list = []
+
+    def __init__(self, client=None, name="", instructions="", tools=None, default_options=None):
         self.name, self.tools = name, tools
+        FakeAgent.options.append(default_options)
 
     async def run(self, prompt):
         FakeAgent.runs.append((self.name, self.tools))
@@ -508,6 +511,7 @@ def test_agent_framework_run_with_and_without_mcp(af):
     r2 = asyncio.run(agents.run(agents.AgentSpec("Tactician", "i", tools=True, deployment="reasoning"), "q"))
     assert FakeAgent.runs[-1][1] and r2.text == "Tactician says hi"
     assert agents._foundry_client() is agents._foundry_client()             # chat client is reused
+    assert FakeAgent.options[-2:] == [{"reasoning": {"effort": "low"}}] * 2  # broadcast-speed latency
 
 
 def test_agent_framework_failure_falls_back_to_openai(af, monkeypatch):
