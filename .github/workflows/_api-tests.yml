@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   api:
-    name: API: lint, tests (coverage floor 90%), offline eval gate
+    name: "API: lint, tests (coverage floor 90%), offline eval gate"
     runs-on: ubuntu-latest
     defaults:
       run:

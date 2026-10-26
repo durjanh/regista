@@ -20,7 +20,7 @@ jobs:
     uses: ./.github/workflows/_frontend-tests.yml
 
   e2e:
-    name: Frontend: Playwright end-to-end (real browser, real API)
+    name: "Frontend: Playwright end-to-end (real browser, real API)"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -64,7 +64,7 @@ jobs:
             frontend/web/test-results/
 
   bicep:
-    name: Infrastructure: Bicep build and lint
+    name: "Infrastructure: Bicep build and lint"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -118,7 +118,7 @@ jobs:
           shellcheck -S warning deploy/hooks/*.sh
 
   functions:
-    name: Functions: dependency and import check
+    name: "Functions: dependency and import check"
     runs-on: ubuntu-latest
     defaults:
       run:
