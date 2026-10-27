@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Annotated
+
 from pydantic import BaseModel, Field
 
 
@@ -42,8 +44,9 @@ class SpeechRequest(BaseModel):
 
 
 class TranslateRequest(BaseModel):
-    texts: list[str]
-    to: str
+    # The web app translates a page in batches of up to 100 strings; Translator's own limit is 1,000 and 50,000 characters.
+    texts: list[Annotated[str, Field(max_length=2000)]] = Field(..., max_length=100)
+    to: str = Field(..., pattern=r"^[a-z]{2,3}(-[A-Za-z]{2,4})?$")
 
 
 class StudioAction(BaseModel):

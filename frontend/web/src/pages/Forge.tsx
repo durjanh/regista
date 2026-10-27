@@ -102,7 +102,7 @@ export function Forge() {
       <div>
         <h1 className="page-title row gap-10"><IconForge width={30} height={30} /> {t("nav.forge")}</h1>
         <p className="muted max-70ch">
-          Direct a <b>what-if</b> match between real national teams in plain English. The Scenario Director agent turns your brief into a
+          Direct a what-if match between real national teams in plain English. The Scenario Director agent turns your brief into a
           simulator config, team strength comes from Elo built on 150 years of real results, and every generated match is checked against
           real-world distributions.
         </p>

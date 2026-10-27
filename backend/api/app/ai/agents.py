@@ -95,6 +95,13 @@ async def run(spec: AgentSpec, prompt: str, *, json_mode: bool = False, use_mcp:
     raise RuntimeError("No AI backend configured")
 
 
+def _token_counts(usage) -> tuple[int | None, int | None]:
+    """Input and output tokens. Agent Framework 1.x returns UsageDetails, a dict; older builds returned an object."""
+    if isinstance(usage, dict):
+        return usage.get("input_token_count"), usage.get("output_token_count")
+    return getattr(usage, "input_token_count", None), getattr(usage, "output_token_count", None)
+
+
 async def _run_af(spec: AgentSpec, prompt: str, *, use_mcp: bool, t0: float) -> AgentResult:
     from agent_framework import Agent
     client = _foundry_client(spec.deployment)
@@ -110,8 +117,7 @@ async def _run_af(spec: AgentSpec, prompt: str, *, use_mcp: bool, t0: float) -> 
     ms = int((time.perf_counter() - t0) * 1000)
     calls = _extract_tool_calls(response)
     from .. import ops
-    usage = getattr(response, "usage_details", None)
-    ops.record_usage(getattr(usage, "input_token_count", 0), getattr(usage, "output_token_count", 0))
+    ops.record_usage(*_token_counts(getattr(response, "usage_details", None)))
     trace = [{"agent": spec.name, "action": "agent_framework.run" + (" + MCP tools" if use_mcp and spec.tools else ""), "ms": ms}]
     trace += [{"agent": spec.name, "action": f"tool: {c['tool']}", "ms": 0, "detail": json.dumps(c["args"])[:200]} for c in calls]
     return AgentResult(text=response.text or "", trace=trace, tool_calls=calls)

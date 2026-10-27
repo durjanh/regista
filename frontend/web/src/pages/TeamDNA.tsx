@@ -10,10 +10,13 @@ import { PlayerLink } from "../components/ScoutViz";
 import { slugName, teamReportPath } from "../lib/players";
 import { useMemo } from "react";
 import { IconBack } from "../components/icons";
+import { FavouriteToggle } from "../components/FavouriteToggle";
+import { usePrefs } from "../lib/prefs";
 import { cx } from "../lib/format";
 
 export function TeamDNA() {
   const { teamId = "" } = useParams();
+  const { favClubs, toggleFavClub } = usePrefs();
   const { data, error, loading, reload } = useAsync<TeamDNAT>(() => referenceService.team(teamId), [teamId]);
   const squad = useAsync(() => scoutingService.players({ team_id: teamId }), [teamId]);
   const known = useMemo(() => new Set((squad.data ?? []).map((p) => p.player_key)), [squad.data]);
@@ -49,6 +52,7 @@ export function TeamDNA() {
           </div>
         </div>
         <span className="grow" />
+        <FavouriteToggle name={data.name} on={favClubs.includes(data.team_id)} onToggle={() => toggleFavClub(data.team_id)} />
         <Link to={teamReportPath(data.team_id)} className="btn sm primary">
           🔎 Scouting report
         </Link>

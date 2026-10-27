@@ -9,13 +9,14 @@ import { SHOT_COLORS } from "../lib/palette";
 import { teamReportPath } from "../lib/players";
 import { usePrefs } from "../lib/prefs";
 import { IconBack } from "../components/icons";
+import { FavouriteToggle } from "../components/FavouriteToggle";
 import { PlayerAvatar } from "../components/PlayerAvatar";
 
 const pct = (v: number) => `${Math.round(v * 100)}%`;
 
 export function PlayerDNA() {
   const { key = "" } = useParams();
-  const { t } = usePrefs();
+  const { t, favPlayers, toggleFavPlayer } = usePrefs();
   const { data, error, loading, reload } = useAsync<PlayerDNAT>(() => scoutingService.playerDNA(key), [key]);
   const team = useAsync(() => referenceService.team(key.split(":")[0] ?? ""), [key]);
 
@@ -47,7 +48,7 @@ export function PlayerDNA() {
         <PlayerAvatar name={data.name} colors={team.data?.colors} size={64} square />
         <div className="min-w-0">
           <h1 className="page-title fs-display-sm">
-            <span className={placeholder ? "placeholder-name" : undefined}>{data.name}</span>
+            <span className={placeholder ? "placeholder-name" : undefined} translate="no">{data.name}</span>
           </h1>
           <div className="row small muted gap-8 wrap">
             <Link to={teamReportPath(data.team_id)} className="team-link">
@@ -61,6 +62,7 @@ export function PlayerDNA() {
           </div>
         </div>
         <span className="grow" />
+        <FavouriteToggle name={data.name} on={favPlayers.includes(key)} onToggle={() => toggleFavPlayer(key)} />
         <InfoPop text={data.disclosure} label="Where these numbers come from" />
         <Link to="/scouting" className="btn sm">
           <IconBack /> {t("scout.title")}

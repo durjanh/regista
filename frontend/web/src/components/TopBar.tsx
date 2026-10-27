@@ -27,7 +27,7 @@ export function LanguageSelect({ compact }: { compact?: boolean }) {
   return (
     <label className="row gap-6">
       <span className={compact ? "sr-only" : "xs muted"}>{t("language")}</span>
-      <select className="select" value={language} onChange={(e) => setLanguage(e.target.value)} aria-label={t("language")}>
+      <select className="select" value={language} onChange={(e) => setLanguage(e.target.value)} aria-label={t("language")} translate="no">
         {LANGUAGES.map((l) => (
           <option key={l.code} value={l.code}>
             {l.label}
@@ -46,7 +46,7 @@ export function TopBar() {
         <span className="brand-mark" aria-hidden="true">
           R
         </span>
-        <span className="brand-name">Regista</span>
+        <span className="brand-name" translate="no">Regista</span>
         <span className="brand-tag">{t("tagline")}</span>
       </NavLink>
       <nav className="topnav" aria-label="Primary">

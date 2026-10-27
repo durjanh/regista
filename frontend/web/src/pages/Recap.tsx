@@ -78,7 +78,7 @@ export function Recap() {
           </div>
           <div className="field">
             <label htmlFor="rl">{prefs.t("language")}</label>
-            <select id="rl" className="select" value={language} onChange={(e) => setLanguage(e.target.value)}>
+            <select id="rl" className="select" value={language} onChange={(e) => setLanguage(e.target.value)} translate="no">
               {LANGUAGES.map((l) => (
                 <option key={l.code} value={l.code}>
                   {l.label}

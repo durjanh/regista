@@ -71,7 +71,7 @@ describe("Matchday page", () => {
     expect(document.querySelector(".metric-stage")).toHaveTextContent("0.85");
   });
 
-  it("opens Player focus and Club focus from the URL", async () => {
+  it("opens Player focus and Team focus from the URL", async () => {
     renderMatchday("?view=club&side=away");
     await feed();
     expect(screen.getByText("Argentina", { selector: ".pf-name" })).toBeInTheDocument();

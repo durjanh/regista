@@ -7,7 +7,7 @@ import { Pitch } from "./Pitch";
 
 /** Player name that links to the Player DNA page when a stable key exists. */
 export function PlayerLink({ name, playerKey, placeholder, className }: { name: string; playerKey?: string; placeholder?: boolean; className?: string }) {
-  const label = <span className={placeholder ? "placeholder-name" : undefined}>{name}</span>;
+  const label = <span className={placeholder ? "placeholder-name" : undefined} translate="no">{name}</span>;
   if (!playerKey) return <span className={className}>{label}</span>;
   return (
     <Link to={scoutingPath(playerKey)} className={cx("team-link", className)} title={`${name}: scouting profile`}>

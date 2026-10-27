@@ -10,6 +10,7 @@ import { useAsync } from "../hooks/useAsync";
 import { slugName } from "../lib/players";
 import { usePrefs } from "../lib/prefs";
 import { IconBack, IconDNA } from "../components/icons";
+import { FavouriteToggle } from "../components/FavouriteToggle";
 import { cx } from "../lib/format";
 
 const pct = (v: number) => `${Math.round((v > 1 ? v / 100 : v) * 100)}%`;
@@ -25,7 +26,7 @@ const BOARDS: { key: keyof TeamReportT["model"]["leaders"]; title: string }[] = 
 
 export function TeamReport() {
   const { teamId = "" } = useParams();
-  const { t } = usePrefs();
+  const { t, favClubs, toggleFavClub } = usePrefs();
   const { data, error, loading, reload } = useAsync<TeamReportT>(() => scoutingService.teamReport(teamId), [teamId]);
   const squad = useAsync(() => scoutingService.players({ team_id: teamId }), [teamId]);
   const known = useMemo(() => new Set((squad.data ?? []).map((p) => p.player_key)), [squad.data]);
@@ -65,6 +66,7 @@ export function TeamReport() {
           </div>
         </div>
         <span className="grow" />
+        <FavouriteToggle name={data.name} on={favClubs.includes(data.team_id)} onToggle={() => toggleFavClub(data.team_id)} />
         <InfoPop text={data.disclosure} label="Where these numbers come from" />
         <Link to={`/team/${encodeURIComponent(data.team_id)}`} className="btn sm">
           <IconDNA /> Team DNA

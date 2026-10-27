@@ -357,7 +357,7 @@ export function PlayerFocusView({ match, state, colors, playerId, onPlayer }: {
   );
 }
 
-// ---------------------------------------------------------------- Club focus
+// ---------------------------------------------------------------- Team focus
 
 function Spark({ values, color, label }: { values: { minute: number; value: number }[]; color: string; label: string }) {
   if (values.length < 2) return <Skeleton h={90} />;

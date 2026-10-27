@@ -9,6 +9,7 @@ import sys
 import types
 
 import pytest
+from agent_framework import UsageDetails
 from conftest import HERO
 
 # ---------------------------------------------------------------- helpers
@@ -468,7 +469,7 @@ class FakeAgent:
         dict_args = types.SimpleNamespace(type="function_call", name="list_matches", arguments={})
         text = types.SimpleNamespace(type="text", name=None)
         return types.SimpleNamespace(text=f"{self.name} says hi", messages=[types.SimpleNamespace(contents=[call, bad, dict_args, text])],
-                                     usage_details=types.SimpleNamespace(input_token_count=7, output_token_count=3))
+                                     usage_details=UsageDetails(input_token_count=7, output_token_count=3))
 
 
 @pytest.fixture
@@ -512,6 +513,16 @@ def test_agent_framework_run_with_and_without_mcp(af):
     assert FakeAgent.runs[-1][1] and r2.text == "Tactician says hi"
     assert agents._foundry_client() is agents._foundry_client()             # chat client is reused
     assert FakeAgent.options[-2:] == [{"reasoning": {"effort": "low"}}] * 2  # broadcast-speed latency
+
+
+def test_agent_framework_token_usage_reaches_ops(af):
+    from app import ops
+    def tokens():
+        return sum(c["input_tokens"] + c["output_tokens"] for c in ops._calls.values())
+
+    start = tokens()
+    asyncio.run(af.run(af.AgentSpec("MatchAnalyst", "i"), "q"))
+    assert tokens() - start == 10                                         # UsageDetails is a dict in Agent Framework 1.x
 
 
 def test_agent_framework_failure_falls_back_to_openai(af, monkeypatch):

@@ -44,7 +44,7 @@ test.describe("Matchday", () => {
   test("the five views switch, and ?view= survives a reload", async ({ page }) => {
     await page.goto(`/match/${HERO}`);
     const views = page.getByRole("group", { name: "View" });
-    for (const name of ["Casual", "Player focus", "Club focus", "Single metric", "Analyst"]) {
+    for (const name of ["Casual", "Player focus", "Team focus", "Single metric", "Analyst"]) {
       await views.getByRole("button", { name: new RegExp(name) }).click();
       await expect(views.getByRole("button", { name: new RegExp(name) })).toHaveAttribute("aria-pressed", "true");
     }

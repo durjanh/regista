@@ -151,3 +151,10 @@ def test_mcp_tools_are_registered():
     from app.mcp_server import mcp
     tools = asyncio.run(mcp.list_tools())
     assert len(tools) == 14 and {"get_match_state", "get_player_dna", "get_dugout_advice"} <= {t.name for t in tools}
+
+
+def test_translate_rejects_oversized_or_malformed_requests(client):
+    assert client.post("/api/translate", json={"texts": ["x"] * 101, "to": "es"}).status_code == 422
+    assert client.post("/api/translate", json={"texts": ["x" * 2001], "to": "es"}).status_code == 422
+    assert client.post("/api/translate", json={"texts": ["Hi"], "to": "es&x=1"}).status_code == 422
+    assert client.post("/api/translate", json={"texts": ["Hi"], "to": "zh-Hans"}).status_code == 200

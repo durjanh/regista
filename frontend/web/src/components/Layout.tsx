@@ -3,6 +3,7 @@ import { matchService } from "../api";
 import type { MatchMeta } from "../api/types";
 import { useAsync } from "../hooks/useAsync";
 import { usePrefs } from "../lib/prefs";
+import { usePageTranslation } from "../lib/pageTranslation";
 import { SourceBadge } from "./SourceBadge";
 import { TeamLink, TeamSwatch } from "./TeamSwatch";
 import { ActivityIndicator } from "./ActivityIndicator";
@@ -12,7 +13,8 @@ import { teamReportPath } from "../lib/players";
 import { IconAsk, IconDugout, IconMatchday, IconRecap, IconReport, IconStudio, IconTactics } from "./icons";
 
 export function AppLayout() {
-  const { t } = usePrefs();
+  const { t, language } = usePrefs();
+  usePageTranslation(language);
   return (
     <div className="app">
       <a href="#main" className="sr-only skip-link">
@@ -25,7 +27,7 @@ export function AppLayout() {
       </main>
       <footer className="footer">
         <span>{t("footer.disclaimer")}</span>
-        <span>
+        <span translate="no">
           Built with Microsoft Foundry · Agent Framework · Azure AI Services · Fabric · Azure Container Apps ·{" "}
           <NavLink to="/ops" className="team-link">{t("ops.title")}</NavLink>
         </span>

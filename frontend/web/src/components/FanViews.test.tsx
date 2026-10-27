@@ -44,9 +44,9 @@ describe("view switching", () => {
     expect(screen.getByLabelText("view")).toHaveTextContent("analyst");
     const group = screen.getByRole("group", { name: "View" });
     expect(within(group).getAllByRole("button").map((b) => b.textContent?.trim())).toEqual(
-      ["📊 Analyst", "🍿 Casual", "👟 Player focus", "🏳 Club focus", "① Single metric"],
+      ["📊 Analyst", "🍿 Casual", "👟 Player focus", "🏳 Team focus", "① Single metric"],
     );
-    for (const [label, mode] of [["Casual", "casual"], ["Player focus", "player"], ["Club focus", "club"], ["Single metric", "metric"]]) {
+    for (const [label, mode] of [["Casual", "casual"], ["Player focus", "player"], ["Team focus", "club"], ["Single metric", "metric"]]) {
       await userEvent.click(within(group).getByRole("button", { name: new RegExp(label) }));
       expect(screen.getByLabelText("view")).toHaveTextContent(mode);
       expect(screen.getByLabelText("search")).toHaveTextContent(`view=${mode}`);
