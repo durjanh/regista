@@ -15,7 +15,7 @@ function formatDate(iso: string): string {
   return d.toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
 }
 
-function Fixture({ m }: { m: MatchSummary }) {
+export function Fixture({ m }: { m: MatchSummary }) {
   const { t, favClubs } = usePrefs();
   const real = m.source?.real;
   const mine = [m.home, m.away].filter((x) => favClubs.includes(x.team_id));

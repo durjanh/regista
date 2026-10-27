@@ -2,7 +2,7 @@ import { NavLink } from "react-router-dom";
 import type { Persona } from "../api/types";
 import { LANGUAGES } from "../lib/i18n";
 import { usePrefs } from "../lib/prefs";
-import { IconDark, IconForge, IconLight, IconMatches, IconScouting } from "./icons";
+import { IconDark, IconFavourites, IconForge, IconLight, IconMatches, IconScouting } from "./icons";
 
 const PERSONAS: Persona[] = ["casual", "analyst", "kids", "fantasy", "accessible"];
 
@@ -39,7 +39,8 @@ export function LanguageSelect({ compact }: { compact?: boolean }) {
 }
 
 export function TopBar() {
-  const { t, theme, setTheme } = usePrefs();
+  const { t, theme, setTheme, favClubs, favPlayers } = usePrefs();
+  const saved = favClubs.length + favPlayers.length;
   return (
     <header className="topbar">
       <NavLink to="/" className="brand" aria-label="Regista home">
@@ -58,6 +59,10 @@ export function TopBar() {
         </NavLink>
         <NavLink to="/forge">
           <IconForge /> {t("nav.forge")}
+        </NavLink>
+        <NavLink to="/favourites">
+          <IconFavourites /> {t("nav.favourites")}
+          {saved ? <span className="nav-count tnum" aria-label={`${saved} saved`}>{saved}</span> : null}
         </NavLink>
       </nav>
       <div className="topbar-right">

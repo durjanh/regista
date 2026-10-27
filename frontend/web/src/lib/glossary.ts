@@ -26,6 +26,7 @@ const TERMS: Record<string, readonly [string, string, string, string, string, st
   "Scouting report": ["Informe de ojeo", "Rapport de recrutement", "Scouting-Bericht", "Relatório de observação", "Report di scouting", "Scoutingrapport", "تقرير الكشافة", "स्काउटिंग रिपोर्ट", "スカウティングレポート", "球探报告", "Ripoti ya utafutaji vipaji"],
   "Data Forge": ["Forja de datos", "Forge de données", "Datenschmiede", "Forja de dados", "Fucina dei dati", "Datasmidse", "مصنع البيانات", "डेटा फ़ोर्ज", "データフォージ", "数据工坊", "Kiwanda cha data"],
   "Primary": ["Principal", "Principal", "Hauptnavigation", "Principal", "Principale", "Hoofdmenu", "الرئيسية", "मुख्य", "メイン", "主导航", "Kuu"],
+  "Favourites": ["Favoritos", "Favoris", "Favoriten", "Favoritos", "Preferiti", "Favorieten", "المفضلة", "पसंदीदा", "お気に入り", "收藏", "Vipendwa"],
   "Search players": ["Buscar jugadores", "Rechercher des joueurs", "Spieler suchen", "Buscar jogadores", "Cerca giocatori", "Spelers zoeken", "ابحث عن لاعبين", "खिलाड़ी खोजें", "選手を検索", "搜索球员", "Tafuta wachezaji"],
 
   // Personas

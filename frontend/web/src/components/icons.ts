@@ -7,6 +7,7 @@ export {
   // Navigation
   CalendarDays as IconMatches,
   ScanSearch as IconScouting,
+  Star as IconFavourites,
   FlaskConical as IconForge,
   Radio as IconMatchday,
   Network as IconTactics,

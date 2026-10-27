@@ -153,6 +153,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .topnav a svg { width: 16px; height: 16px; flex: none; }
 .topnav a:hover { color: var(--text); background: var(--surface-2); }
 .topnav a.active { color: var(--text); background: var(--surface-3); }
+.nav-count { min-width: 18px; padding: 0 5px; border-radius: 999px; background: var(--accent); color: var(--accent-ink); font-size: 11px; font-weight: 700; line-height: 18px; text-align: center; }
 .topbar-right { margin-inline-start: auto; display: flex; align-items: center; gap: 8px; }
 @media (max-width: 760px) {
   .topnav { display: none; }

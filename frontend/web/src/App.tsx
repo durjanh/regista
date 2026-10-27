@@ -19,6 +19,7 @@ const Scouting = lazy(() => import("./pages/Scouting").then((m) => ({ default: m
 const PlayerDNA = lazy(() => import("./pages/PlayerDNA").then((m) => ({ default: m.PlayerDNA })));
 const TeamReport = lazy(() => import("./pages/TeamReport").then((m) => ({ default: m.TeamReport })));
 const Ops = lazy(() => import("./pages/Ops").then((m) => ({ default: m.Ops })));
+const Favourites = lazy(() => import("./pages/Favourites").then((m) => ({ default: m.Favourites })));
 
 function NotFound() {
   return (
@@ -48,6 +49,7 @@ export function App() {
               <Route path="scouting/team/:teamId" element={<TeamReport />} />
               <Route path="studio/:id" element={<Studio />} />
               <Route path="ops" element={<Ops />} />
+              <Route path="favourites" element={<Favourites />} />
               <Route path="match/:id" element={<MatchLayout />}>
                 <Route index element={<Matchday />} />
                 <Route path="tactics" element={<Tactics />} />
