@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { narrationService, truthService } from "../api";
 import type { Evidence, MatchEvent, Narrative } from "../api/types";
@@ -29,6 +29,22 @@ import { speak } from "../lib/speech";
 import { usePoll, useTruthMode } from "../lib/truth";
 import { IconBack } from "../components/icons";
 import { quietly } from "../lib/activity";
+import { Lineups } from "../components/Lineups";
+import { ModelTag } from "../components/SourceBadge";
+import { webglAvailable } from "../lib/webgl";
+
+// Three.js loads only when the 3D pitch is shown.
+const Pitch3D = lazy(() => import("../components/Pitch3D").then((m) => ({ default: m.Pitch3D })));
+type PitchMode = "3d" | "2d";
+const storedPitchMode = (): PitchMode => {
+  try {
+    const v = localStorage.getItem("regista.pitchMode");
+    if (v === "2d" || v === "3d") return v;
+  } catch {
+    /* storage unavailable */
+  }
+  return "3d";
+};
 
 export function Matchday() {
   const { id = "" } = useParams();
@@ -147,6 +163,18 @@ export function Matchday() {
     if (latest) void narrate(latest.id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [persona]);
+
+  const can3d = useMemo(() => webglAvailable(), []);
+  const [pitchMode, setPitchModeRaw] = useState<PitchMode>(storedPitchMode);
+  const setPitchMode = (m: PitchMode) => {
+    setPitchModeRaw(m);
+    try {
+      localStorage.setItem("regista.pitchMode", m);
+    } catch {
+      /* storage unavailable: the choice lasts for this visit */
+    }
+  };
+  const show3d = can3d && pitchMode === "3d" && !evidence;
 
   const stats = state.latest?.stats;
 
@@ -373,7 +401,22 @@ export function Matchday() {
               ) : (
                 <span className="xs muted">{match.home.short} attack →</span>
               )}
+              {can3d && !evidence ? (
+                <div className="seg" role="group" aria-label="Pitch view">
+                  {(["3d", "2d"] as const).map((m) => (
+                    <button key={m} className={pitchMode === m ? "on" : undefined} aria-pressed={pitchMode === m} onClick={() => setPitchMode(m)}>
+                      {m.toUpperCase()}
+                    </button>
+                  ))}
+                </div>
+              ) : null}
             </div>
+            {show3d ? (
+              <Suspense fallback={<Skeleton h={320} />}>
+                <Pitch3D events={state.events} home={match.home} away={match.away} homeColor={colors.home} awayColor={colors.away}
+                  label={`3D live pitch: ${pitch.caption}`} />
+              </Suspense>
+            ) : (
             <Pitch label="Live pitch view">
               <EventLayer
                 events={pitch.events as MatchEvent[]}
@@ -386,14 +429,29 @@ export function Matchday() {
                 names={names}
               />
             </Pitch>
+            )}
             <div className="pitch-caption">
               {pitch.caption} {!evidence ? <EventDetail e={lastEvent} /> : null}
             </div>
             <div className="pitch-legend">
               <span><i className="swatch" style={{ background: colors.home }} />{match.home.name}</span>
               <span><i className="swatch" style={{ background: colors.away }} />{match.away.name}</span>
-              <span>─ pass · - - carry · ○ shot (size = xG)</span>
+              {show3d ? (
+                <span className="row gap-6">
+                  <span>● on the ball · other players placed from each team's shape</span>
+                  <ModelTag title="The ball and the player on it follow the event stream; the other 20 players are placed from each team's formation, shifted with the ball" />
+                </span>
+              ) : (
+                <span>─ pass · - - carry · ○ shot (size = xG)</span>
+              )}
             </div>
+          </section>
+
+          <section className="card area-lineups">
+            <div className="card-head">
+              <h2 className="card-title">Line-ups</h2>
+            </div>
+            <Lineups match={match} events={state.events} />
           </section>
 
           <section className="card area-facts">

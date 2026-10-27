@@ -504,6 +504,8 @@ button[aria-busy="true"]:disabled { opacity: 0.85; cursor: progress; }
 .table .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12.5px; white-space: nowrap; }
 .table-wrap { overflow-x: auto; }
 .year-input { width: 9.5rem; }
+.pitch-3d { border-radius: 12px; overflow: hidden; line-height: 0; background: #070b14; min-height: 200px; }
+.pitch-3d canvas { display: block; }
 .potm { display: flex; gap: 14px; align-items: center; }
 .potm .badge { width: 56px; height: 56px; border-radius: 16px; display: grid; place-items: center; font-family: var(--font-display); font-weight: 800; font-size: 26px; }
 .check { display: flex; gap: 10px; align-items: flex-start; font-size: 13.5px; }
@@ -644,10 +646,10 @@ button[aria-busy="true"]:disabled { opacity: 0.85; cursor: progress; }
 
 /* matchday grid areas */
 .matchday-areas { display: grid; gap: 16px; grid-template-columns: minmax(0, 1.55fr) minmax(320px, 1fr);
-  grid-template-areas: "pulse feed" "pitch feed" "ticker battle" "stats facts" "stats h2h"; align-items: start; }
-.matchday-areas .feed { max-height: 860px; }
+  grid-template-areas: "pulse feed" "pitch lineups" "ticker battle" "stats facts" "stats h2h"; align-items: start; }
+.matchday-areas .feed { max-height: 520px; }
 @media (max-width: 1080px) {
-  .matchday-areas { grid-template-columns: minmax(0, 1fr); grid-template-areas: "pulse" "feed" "pitch" "battle" "ticker" "facts" "stats" "h2h"; }
+  .matchday-areas { grid-template-columns: minmax(0, 1fr); grid-template-areas: "pulse" "feed" "pitch" "lineups" "battle" "ticker" "facts" "stats" "h2h"; }
   .matchday-areas .feed { max-height: 640px; }
 }
 
@@ -1040,6 +1042,13 @@ html.overlay-mode body { overflow: hidden; }
 
 /* Named areas of the Matchday analyst grid. */
 .area-pitch { grid-area: pitch; }
+.area-lineups { grid-area: lineups; }
+.lineup-pitch { width: 100%; max-width: 420px; display: block; margin-inline: auto; border-radius: 10px; }
+.lineup-name { font-size: 2.6px; font-weight: 700; fill: #fff; paint-order: stroke; stroke: rgba(0,0,0,0.55); stroke-width: 0.5px; }
+.lineup-sub { font-size: 2.2px; font-weight: 700; fill: var(--accent); }
+.lineup-bench { margin-top: 10px; }
+.lineup-bench ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 4px 12px; font-size: 13px; }
+.lineup-no { display: inline-block; min-width: 1.6em; color: var(--text-faint); font-weight: 700; }
 .area-pulse { grid-area: pulse; }
 .area-feed { grid-area: feed; }
 .area-stats { grid-area: stats; }
