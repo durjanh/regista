@@ -11,6 +11,9 @@ const KEEPER: Record<"home" | "away", Kit> = {
   away: { shirt: "#22c55e", shorts: "#0f172a", socks: "#22c55e", number: "#0f172a" },
 };
 
+/** Training bibs the substitutes wear on the bench, in colours no kit or ball uses. */
+export const BIBS = { home: "#a3e635", away: "#2dd4bf" };
+
 /** A country's kit in its team colours: the shirt in the primary colour, shorts in the text colour (England's navy,
  *  Germany's black, France's white), striped where the real shirt is. Shared by the 3D pitch and the line-ups. */
 export function kitFor(team: Pick<TeamRef, "team_id" | "colors">, keeper: "home" | "away" | null): Kit {

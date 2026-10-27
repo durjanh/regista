@@ -192,3 +192,9 @@ def test_rebuilt_replays_are_capped(client):
         assert client.post("/api/forge/real", json={"match_id": mid}).status_code == 200
     store.add_rebuilt(store.get(ids[-1]), keep=2)
     assert sum(1 for d in store.docs.values() if d["meta"].get("rebuilt")) == 2
+
+
+def test_live_stream_max_gap_is_bounded(client):
+    from conftest import HERO
+    assert client.get(f"/api/matches/{HERO}/live", params={"max_gap": 50}).status_code == 422
+    assert client.get(f"/api/matches/{HERO}/live", params={"max_gap": 0}).status_code == 422

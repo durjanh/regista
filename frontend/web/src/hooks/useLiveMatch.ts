@@ -41,6 +41,8 @@ type Options = {
   autoplay?: boolean;
   /** Verifier drill: the API plants one overstated number in each insight draft so the Verifier's catch is visible. */
   drill?: boolean;
+  /** Longest wait between events, in seconds (the API squeezes dead time to 1.5 by default; a real-time feed needs more). */
+  maxGap?: number;
 };
 
 type Pending = {
@@ -59,7 +61,7 @@ const freshPending = (): Pending => ({ events: [], snapshots: [], moments: [], s
  * Subscribes to /api/matches/{id}/live (SSE). Messages are buffered and flushed once per
  * animation frame so a 120x replay doesn't re-render on every event.
  */
-export function useLiveMatch(matchId: string | undefined, { persona, language, initialSpeed = 30, autoplay = true, drill = false }: Options) {
+export function useLiveMatch(matchId: string | undefined, { persona, language, initialSpeed = 30, autoplay = true, drill = false, maxGap }: Options) {
   const [state, setState] = useState<LiveState>(EMPTY);
   const [speed, setSpeedState] = useState(initialSpeed);
   const esRef = useRef<EventSource | null>(null);
@@ -141,7 +143,7 @@ export function useLiveMatch(matchId: string | undefined, { persona, language, i
       close();
       endedRef.current = false;
       setState((s) => ({ ...s, status: "connecting", error: undefined }));
-      const es = new EventSource(matchService.liveUrl(matchId, { speed: spd, start_t: Math.floor(startT), persona, language, drill }));
+      const es = new EventSource(matchService.liveUrl(matchId, { speed: spd, start_t: Math.floor(startT), persona, language, drill, max_gap: maxGap }));
       esRef.current = es;
       connecting.current = beginActivity();
       const parse = <T,>(e: MessageEvent): T | null => {
@@ -199,7 +201,7 @@ export function useLiveMatch(matchId: string | undefined, { persona, language, i
         setState((s) => ({ ...s, status: "error", error: "Live stream interrupted" }));
       };
     },
-    [matchId, persona, language, drill, close, connected, schedule],
+    [matchId, persona, language, drill, maxGap, close, connected, schedule],
   );
 
   // Restart from kick-off on match change; resume at the current clock when persona/language/drill change.

@@ -32,6 +32,7 @@ import { quietly } from "../lib/activity";
 import { Lineups } from "../components/Lineups";
 import { ModelTag } from "../components/SourceBadge";
 import { webglAvailable } from "../lib/webgl";
+import { venueStyle } from "../lib/venue";
 
 // Three.js loads only when the 3D pitch is shown.
 const Pitch3D = lazy(() => import("../components/Pitch3D").then((m) => ({ default: m.Pitch3D })));
@@ -175,6 +176,7 @@ export function Matchday() {
     }
   };
   const show3d = can3d && pitchMode === "3d" && !evidence;
+  const venue = useMemo(() => venueStyle(match), [match]);
 
   const stats = state.latest?.stats;
 
@@ -414,7 +416,7 @@ export function Matchday() {
             {show3d ? (
               <Suspense fallback={<Skeleton h={320} />}>
                 <Pitch3D events={state.events} home={match.home} away={match.away} homeColor={colors.home} awayColor={colors.away}
-                  label={`3D live pitch: ${pitch.caption}`} />
+                  venue={venue} label={`3D live pitch at ${venue.label}: ${pitch.caption}`} />
               </Suspense>
             ) : (
             <Pitch label="Live pitch view">
@@ -438,6 +440,9 @@ export function Matchday() {
               <span><i className="swatch" style={{ background: colors.away }} />{match.away.name}</span>
               {show3d ? (
                 <span className="row gap-6">
+                  <span title="Regista knows each venue's city, country and altitude, not its stadium: the ground is generated from those">
+                    🏟 {venue.label}{venue.altitude ? ` · ${venue.altitude.toLocaleString()} m` : ""} (generated ground)
+                  </span>
                   <span>● on the ball · other players placed from each team's shape</span>
                   <ModelTag title="The ball and the player on it follow the event stream; the other 20 players are placed from each team's formation, shifted with the ball" />
                 </span>

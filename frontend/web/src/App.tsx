@@ -19,6 +19,7 @@ const Scouting = lazy(() => import("./pages/Scouting").then((m) => ({ default: m
 const PlayerDNA = lazy(() => import("./pages/PlayerDNA").then((m) => ({ default: m.PlayerDNA })));
 const TeamReport = lazy(() => import("./pages/TeamReport").then((m) => ({ default: m.TeamReport })));
 const Ops = lazy(() => import("./pages/Ops").then((m) => ({ default: m.Ops })));
+const AutoEvent = lazy(() => import("./pages/AutoEvent").then((m) => ({ default: m.AutoEvent })));
 const Favourites = lazy(() => import("./pages/Favourites").then((m) => ({ default: m.Favourites })));
 
 function NotFound() {
@@ -56,6 +57,7 @@ export function App() {
                 <Route path="ask" element={<Ask />} />
                 <Route path="recap" element={<Recap />} />
                 <Route path="dugout" element={<Dugout />} />
+                <Route path="video" element={<AutoEvent />} />
               </Route>
               <Route path="*" element={<NotFound />} />
             </Route>

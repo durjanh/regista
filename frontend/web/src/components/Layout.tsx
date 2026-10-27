@@ -10,7 +10,7 @@ import { ActivityIndicator } from "./ActivityIndicator";
 import { ErrorState, Loading, Skeleton } from "./States";
 import { TopBar } from "./TopBar";
 import { teamReportPath } from "../lib/players";
-import { IconAsk, IconDugout, IconMatchday, IconRecap, IconReport, IconStudio, IconTactics } from "./icons";
+import { IconAsk, IconAutoEvent, IconDugout, IconMatchday, IconRecap, IconReport, IconStudio, IconTactics } from "./icons";
 
 export function AppLayout() {
   const { t, language } = usePrefs();
@@ -71,6 +71,7 @@ export function MatchLayout() {
     { to: `/match/${id}/ask`, label: t("nav.ask"), icon: <IconAsk /> },
     { to: `/match/${id}/recap`, label: t("nav.recap"), icon: <IconRecap /> },
     { to: `/match/${id}/dugout`, label: t("nav.dugout"), icon: <IconDugout /> },
+    { to: `/match/${id}/video`, label: t("nav.autoevent"), icon: <IconAutoEvent /> },
   ];
 
   return (

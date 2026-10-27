@@ -3,7 +3,7 @@ import { qs, seg } from "../http/query";
 import type { Analysis, MatchEvent, MatchMeta, MatchSummary, MomentDetail, Physical, PlayerStat } from "../types";
 
 export type EventFilter = { from_t?: number; to_t?: number; types?: string[] };
-export type LiveParams = { speed: number; start_t: number; persona: string; language: string; drill?: boolean };
+export type LiveParams = { speed: number; start_t: number; persona: string; language: string; drill?: boolean; max_gap?: number };
 
 /** Matches and what happened in them: events, analysis, moments, player and physical stats, the live replay. */
 export class MatchService {

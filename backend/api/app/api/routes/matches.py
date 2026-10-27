@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import asyncio
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sse_starlette.sse import EventSourceResponse
 
 from ...analytics.stats import player_stats
@@ -63,6 +63,7 @@ async def match_physical(upto_t: float | None = None, match_id: str = Depends(re
 
 @router.get("/{match_id}/live")
 async def live(speed: float = 30, start_t: float = 0, persona: str = "casual", language: str = "en", drill: bool = False,
-               match_id: str = Depends(require_match)):
-    """drill=true runs the Verifier drill on insight lines: one overstated number is planted in each draft."""
-    return EventSourceResponse(live_stream(match_id, speed, start_t, persona, language, drill), ping=15, headers=SSE_HEADERS)
+               max_gap: float = Query(1.5, ge=0.1, le=10), match_id: str = Depends(require_match)):
+    """drill=true runs the Verifier drill on insight lines: one overstated number is planted in each draft. max_gap caps
+    the wait between events in seconds (1.5 squeezes dead time; the real-time auto-eventing feed uses 8)."""
+    return EventSourceResponse(live_stream(match_id, speed, start_t, persona, language, drill, max_gap), ping=15, headers=SSE_HEADERS)

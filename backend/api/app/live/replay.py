@@ -63,7 +63,7 @@ def _sse(event: str, data) -> dict:
 
 
 async def live_stream(match_id: str, speed: float = 30.0, start_t: float = 0.0, persona: str = "casual", language: str = "en",
-                      drill: bool = False):
+                      drill: bool = False, max_gap: float = 1.5):
     an = store.analyzer(match_id)
     speed = max(1.0, min(speed, 600.0))
     queue: asyncio.Queue = asyncio.Queue()
@@ -124,7 +124,7 @@ async def live_stream(match_id: str, speed: float = 30.0, start_t: float = 0.0, 
         for e in events:
             gap = (e["t"] - last_t) / speed
             if gap > 0:
-                await asyncio.sleep(min(gap, 1.5))
+                await asyncio.sleep(min(gap, max_gap))   # dead time is squeezed; the auto-eventing feed asks for more
             last_t = e["t"]
             await queue.put(_sse("event", e))
             notable = e["type"] in TRIGGER_TYPES and (e["type"] != "foul" or "penalty_conceded" in (e.get("tags") or []))
