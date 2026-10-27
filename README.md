@@ -6,7 +6,7 @@ Built for the Microsoft + Premier League *Inside the Game* Developer Hackathon w
 
 **Try it live:** https://lively-mushroom-048c7b70f.2.azurestaticapps.net (no login; [judge mode](#judge-mode) below). One API instance stays warm, so there's no cold start.
 
-![Control room at 68': Argentina's planted press switch detected, the Verifier drill catching an overstated number (1.76 struck through, evidence says 0.82), and the truth panel scoring the detection in 286 seconds](docs/screenshots/studio-hero.png)
+![Control room at 77': a tiring full-back explained with cited evidence, the Verifier drill catching a planted wrong number before air, and the truth panel scoring both planted changes (recall 100%, 0 false alarms, the press switch detected in 4 min 46 s)](docs/screenshots/studio-hero.png)
 
 > A *regista* is the deep-lying playmaker who sees the whole pitch and dictates the tempo. Regista does that for every viewer, producer and manager: what happened, **why it mattered**, with the evidence.
 
@@ -53,8 +53,8 @@ Built for the Microsoft + Premier League *Inside the Game* Developer Hackathon w
 <tr><td><img src="docs/screenshots/studio-azure.png" alt="Studio on Azure AI: detected changes with evidence charts beside the truth panel (recall 100%, 0 false alarms, median 248 s)"></td>
 <td><img src="docs/screenshots/overlay.png" alt="Broadcast overlay: an approved lower third, Argentina pressing higher from 64', on the transparent page"></td></tr>
 <tr><td align="center">Studio on Azure AI: detections graded by the truth panel</td><td align="center">Overlay: the approved lower third on air</td></tr>
-<tr><td><img src="docs/screenshots/ask.png" alt="Ask Regista: an answer to why England lost, every number tagged with a fact ID, fact-checked against 50 facts"></td>
-<td><img src="docs/screenshots/recap.png" alt="Automated recap: headline, report, player of the match and a 60-second audio script, fact-checked against 139 facts"></td></tr>
+<tr><td><img src="docs/screenshots/ask.png" alt="Ask Regista: an answer to why England lost, every number tagged with a fact ID and fact-checked, with the agent trace"></td>
+<td><img src="docs/screenshots/recap.png" alt="Automated recap: headline, report, player of the match and a 60-second audio script, fact-checked"></td></tr>
 <tr><td align="center">Ask Regista: MCP tools, every number cited</td><td align="center">Multi-agent recap, fact-checked</td></tr>
 <tr><td><img src="docs/screenshots/matchday-player.png" alt="Matchday, Player focus: one player's touches, passes, distance, sprints and top speed"></td>
 <td><img src="docs/screenshots/tactics.png" alt="Tactics: shape, xG, PPDA, field tilt and the pass network"></td></tr>
