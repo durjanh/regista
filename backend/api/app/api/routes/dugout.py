@@ -18,7 +18,9 @@ router = APIRouter(prefix="/api", tags=["dugout"])
 @router.get("/matches/{match_id}/dugout")
 async def match_dugout(side: str = Query("home", pattern="^(home|away)$"), upto_t: float | None = None,
                        match_id: str = Depends(require_match), store: MatchStore = Depends(get_store)):
-    sc = await asyncio.to_thread(store.ensure_scouting)
+    # Form baselines come from the scouting index; until it's built (cold start) the dugout answers without them and the
+    # next poll picks them up, rather than waiting on the build.
+    sc = store.scouting_if_ready()
     return await asyncio.to_thread(dugout_view.dugout, store.analyzer(match_id), store.get(match_id), side, upto_t, sc)
 
 

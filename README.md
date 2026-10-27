@@ -92,7 +92,21 @@ Every *Test everything* run (Azure DevOps or GitHub Actions) runs `python -m app
 
 ## Architecture
 
-Diagrams (open in diagrams.net or the Draw.io VS Code extension): [Container Apps](docs/architecture.drawio) · [AKS standard](docs/architecture-aks.drawio) · [AKS enterprise: API Management, private endpoints](docs/architecture-aks-enterprise.drawio). Details: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) · API: [docs/API_CONTRACT.md](docs/API_CONTRACT.md) · Deploy: [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)
+One codebase deploys three ways. Click a diagram for full size; the editable sources are the `.drawio` files next to them (diagrams.net or the Draw.io VS Code extension).
+
+**1. Azure Container Apps** (default; runs the live demo): serverless, keyless, pay for use.
+
+[![Regista on Azure Container Apps](docs/architecture.png)](docs/architecture.png)
+
+**2. AKS standard**: the same app on Kubernetes, Entra-only, workload identity, HTTPS from Let's Encrypt.
+
+[![Regista on AKS, standard profile](docs/architecture-aks.png)](docs/architecture-aks.png)
+
+**3. AKS enterprise**: API Management is the only public entry, a private cluster, and every data service on a private endpoint.
+
+[![Regista on AKS, enterprise profile: API Management and private endpoints](docs/architecture-aks-enterprise.png)](docs/architecture-aks-enterprise.png)
+
+Sources: [architecture.drawio](docs/architecture.drawio) · [architecture-aks.drawio](docs/architecture-aks.drawio) · [architecture-aks-enterprise.drawio](docs/architecture-aks-enterprise.drawio). Details: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) · API: [docs/API_CONTRACT.md](docs/API_CONTRACT.md) · Deploy: [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)
 
 - **API** (`backend/api`, Python/FastAPI): match engine with planted scenarios, detectors and Grader, analytics (xG, xT, win probability, PPDA, shapes), live engine (SSE), Agent Framework agents, MCP server at `/mcp`, guardrails, ops.
 - **Web** (`frontend/web`, React + TypeScript, hosted on **Azure Static Web Apps**): control room, overlay, matchday, dugout, scouting, tactics, ask, recap, forge, ops. It calls the API directly; the API's CORS allows only the Static Web App.

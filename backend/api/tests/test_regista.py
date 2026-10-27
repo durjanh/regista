@@ -347,3 +347,21 @@ def test_season_generator_small():
     from app.forge.season import generate
     docs, summary = generate(n_teams=3, plant_share=1.0, seed=7)
     assert summary["matches"] == 6 and summary["planted_changes"] >= 6 and len(summary["standings"]) == 3
+
+
+def test_dugout_answers_while_the_scouting_index_is_still_building(client, monkeypatch):
+    """A cold start must not make the dugout wait for the scouting build: it answers without form baselines and
+    starts the build in the background."""
+    from app.analytics.scouting import scouting
+    from app.store import store
+    monkeypatch.setattr(scouting, "ready", False)
+    started = []
+    monkeypatch.setattr(store, "ensure_scouting", lambda: started.append(True))
+    r = client.get("/api/matches/2022-11-22-argentina-saudi-arabia/dugout", params={"side": "home", "upto_t": 4300})
+    assert r.status_code == 200 and r.json()["players"]
+    for _ in range(50):          # the background build thread starts
+        if started:
+            break
+        import time
+        time.sleep(0.02)
+    assert started

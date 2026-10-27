@@ -137,6 +137,16 @@ class MatchStore:
                 scouting.build(list(self.docs.values()) + corpus)
         return scouting
 
+    def scouting_if_ready(self):
+        """The scouting index if it is built, else None after starting the build in the background. For views that use
+        scouting only as extra context (the dugout's form baselines), so a cold start never makes them wait ~15 s."""
+        from .analytics.scouting import scouting
+        if scouting.ready:
+            return scouting
+        if not self.scout_lock.locked():
+            threading.Thread(target=self.ensure_scouting, name="scouting-build", daemon=True).start()
+        return None
+
     def summaries(self) -> list[dict]:
         out = []
         for mid in self.order:
