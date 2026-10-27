@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { videoService } from "../api";
 import { quietly } from "../lib/activity";
 import type { VideoRead, VideoTeams } from "../api/types";
-import { BATCH, COUNTED, grabFrame, sampleTimes, tally, teamLabel, type Side } from "../lib/videoRead";
+import { BATCH, COUNTED, grabFrame, sampleTimes, tally, teamLabel, unusableBatch, type Side } from "../lib/videoRead";
 import { ErrorState } from "./States";
 
 const ROWS: { type: (typeof COUNTED)[number]; label: string }[] = [
@@ -19,7 +19,11 @@ const mmss = (t: number) => `${Math.floor(t / 60)}:${String(Math.floor(t % 60)).
  * Any football clip read by the reasoning model: about one frame a second, sent in batches of eight, the figures
  * filling in as each batch comes back. Counts are the model's reading of the pictures; nothing is measured or graded.
  */
-export function VideoReader({ src, name, onSeek }: { src: string; name: string; onSeek?: (t: number) => void }) {
+export function VideoReader({ src, name, onSeek, player }: {
+  src: string; name: string; onSeek?: (t: number) => void;
+  /** The clip's visible player: frames are taken from it (a hidden copy can hand back blank or stale pictures). */
+  player?: () => HTMLVideoElement | null;
+}) {
   const sampler = useRef<HTMLVideoElement>(null);
   const canvas = useRef<HTMLCanvasElement | null>(null);
   const stop = useRef(false);
@@ -40,8 +44,10 @@ export function VideoReader({ src, name, onSeek }: { src: string; name: string; 
   }, [src]);
 
   const run = async (from: number, prior: VideoRead[]) => {
-    const v = sampler.current;
+    const v = player?.() ?? sampler.current;
     if (!v) return;
+    const resume = { t: v.currentTime, playing: !v.paused };
+    v.pause();
     if (v.readyState < 1) await new Promise((r) => v.addEventListener("loadedmetadata", r, { once: true }));
     canvas.current ??= document.createElement("canvas");
     const times = sampleTimes(v.duration);
@@ -55,6 +61,8 @@ export function VideoReader({ src, name, onSeek }: { src: string; name: string; 
         const frames: { t: number; image: string }[] = [];
         for (const t of times.slice(i, i + BATCH)) frames.push({ t, image: await grabFrame(v, t, canvas.current) });
         if (stop.current) break;
+        const bad = unusableBatch(frames.map((f) => f.image));
+        if (bad) throw new Error(`${bad} Nothing was sent to the model. Reload the page and upload the clip again.`);
         // The panel shows its own progress, so the page-wide indicator stays out of these long calls.
         const read = await quietly(() => videoService.read(frames, teams));
         teams = read.teams;
@@ -67,6 +75,8 @@ export function VideoReader({ src, name, onSeek }: { src: string; name: string; 
       setError(e instanceof Error ? e.message : String(e));
     } finally {
       setBusy(false);
+      v.currentTime = resume.t;                                     // the player goes back to where it was
+      if (resume.playing) void v.play().catch(() => undefined);
     }
   };
 

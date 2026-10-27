@@ -27,6 +27,12 @@ SYSTEM = (
     ' "events": [{"t": number, "type": one of ' + json.dumps(EVENT_TYPES) + ', "team": "a"|"b"|null, '
     '"description": str}],\n'
     ' "summary": str}\n'
+    "The footage may be a broadcast camera, a phone recording, or a tactical graphic where players are coloured or "
+    "numbered markers on a drawn pitch: read all of them. In a graphic, tell the teams apart by marker colour (kit "
+    "is then e.g. \"white markers\"), find the ball as the small dot, and compare consecutive frames: the ball "
+    "moving between markers of the same colour is a pass, a change of the colour nearest the ball is a change of "
+    "possession. Frames are about a second apart, so small movements matter; only call the play static when the "
+    "ball and players really are in the same places across the frames.\n"
     "Rules: one frames entry per image, with its time. kit is the shirt colour as seen (e.g. \"white shirts\"). name "
     "is the team only if a scoreboard, caption or badge shows it. possession is the team with the ball, or null when "
     "you can't tell. zone is where the ball is, from the possessing team's point of view. scoreboard is the on-screen "

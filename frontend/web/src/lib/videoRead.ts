@@ -79,6 +79,26 @@ export function teamLabel(teams: VideoTeams, side: Side): string {
   return t?.name ? `${t.name} (${t.kit ?? kit})` : kit;
 }
 
+/** Resolves once the browser has the frame at the new position ready to draw (or after 500 ms where it can't say):
+ * right after a seek Chrome can still hand drawImage the previous or an empty picture. */
+function framePainted(video: HTMLVideoElement): Promise<void> {
+  return new Promise((resolve) => {
+    let done = false;
+    const finish = () => { if (!done) { done = true; resolve(); } };
+    const v = video as HTMLVideoElement & { requestVideoFrameCallback?: (cb: () => void) => number };
+    v.requestVideoFrameCallback?.(finish);
+    window.setTimeout(finish, 500);
+  });
+}
+
+/** Frames that would mislead the model: a batch that is blank (tiny JPEGs) or the same picture every time. */
+export function unusableBatch(images: string[]): string | null {
+  if (!images.length) return null;
+  if (images.every((d) => d.length < 3000)) return "The browser returned blank frames for this clip.";
+  if (images.length > 1 && new Set(images).size === 1) return "The browser returned the same frame every time.";
+  return null;
+}
+
 /** Seek a video to `t` and draw that frame as a JPEG data URL `width` pixels wide. */
 export async function grabFrame(video: HTMLVideoElement, t: number, canvas: HTMLCanvasElement, width = FRAME_WIDTH): Promise<string> {
   await new Promise<void>((resolve, reject) => {
@@ -88,6 +108,7 @@ export async function grabFrame(video: HTMLVideoElement, t: number, canvas: HTML
     video.addEventListener("error", fail);
     video.currentTime = t;
   });
+  await framePainted(video);
   const w = video.videoWidth || width;
   const h = video.videoHeight || width * 0.5625;
   const scale = width / Math.max(w, h);                                     // the longer side, so a portrait clip stays small

@@ -322,7 +322,7 @@ export function AutoEvent() {
       </div>
 
       {mode === "clip" && clip ? (
-        <VideoReader src={clip.url} name={clip.name} onSeek={(t) => {
+        <VideoReader src={clip.url} name={clip.name} player={() => video.current} onSeek={(t) => {
           const v = video.current;
           if (!v) return;
           v.currentTime = t;

@@ -6,7 +6,7 @@ import { VideoReader } from "./VideoReader";
 
 vi.mock("../lib/videoRead", async (actual) => ({
   ...(await actual<typeof import("../lib/videoRead")>()),
-  grabFrame: vi.fn(async () => "data:image/jpeg;base64,AAAA"),
+  grabFrame: vi.fn(async (_v: unknown, t: number) => `data:image/jpeg;base64,${"A".repeat(4000)}${t}`),
 }));
 
 const answer = {
