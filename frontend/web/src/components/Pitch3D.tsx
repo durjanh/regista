@@ -172,79 +172,123 @@ function goal(side: 1 | -1, scale = 1): THREE.Group {
 type Stands = { group: THREE.Group; near: THREE.Group; cheer: (now: number, until: number) => void };
 
 /**
- * The stadium for this venue: stepped stands on the far side and both ends (the broadcast camera sits in the near
- * one), one to three tiers, rows of seats in the venue's colours with thousands of fans in them (both teams' shirts
- * and ordinary clothes, some seats empty), a roof edge lined with floodlights, and a closed bowl where the venue has
- * one. Fans are drawn as two instanced meshes, so the whole crowd is a couple of draw calls; they jump after a goal.
+ * The stadium for this venue: one continuous seating bowl round the pitch (a rounded rectangle, as modern grounds are
+ * built), one to three tiers of stepped rows with balcony fronts, thousands of fans in them, and a cantilevered roof
+ * ring lined with floodlights. City landmarks: London gets a great illuminated arch over the far stand, Mexico City a
+ * steep three-tier bowl. The near side is a separate group: it fills the foreground of the wide shot, and the follow
+ * camera (which sits in it, as a broadcast camera does) and the auto-eventing feed hide it.
  */
 function stands(v: VenueStyle, homeColours: string[], awayColours: string[]): Stands {
   const g = new THREE.Group();
-  const seatA = new THREE.MeshStandardMaterial({ color: v.seats[0], roughness: 0.85 });
-  const seatB = new THREE.MeshStandardMaterial({ color: v.seats[1], roughness: 0.85 });
-  const concrete = new THREE.MeshStandardMaterial({ color: "#1b2230", roughness: 0.85 });
-  const roofMat = new THREE.MeshStandardMaterial({ color: "#0d121c", roughness: 0.5, metalness: 0.4 });
-  const ROWS = 11, RISE = 0.55, DEPTH = 0.9;
-  // Side stands: [centre x, z, length, rotation]; local +z points away from the pitch.
-  // The near stand comes last and is kept apart: it fills the foreground of the wide shot, and the follow camera
-  // (which sits in it, as a broadcast camera does) hides it.
-  const sides: [number, number, number, number][] = [
-    [0, -PITCH_H / 2 - 8, 132, Math.PI], [PITCH_W / 2 + 9, 0, 88, Math.PI / 2], [-PITCH_W / 2 - 9, 0, 88, -Math.PI / 2], [0, PITCH_H / 2 + 8, 132, 0],
-  ];
   const near = new THREE.Group();
-  const world: THREE.Vector3[] = [];                                                     // every seat, in world space
-  const nearWorld: THREE.Vector3[] = [];
-  const top = 2 + v.tiers * (ROWS * RISE + 3);
-  sides.forEach(([cx, cz, len, rot], sideIndex) => {
-    const isNear = sideIndex === 3;
-    const seatsOut = isNear ? nearWorld : world;
-    const side = new THREE.Group();
-    const toWorld = new THREE.Matrix4().makeRotationY(rot).setPosition(cx, 0, cz);
-    for (let t = 0; t < v.tiers; t++) {
-      const baseY = 1.2 + t * (ROWS * RISE + 3);
-      const baseZ = t * (ROWS * DEPTH - 2);                                          // upper tiers overhang the lower
-      for (let r = 0; r < ROWS; r++) {
-        const step = new THREE.Mesh(new THREE.BoxGeometry(len, RISE, DEPTH), (r + t) % 2 ? seatB : seatA);
-        step.position.set(0, baseY + r * RISE, baseZ + r * DEPTH);
-        step.receiveShadow = true;
-        side.add(step);
-        for (let x = -len / 2 + 0.5; x < len / 2; x += 0.78)
-          seatsOut.push(new THREE.Vector3(x, baseY + r * RISE + RISE / 2, baseZ + r * DEPTH).applyMatrix4(toWorld));
+  const roofMat = new THREE.MeshStandardMaterial({ color: "#0d121c", roughness: 0.45, metalness: 0.5, side: THREE.DoubleSide });
+  const ROWS = 11, RISE = v.landmark === "bowl" ? 0.8 : 0.6, DEPTH = 0.95;
+  const A0 = PITCH_W / 2 + 6, B0 = PITCH_H / 2 + 6.5, R0 = 12;            // the bowl's inner edge round the pitch
+  const tierOff = (t: number) => t * (ROWS * DEPTH - 2.2);                 // upper tiers overhang the one below
+  const tierY = (t: number) => 1.2 + t * (ROWS * RISE + 3);
+  const outerOff = tierOff(v.tiers - 1) + ROWS * DEPTH;
+  const topY = tierY(v.tiers - 1) + ROWS * RISE;
+
+  /** Points round the bowl at an offset from its inner edge, with outward normals; `near` marks the near side. */
+  type Pt = { x: number; z: number; nx: number; nz: number; near: boolean };
+  const ring = (off: number, step: number): Pt[] => {
+    const a = A0 + off, b = B0 + off, r = R0 + off, sa = a - r, sb = b - r;
+    const out: Pt[] = [];
+    const line = (x0: number, z0: number, x1: number, z1: number, nx: number, nz: number, isNear: boolean) => {
+      const n = Math.max(1, Math.ceil(Math.hypot(x1 - x0, z1 - z0) / step));
+      for (let i = 0; i < n; i++) out.push({ x: x0 + ((x1 - x0) * i) / n, z: z0 + ((z1 - z0) * i) / n, nx, nz, near: isNear });
+    };
+    const arc = (cx: number, cz: number, t0: number, t1: number, isNear: boolean) => {
+      const n = Math.max(2, Math.ceil((Math.abs(t1 - t0) * r) / step));
+      for (let i = 0; i < n; i++) {
+        const t = t0 + ((t1 - t0) * i) / n;
+        out.push({ x: cx + r * Math.cos(t), z: cz + r * Math.sin(t), nx: Math.cos(t), nz: Math.sin(t), near: isNear });
       }
-      if (t) {                                                                          // the balcony front of an upper tier
-        const lip = new THREE.Mesh(new THREE.BoxGeometry(len, 1.6, 0.6), concrete);
-        lip.position.set(0, baseY - 1.2, baseZ - 0.6);
-        side.add(lip);
+    };
+    line(-sa, b, sa, b, 0, 1, true);                       // near side
+    arc(sa, sb, Math.PI / 2, 0, true);
+    line(a, sb, a, -sb, 1, 0, false);                      // right end
+    arc(sa, -sb, 0, -Math.PI / 2, false);
+    line(sa, -b, -sa, -b, 0, -1, false);                   // far side
+    arc(-sa, -sb, -Math.PI / 2, -Math.PI, false);
+    line(-a, -sb, -a, sb, -1, 0, false);                   // left end
+    arc(-sa, sb, Math.PI, Math.PI / 2, true);
+    return out;
+  };
+
+  // One mesh per side of the bowl: ribbons between two offsets/heights, closed round the far side, open at the near.
+  type Buf = { pos: number[]; col: number[]; idx: number[] };
+  const bufs: Record<"far" | "near", Buf> = { far: { pos: [], col: [], idx: [] }, near: { pos: [], col: [], idx: [] } };
+  const ribbon = (off0: number, y0: number, off1: number, y1: number, colour: THREE.Color, only?: "far" | "near") => {
+    const pts = ring(Math.min(off0, off1), 1.5);
+    for (const side of ["far", "near"] as const) {
+      if (only && only !== side) continue;
+      const run = pts.filter((p) => p.near === (side === "near"));
+      const b = bufs[side];
+      // Split into contiguous runs (the near side wraps round the start of the loop).
+      const idxs = pts.map((p, i) => (p.near === (side === "near") ? i : -1));
+      let base = -1, prev = -2, firstV = -1;
+      for (const i of idxs) {
+        if (i < 0) { prev = -2; continue; }
+        const p = pts[i];
+        const v0 = b.pos.length / 3;
+        b.pos.push(p.x + p.nx * (off0 - Math.min(off0, off1)), y0, p.z + p.nz * (off0 - Math.min(off0, off1)));
+        b.pos.push(p.x + p.nx * (off1 - Math.min(off0, off1)), y1, p.z + p.nz * (off1 - Math.min(off0, off1)));
+        b.col.push(colour.r, colour.g, colour.b, colour.r, colour.g, colour.b);
+        if (prev === i - 1 && base >= 0) b.idx.push(base, base + 1, v0, base + 1, v0 + 1, v0);
+        if (i === 0) firstV = v0;
+        base = v0;
+        prev = i;
       }
+      // Join across the loop's start where this side wraps round it (the near side does).
+      if (run.length > 2 && firstV >= 0 && idxs[idxs.length - 1] >= 0)
+        b.idx.push(base, base + 1, firstV, base + 1, firstV + 1, firstV);
     }
-    // The near stand has no back wall or roof: the wide camera looks over its fans onto the pitch.
-    if (!isNear) {
-      const back = new THREE.Mesh(new THREE.BoxGeometry(len, top + 4, 1), concrete);
-      back.position.set(0, (top + 4) / 2, v.tiers * ROWS * DEPTH - (v.tiers - 1) * 2 + 1.5);
-      side.add(back);
+  };
+  const seatA = new THREE.Color(v.seats[0]), seatB = new THREE.Color(v.seats[1]);
+  const dark = new THREE.Color("#1b2230"), led = new THREE.Color("#0f6e4f");
+  const world: THREE.Vector3[] = [], nearWorld: THREE.Vector3[] = [];
+  for (let t = 0; t < v.tiers; t++) {
+    for (let r = 0; r < ROWS; r++) {
+      const off = tierOff(t) + r * DEPTH, y = tierY(t) + r * RISE;
+      const c = (r + t) % 2 ? seatB : seatA;
+      ribbon(off, y, off + DEPTH, y, c);                                   // the row's tread
+      ribbon(off, y - RISE, off, y, dark);                                 // and its riser
+      for (const p of ring(off + DEPTH / 2, 0.78))
+        (p.near ? nearWorld : world).push(new THREE.Vector3(p.x, y + 0.05, p.z));
     }
-    if (v.roof !== "open" && !isNear) {
-      const depth = v.tiers * ROWS * DEPTH + 8;
-      const lid = new THREE.Mesh(new THREE.BoxGeometry(len + 2, 0.8, depth), roofMat);
-      lid.position.set(0, top + 5, depth / 2 - 6);
-      lid.rotation.x = 0.06;
-      side.add(lid);
-      // Floodlights along the roof's front edge: a bright strip and a glow every few metres.
-      const strip = new THREE.Mesh(new THREE.BoxGeometry(len, 0.35, 0.35), new THREE.MeshBasicMaterial({ color: "#fffaf0" }));
-      strip.position.set(0, top + 4.4, -5.6);
-      side.add(strip);
-    }
-    side.position.set(cx, 0, cz);
-    side.rotation.y = rot;
-    (isNear ? near : g).add(side);
-  });
-  if (v.roof === "bowl") {
-    for (const x of [-1, 1]) {
-      const corner = new THREE.Mesh(new THREE.CylinderGeometry(20, 12, top + 4, 8, 1, true, 0, Math.PI / 2),
-        new THREE.MeshStandardMaterial({ color: v.seats[0], roughness: 0.9, side: THREE.DoubleSide }));
-      corner.position.set(x * (PITCH_W / 2 + 4), (top + 4) / 2, -(PITCH_H / 2 + 4));
-      corner.rotation.y = x < 0 ? Math.PI : Math.PI / 2;
-      g.add(corner);
-    }
+    if (t) ribbon(tierOff(t) - 0.4, tierY(t) - 2.4, tierOff(t) - 0.4, tierY(t) - 0.6, led);   // LED ribbon on the tier front
+  }
+  ribbon(outerOff, 0, outerOff, topY + 4, dark, "far");                     // the bowl's outer wall
+  const hasRoof = v.roof !== "open";
+  if (hasRoof) {
+    ribbon(outerOff + 1, topY + 5, Math.max(2, tierOff(v.tiers - 1) - 4), topY + 7.5, new THREE.Color("#0d121c"), "far");
+    // A continuous floodlight strip along the roof's inner edge.
+    ribbon(Math.max(2, tierOff(v.tiers - 1) - 4), topY + 7.2, Math.max(2, tierOff(v.tiers - 1) - 3.4), topY + 7.2, new THREE.Color("#ffffff"), "far");
+  }
+  for (const side of ["far", "near"] as const) {
+    const b = bufs[side];
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute("position", new THREE.Float32BufferAttribute(b.pos, 3));
+    geo.setAttribute("color", new THREE.Float32BufferAttribute(b.col, 3));
+    geo.setIndex(b.idx);
+    geo.computeVertexNormals();
+    const mesh = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.85, side: THREE.DoubleSide }));
+    mesh.receiveShadow = true;
+    (side === "far" ? g : near).add(mesh);
+  }
+
+  // London: a great illuminated arch spanning the far stand.
+  if (v.landmark === "arch") {
+    const span = 105, rise = 70, z = -(B0 + outerOff + 4);
+    const pts = Array.from({ length: 41 }, (_, i) => {
+      const x = -span + (2 * span * i) / 40;
+      return new THREE.Vector3(x, rise * (1 - (x / span) ** 2), z);
+    });
+    const arch = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 160, 1.6, 12, false),
+      new THREE.MeshStandardMaterial({ color: "#ffffff", emissive: "#dfe9ff", emissiveIntensity: 0.9, roughness: 0.3 }));
+    arch.rotation.x = -0.18;                                                // leaning over the pitch
+    g.add(arch);
   }
 
   // Fans: one per seat, minus empty ones. Rounded bodies in shirts (home, away, everyday), heads in a range of skin
@@ -322,7 +366,7 @@ function stands(v: VenueStyle, homeColours: string[], awayColours: string[]): St
   for (let i = 0; i < 10; i++) {
     const flag = new THREE.Mesh(new THREE.PlaneGeometry(4.4, 2.6, 12, 4), flagMats[i % 2]);
     const fx = -55 + i * 12 + Math.sin(i * 7) * 3;
-    flag.position.set(fx, 6 + (i % 3) * 3.5, -(PITCH_H / 2 + 11 + (i % 3) * 5));
+    flag.position.set(fx, 2.5 + (i % 3) * 2.6, -(PITCH_H / 2 + 9 + (i % 3) * 3.5));
     g.add(flag);
   }
 
@@ -331,13 +375,14 @@ function stands(v: VenueStyle, homeColours: string[], awayColours: string[]): St
     crowdCheer.value = now < until ? 1 : Math.max(0, crowdCheer.value - 0.05);
   };
 
-  // Open grounds: floodlight pylons on the far corners.
+  // Open grounds: floodlight pylons on the far corners. Roofed: glows along the roof's floodlight strip.
   const glow = glowTexture();
-  const lights: [number, number, number][] = v.roof === "open"
-    ? [[-64, 44, -50], [64, 44, -50]]
-    : [-55, -33, -11, 11, 33, 55].map((x) => [x, top + 4.4, -(PITCH_H / 2 + 2.4)] as [number, number, number]);
+  const roofEdge = ring(Math.max(2, tierOff(v.tiers - 1) - 4), 22).filter((p) => !p.near);
+  const lights: [number, number, number][] = hasRoof
+    ? roofEdge.map((p) => [p.x, topY + 7.3, p.z] as [number, number, number])
+    : [[-70, 46, -58], [70, 46, -58]];
   for (const [x, y, z] of lights) {
-    if (v.roof === "open") {
+    if (!hasRoof) {
       const pylon = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.8, y, 8), roofMat);
       pylon.position.set(x, y / 2, z);
       const panel = new THREE.Mesh(new THREE.BoxGeometry(8, 3, 0.6), new THREE.MeshBasicMaterial({ color: "#fffaf0" }));
@@ -346,7 +391,7 @@ function stands(v: VenueStyle, homeColours: string[], awayColours: string[]): St
       g.add(pylon, panel);
     }
     const halo = new THREE.Sprite(new THREE.SpriteMaterial({ map: glow, color: "#e9f1ff", transparent: true, blending: THREE.AdditiveBlending, depthWrite: false }));
-    halo.scale.setScalar(v.roof === "open" ? 30 : 18);
+    halo.scale.setScalar(hasRoof ? 16 : 30);
     halo.position.set(x, y, z);
     g.add(halo);
   }
@@ -467,7 +512,7 @@ function boards(city: string): THREE.Group {
     t.needsUpdate = true;
     return new THREE.MeshBasicMaterial({ map: t });
   };
-  for (const [x, z, len, rot] of [[0, -PITCH_H / 2 - 6, PITCH_W + 10, 0], [-PITCH_W / 2 - 5, 0, PITCH_H, Math.PI / 2], [PITCH_W / 2 + 5, 0, PITCH_H, -Math.PI / 2]] as const) {
+  for (const [x, z, len, rot] of [[0, -PITCH_H / 2 - 5, PITCH_W + 10, 0], [-PITCH_W / 2 - 5, 0, PITCH_H, Math.PI / 2], [PITCH_W / 2 + 5, 0, PITCH_H, -Math.PI / 2]] as const) {
     const b = new THREE.Mesh(new THREE.BoxGeometry(len, 1, 0.2), mat(len));
     b.position.set(x, 0.5, z);
     b.rotation.y = rot;
@@ -860,10 +905,10 @@ export function Pitch3D({ events, home, away, homeColor, awayColor, label, feed,
     orbit.enableDamping = true;
     orbit.enablePan = false;
     orbit.minDistance = 45;
-    orbit.maxDistance = 190;
+    orbit.maxDistance = 230;
     orbit.maxPolarAngle = 1.32;
     orbit.target.set(0, 0, -4);
-    camera.position.set(0, 62, 104);
+    camera.position.set(0, 70, 112);
     orbit.update();
     if (ballColour) {                                   // the auto-eventing feed keeps its fixed, calibrated camera
       orbit.enabled = false;
@@ -1167,7 +1212,7 @@ export function Pitch3D({ events, home, away, homeColor, awayColor, label, feed,
         ground.near.visible = wide;                       // the follow camera sits in the near stand
         orbit.enabled = wide;
         if (wide) {
-          camera.position.set(0, 62, 104);
+          camera.position.set(0, 70, 112);
           orbit.target.set(0, 0, -4);
         }
       }

@@ -16,7 +16,11 @@ export type VenueStyle = {
   sky: string;
   mountains: boolean;
   altitude?: number;
+  /** A signature feature for a few cities: London's great arch, Mexico City's steep three-tier bowl. */
+  landmark?: "arch" | "bowl";
 };
+
+const LANDMARKS: Record<string, "arch" | "bowl"> = { London: "arch", "Mexico City": "bowl" };
 
 /** Seat colour pairs for a host nation that isn't one of the two teams. */
 const SEATS: [string, string][] = [["#1e3a8a", "#e5e7eb"], ["#991b1b", "#f3f4f6"], ["#166534", "#facc15"], ["#0f172a", "#38bdf8"], ["#7c2d12", "#fde68a"], ["#334155", "#cbd5e1"]];
@@ -36,15 +40,17 @@ export function venueStyle(match: Pick<MatchMeta, "venue" | "venue_info" | "home
   const h = hash(`${city}|${country}`);
   const host = [match.home, match.away].find((t) => t.name === country);
   const altitude = match.venue_info?.altitude_m;
+  const landmark = LANDMARKS[city];
   return {
     city,
     label: [city, country].filter(Boolean).join(", "),
-    tiers: ((h % 3) + 1) as 1 | 2 | 3,
-    roof: (["open", "cantilever", "bowl"] as const)[(h >>> 3) % 3],
+    tiers: landmark ? 3 : (((h % 3) + 1) as 1 | 2 | 3),
+    roof: landmark ? "cantilever" : (["open", "cantilever", "bowl"] as const)[(h >>> 3) % 3],
     seats: host ? [host.colors.primary, host.colors.secondary] : SEATS[(h >>> 6) % SEATS.length],
     mowing: (["stripes", "checks", "wide"] as const)[(h >>> 9) % 3],
     sky: SKIES[(h >>> 12) % SKIES.length],
     mountains: (altitude ?? 0) >= 1500,
     altitude,
+    landmark,
   };
 }
