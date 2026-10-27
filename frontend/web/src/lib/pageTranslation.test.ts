@@ -67,3 +67,12 @@ describe("page translation", () => {
     stop();
   });
 });
+
+describe("glossary", () => {
+  it("matches a capitals label, so a moment's GOAL stays a goal", async () => {
+    const { glossary } = await import("./glossary");
+    expect(glossary("es", "GOAL")).toBe("GOL");
+    expect(glossary("de", "GOAL")).toBe("TOR");
+    expect(glossary("es", "ST")).toBeUndefined();
+  });
+});

@@ -132,9 +132,13 @@ export const GLOSSARY: Record<string, Record<string, string>> = Object.fromEntri
   LANGS.map((lang, i) => [lang, Object.fromEntries(Object.entries(TERMS).map(([en, row]) => [en, row[i]]))]),
 );
 
-/** The glossary entry for `term` in `language`, also when the page writes it in lower case. */
+/** The glossary entry for `term` in `language`, also when the page writes it in lower case or as a capitals label
+ * ("GOAL: Kane 26'" → "GOL", not Translator's "OBJETIVO"). */
 export function glossary(language: string, term: string): string | undefined {
   const table = GLOSSARY[language];
   if (!table) return undefined;
-  return table[term] ?? table[term.charAt(0).toUpperCase() + term.slice(1)];
+  const hit = table[term] ?? table[term.charAt(0).toUpperCase() + term.slice(1)];
+  if (hit !== undefined || term.length < 2 || term !== term.toUpperCase()) return hit;
+  const titled = table[term.charAt(0) + term.slice(1).toLowerCase()];
+  return titled?.toLocaleUpperCase(language);
 }

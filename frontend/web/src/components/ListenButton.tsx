@@ -38,7 +38,8 @@ export function ListenButton({ text, language, persona, small }: { text: string;
       title={via ? `Last played with ${via}` : "Read aloud"}
     >
       {playing ? <IconStop /> : <IconListen />}
-      {playing ? t("feed.stop") : t("feed.listen")}
+      {/* Already in the viewer's language: the page translator would read "Parar" as English and make it "¡Para" */}
+      <span translate="no">{playing ? t("feed.stop") : t("feed.listen")}</span>
     </button>
   );
 }

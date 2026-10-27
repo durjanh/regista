@@ -56,7 +56,7 @@ export function Ask() {
     `What changed tactically for ${h} in the second half?`,
     "Which chance had the highest xG, and why?",
     "Who was the best player, by the numbers?",
-    "Explain this match to a ten-year-old.",
+    "Explain this football match to a ten-year-old.",            // "match" alone reads as a bout ("combate")
   ];
 
   useEffect(() => {
