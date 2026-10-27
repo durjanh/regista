@@ -391,6 +391,13 @@ reusing the same names for 48 hours; the script purges them.
 
 More detail (Fabric setup, troubleshooting): [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
 
+## Next steps
+
+- **Sign-in and favourites on every device.** Today favourites, persona and language are saved in the browser, so anyone can try Regista without an account. The next step is sign-in with Microsoft Entra External ID, with each fan's favourites and preferences stored in Cosmos DB so they follow them to any device.
+- **A WAF in front of the enterprise profile.** Azure Front Door Premium in front of API Management, with API Management made private; the design is in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md#future-azure-front-door-in-front-of-api-management).
+- **Scale the API out.** Live sessions, the studio queue and caches are in memory, so the API runs as one replica; moving that state to Cosmos DB or Redis allows more.
+- **A stricter Verifier.** It checks that every number is in the evidence; next, that each number is attached to the right claim.
+
 ## How it was built
 
 I designed Regista, chose the architecture and the trade-offs, and reviewed and tested every change. AI coding assistants wrote much of the code with me, and the repo carries the GitHub Copilot setup used day to day: [instructions](.github/copilot-instructions.md), [custom agents](.github/agents/), [prompt files](.github/prompts/) and MCP servers in [.vscode/mcp.json](.vscode/mcp.json). The code is held to the same rule as the product's AI: every number comes from code, and the tests and evaluation gates above run on every change.
