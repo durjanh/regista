@@ -91,11 +91,11 @@ function framePainted(video: HTMLVideoElement): Promise<void> {
   });
 }
 
-/** Frames that would mislead the model: a batch that is blank (tiny JPEGs) or the same picture every time. */
+/** Frames that would mislead the model: a batch where the browser drew nothing (tiny, blank JPEGs). The same picture
+ * several times over is real content (an intro card, a pause, a still graphic), so that goes to the model as it is. */
 export function unusableBatch(images: string[]): string | null {
   if (!images.length) return null;
   if (images.every((d) => d.length < 3000)) return "The browser returned blank frames for this clip.";
-  if (images.length > 1 && new Set(images).size === 1) return "The browser returned the same frame every time.";
   return null;
 }
 

@@ -50,10 +50,10 @@ describe("video read", () => {
     expect(teamLabel({}, "b")).toBe("Team B");
   });
 
-  it("refuses a batch of blank or frozen frames rather than sending it to the model", () => {
+  it("refuses a blank batch, but sends a still one (an intro card or a pause is real content)", () => {
     const big = (k: string) => `data:image/jpeg;base64,${"A".repeat(4000)}${k}`;
     expect(unusableBatch([big("1"), big("2")])).toBeNull();
     expect(unusableBatch(["data:image/jpeg;base64,AA", "data:image/jpeg;base64,AB"])).toMatch(/blank/);
-    expect(unusableBatch([big("1"), big("1"), big("1")])).toMatch(/same frame/);
+    expect(unusableBatch([big("1"), big("1"), big("1")])).toBeNull();
   });
 });
