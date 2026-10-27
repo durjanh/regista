@@ -1,5 +1,11 @@
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
+import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
+import { OutputPass } from "three/examples/jsm/postprocessing/OutputPass.js";
+import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
+import { ShaderPass } from "three/examples/jsm/postprocessing/ShaderPass.js";
+import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
+import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
 import type { MatchEvent, Team } from "../api/types";
 import { PITCH_H, PITCH_W, toHomeFrame } from "../lib/format";
 import { BIBS, kitFor, type Kit } from "../lib/kits";
@@ -46,7 +52,7 @@ const BALL_EVENTS = new Set([...STRIKES, "carry", "dribble", "recovery", "interc
 /** Home frame (home attacks +x) → world: x along the pitch, z across it with the home team's right touchline nearest. */
 const world = (hx: number, hy: number) => new THREE.Vector2(hx - PITCH_W / 2, PITCH_H / 2 - hy);
 
-function pitchTexture(mowing: VenueStyle["mowing"] = "stripes"): THREE.CanvasTexture {
+function pitchTexture(mowing: VenueStyle["mowing"] = "stripes", linesOnly = false): THREE.CanvasTexture {
   const S = 24;                                                                // pixels per metre
   const c = document.createElement("canvas");
   c.width = PITCH_W * S;
@@ -64,8 +70,12 @@ function pitchTexture(mowing: VenueStyle["mowing"] = "stripes"): THREE.CanvasTex
       g.fillStyle = grd;
       g.fillRect((c.width / bands) * i, (c.height / rows) * r, c.width / bands + 1, c.height / rows + 1);
     }
+  if (linesOnly) {                                                              // black, so only the markings glow
+    g.fillStyle = "#000000";
+    g.fillRect(0, 0, c.width, c.height);
+  }
   // Grain, so the grass doesn't look like flat paint up close.
-  for (let n = 0; n < 60000; n++) {
+  for (let n = 0; n < (linesOnly ? 0 : 60000); n++) {
     g.fillStyle = Math.random() < 0.5 ? "rgba(255,255,255,0.035)" : "rgba(0,0,0,0.05)";
     g.fillRect(Math.random() * c.width, Math.random() * c.height, 2, 2);
   }
@@ -115,75 +125,235 @@ function goal(side: 1 | -1): THREE.Group {
   return g;
 }
 
-/** The stands for this venue: one to three tiers, open, cantilevered roof or a closed bowl, seats in its colours. */
-function stadium(v: VenueStyle): THREE.Group {
+/** A stand: stepped rows of seats rising from behind the boards, with the fans sitting in them. */
+type Stands = { group: THREE.Group; cheer: (now: number, until: number) => void };
+
+/**
+ * The stadium for this venue: stepped stands on the far side and both ends (the broadcast camera sits in the near
+ * one), one to three tiers, rows of seats in the venue's colours with thousands of fans in them (both teams' shirts
+ * and ordinary clothes, some seats empty), a roof edge lined with floodlights, and a closed bowl where the venue has
+ * one. Fans are drawn as two instanced meshes, so the whole crowd is a couple of draw calls; they jump after a goal.
+ */
+function stands(v: VenueStyle, homeColours: string[], awayColours: string[]): Stands {
   const g = new THREE.Group();
-  const seatA = new THREE.MeshStandardMaterial({ color: v.seats[0], roughness: 0.9 });
-  const seatB = new THREE.MeshStandardMaterial({ color: v.seats[1], roughness: 0.9 });
-  const concrete = new THREE.MeshStandardMaterial({ color: "#151b28", roughness: 0.8 });
-  const roof = new THREE.MeshStandardMaterial({ color: "#0e1420", roughness: 0.6, metalness: 0.3 });
-  // Far side and both ends: the broadcast camera sits in the near stand, so that one stays out of the picture.
+  const seatA = new THREE.MeshStandardMaterial({ color: v.seats[0], roughness: 0.85 });
+  const seatB = new THREE.MeshStandardMaterial({ color: v.seats[1], roughness: 0.85 });
+  const concrete = new THREE.MeshStandardMaterial({ color: "#1b2230", roughness: 0.85 });
+  const roofMat = new THREE.MeshStandardMaterial({ color: "#0d121c", roughness: 0.5, metalness: 0.4 });
+  const ROWS = 11, RISE = 0.55, DEPTH = 0.9;
+  // Side stands: [centre x, z, length, rotation]; local +z points away from the pitch.
   const sides: [number, number, number, number][] = [
-    [0, -PITCH_H / 2 - 12, 150, Math.PI], [PITCH_W / 2 + 13, 0, 96, -Math.PI / 2], [-PITCH_W / 2 - 13, 0, 96, Math.PI / 2],
+    [0, -PITCH_H / 2 - 8, 132, Math.PI], [PITCH_W / 2 + 9, 0, 88, Math.PI / 2], [-PITCH_W / 2 - 9, 0, 88, -Math.PI / 2],
   ];
-  const top = 5 + v.tiers * 8;
-  for (const [x, z, len, rot] of sides) {
+  const world: THREE.Vector3[] = [];                                                     // every seat, in world space
+  const top = 2 + v.tiers * (ROWS * RISE + 3);
+  for (const [cx, cz, len, rot] of sides) {
     const side = new THREE.Group();
+    const toWorld = new THREE.Matrix4().makeRotationY(rot).setPosition(cx, 0, cz);
     for (let t = 0; t < v.tiers; t++) {
-      const tier = new THREE.Mesh(new THREE.BoxGeometry(len, 0.6, 14), t % 2 ? seatB : seatA);
-      tier.rotation.x = -0.55;
-      tier.position.set(0, 4 + t * 8, 3 + t * 9);
-      tier.receiveShadow = true;
-      side.add(tier);
-      if (t) {                                                                              // the front of an upper tier
-        const lip = new THREE.Mesh(new THREE.BoxGeometry(len, 1.4, 0.8), concrete);
-        lip.position.set(0, 1 + t * 8, -3 + t * 9);
+      const baseY = 1.2 + t * (ROWS * RISE + 3);
+      const baseZ = t * (ROWS * DEPTH - 2);                                          // upper tiers overhang the lower
+      for (let r = 0; r < ROWS; r++) {
+        const step = new THREE.Mesh(new THREE.BoxGeometry(len, RISE, DEPTH), (r + t) % 2 ? seatB : seatA);
+        step.position.set(0, baseY + r * RISE, baseZ + r * DEPTH);
+        step.receiveShadow = true;
+        side.add(step);
+        for (let x = -len / 2 + 0.5; x < len / 2; x += 0.78)
+          world.push(new THREE.Vector3(x, baseY + r * RISE + RISE / 2, baseZ + r * DEPTH).applyMatrix4(toWorld));
+      }
+      if (t) {                                                                          // the balcony front of an upper tier
+        const lip = new THREE.Mesh(new THREE.BoxGeometry(len, 1.6, 0.6), concrete);
+        lip.position.set(0, baseY - 1.2, baseZ - 0.6);
         side.add(lip);
       }
     }
-    const back = new THREE.Mesh(new THREE.BoxGeometry(len, top, 1), concrete);
-    back.position.set(0, top / 2, 9 + v.tiers * 9);
+    const back = new THREE.Mesh(new THREE.BoxGeometry(len, top + 4, 1), concrete);
+    back.position.set(0, (top + 4) / 2, v.tiers * ROWS * DEPTH - (v.tiers - 1) * 2 + 1.5);
     side.add(back);
     if (v.roof !== "open") {
-      const lid = new THREE.Mesh(new THREE.BoxGeometry(len, 0.7, 10 + v.tiers * 6), roof);
-      lid.position.set(0, top + 1, 4 + v.tiers * 6);
-      lid.rotation.x = 0.08;
+      const depth = v.tiers * ROWS * DEPTH + 8;
+      const lid = new THREE.Mesh(new THREE.BoxGeometry(len + 2, 0.8, depth), roofMat);
+      lid.position.set(0, top + 5, depth / 2 - 6);
+      lid.rotation.x = 0.06;
       side.add(lid);
+      // Floodlights along the roof's front edge: a bright strip and a glow every few metres.
+      const strip = new THREE.Mesh(new THREE.BoxGeometry(len, 0.35, 0.35), new THREE.MeshBasicMaterial({ color: "#fffaf0" }));
+      strip.position.set(0, top + 4.4, -5.6);
+      side.add(strip);
     }
-    side.position.set(x, 0, z);
+    side.position.set(cx, 0, cz);
     side.rotation.y = rot;
     g.add(side);
   }
   if (v.roof === "bowl") {
-    // Closed corners, so the stands wrap round the pitch.
-    for (const [x, z] of [[-1, -1], [1, -1]] as const) {
-      const corner = new THREE.Mesh(new THREE.CylinderGeometry(14 + v.tiers * 8, 10, top, 6, 1, true, 0, Math.PI / 2), seatA);
-      corner.material = new THREE.MeshStandardMaterial({ color: v.seats[0], roughness: 0.9, side: THREE.DoubleSide });
-      corner.position.set(x * (PITCH_W / 2 + 8), top / 2, z * (PITCH_H / 2 + 8));
-      corner.rotation.y = Math.atan2(x, z) - Math.PI / 4;
+    for (const x of [-1, 1]) {
+      const corner = new THREE.Mesh(new THREE.CylinderGeometry(20, 12, top + 4, 8, 1, true, 0, Math.PI / 2),
+        new THREE.MeshStandardMaterial({ color: v.seats[0], roughness: 0.9, side: THREE.DoubleSide }));
+      corner.position.set(x * (PITCH_W / 2 + 4), (top + 4) / 2, -(PITCH_H / 2 + 4));
+      corner.rotation.y = x < 0 ? Math.PI : Math.PI / 2;
       g.add(corner);
     }
   }
-  // Floodlights: corner pylons for open grounds, lights along the roof edge where there's a roof.
+
+  // Fans: one per seat, minus empty ones. Rounded bodies in shirts (home, away, everyday), heads in a range of skin
+  // tones with hair, about one in eight holding a scarf up, some standing. They sway all the time and jump on a goal:
+  // the motion runs in the vertex shader (per-instance phase from the instance id), so 20,000 fans cost almost nothing.
+  const everyday = ["#2b3550", "#3f4a5c", "#5b6b8c", "#1f2937", "#6b4a4a", "#e5e7eb", "#374151", "#7c3a3a"];
+  const filled = world.filter((_, n) => (Math.sin(n * 12.9898) * 43758.5453) % 1 > -0.84);       // ~8% empty seats
+  const crowdTime = { value: 0 }, crowdCheer = { value: 0 };
+  const animated = (m: THREE.Material) => {
+    m.onBeforeCompile = (shader) => {
+      shader.uniforms.uTime = crowdTime;
+      shader.uniforms.uCheer = crowdCheer;
+      shader.vertexShader = shader.vertexShader
+        .replace("#include <common>", "#include <common>\nuniform float uTime;\nuniform float uCheer;")
+        .replace("#include <begin_vertex>", `#include <begin_vertex>
+          float ph = float(gl_InstanceID) * 0.618;
+          transformed.y += sin(uTime * 1.3 + ph * 7.0) * 0.035 + uCheer * (0.3 + abs(sin(uTime * 9.0 + ph * 3.0)) * 0.45);
+          transformed.x += sin(uTime * 0.9 + ph * 5.0) * 0.03;`);
+    };
+    return m;
+  };
+  const fanMat = () => animated(new THREE.MeshLambertMaterial());
+  const bodies = new THREE.InstancedMesh(new THREE.CapsuleGeometry(0.2, 0.36, 2, 8), fanMat(), filled.length);
+  const heads = new THREE.InstancedMesh(new THREE.SphereGeometry(0.13, 8, 6), fanMat(), filled.length);
+  const hair = new THREE.InstancedMesh(new THREE.SphereGeometry(0.14, 8, 4, 0, Math.PI * 2, 0, Math.PI / 2), fanMat(), filled.length);
+  const scarfIdx = filled.map((_, n) => n).filter((n) => Math.abs(Math.sin(n * 3.17)) % 1 < 0.13);
+  const scarves = new THREE.InstancedMesh(new THREE.BoxGeometry(1.0, 0.14, 0.04), fanMat(), scarfIdx.length);
+  const colour = new THREE.Color();
+  const mat = new THREE.Matrix4();
+  const HAIRS = ["#1b1410", "#3b2516", "#6b4a2b", "#a87b45", "#d7b77a", "#2a2a2a"];
+  filled.forEach((p, n) => {
+    const r = Math.abs(Math.sin(n * 78.233) * 43758.5453) % 1;
+    const shirt = r < 0.4 ? homeColours[n % homeColours.length] : r < 0.7 ? awayColours[n % awayColours.length] : everyday[n % everyday.length];
+    const standing = Math.abs(Math.sin(n * 1.7)) % 1 < 0.22 ? 0.35 : 0;
+    const y = p.y + 0.38 + standing;
+    bodies.setMatrixAt(n, mat.makeTranslation(p.x, y, p.z));
+    bodies.setColorAt(n, colour.set(shirt));
+    heads.setMatrixAt(n, mat.makeTranslation(p.x, y + 0.5, p.z));
+    heads.setColorAt(n, colour.set(SKINS[n % SKINS.length]));
+    hair.setMatrixAt(n, mat.makeTranslation(p.x, y + 0.52, p.z));
+    hair.setColorAt(n, colour.set(HAIRS[(n * 7) % HAIRS.length]));
+  });
+  scarfIdx.forEach((n, i) => {
+    const p = filled[n];
+    const r = Math.abs(Math.sin(n * 78.233) * 43758.5453) % 1;
+    mat.makeRotationZ(Math.sin(n) * 0.25).setPosition(p.x, p.y + 1.55, p.z);
+    scarves.setMatrixAt(i, mat);
+    scarves.setColorAt(i, colour.set(r < 0.55 ? homeColours[0] : awayColours[0]));
+  });
+  g.add(bodies, heads, hair, scarves);
+
+  // Big flags waving in the stands, in both teams' colours.
+  const flagMat = (c: string[]) => {
+    const cv = document.createElement("canvas");
+    cv.width = 64;
+    cv.height = 40;
+    const fg = cv.getContext("2d")!;
+    c.forEach((col, i) => { fg.fillStyle = col; fg.fillRect(0, (40 / c.length) * i, 64, 40 / c.length + 1); });
+    const t = new THREE.CanvasTexture(cv);
+    t.colorSpace = THREE.SRGBColorSpace;
+    const m = new THREE.MeshLambertMaterial({ map: t, side: THREE.DoubleSide });
+    m.onBeforeCompile = (shader) => {
+      shader.uniforms.uTime = crowdTime;
+      shader.vertexShader = shader.vertexShader
+        .replace("#include <common>", "#include <common>\nuniform float uTime;")
+        .replace("#include <begin_vertex>", "#include <begin_vertex>\ntransformed.z += sin(position.x * 1.6 + uTime * 4.0) * 0.35 * (position.x + 2.2) / 4.4;");
+    };
+    return m;
+  };
+  const flagMats = [flagMat(homeColours), flagMat(awayColours)];
+  for (let i = 0; i < 10; i++) {
+    const flag = new THREE.Mesh(new THREE.PlaneGeometry(4.4, 2.6, 12, 4), flagMats[i % 2]);
+    const fx = -55 + i * 12 + Math.sin(i * 7) * 3;
+    flag.position.set(fx, 6 + (i % 3) * 3.5, -(PITCH_H / 2 + 11 + (i % 3) * 5));
+    g.add(flag);
+  }
+
+  const cheer = (now: number, until: number) => {
+    crowdTime.value = now;
+    crowdCheer.value = now < until ? 1 : Math.max(0, crowdCheer.value - 0.05);
+  };
+
+  // Open grounds: floodlight pylons on the far corners.
   const glow = glowTexture();
   const lights: [number, number, number][] = v.roof === "open"
-    ? [[-62, 40, -48], [62, 40, -48]]
-    : [-45, -15, 15, 45].map((x) => [x, top + 2, -(PITCH_H / 2 + 14)] as [number, number, number]);
+    ? [[-64, 44, -50], [64, 44, -50]]
+    : [-55, -33, -11, 11, 33, 55].map((x) => [x, top + 4.4, -(PITCH_H / 2 + 2.4)] as [number, number, number]);
   for (const [x, y, z] of lights) {
     if (v.roof === "open") {
-      const pylon = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.8, y, 8), roof);
+      const pylon = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.8, y, 8), roofMat);
       pylon.position.set(x, y / 2, z);
-      g.add(pylon);
+      const panel = new THREE.Mesh(new THREE.BoxGeometry(8, 3, 0.6), new THREE.MeshBasicMaterial({ color: "#fffaf0" }));
+      panel.position.set(x, y, z);
+      panel.lookAt(0, 0, 0);
+      g.add(pylon, panel);
     }
-    const panel = new THREE.Mesh(new THREE.BoxGeometry(v.roof === "open" ? 7 : 5, 2.4, 0.6), new THREE.MeshBasicMaterial({ color: "#fffaf0" }));
-    panel.position.set(x, y, z);
-    panel.lookAt(0, 0, 0);
-    const halo = new THREE.Sprite(new THREE.SpriteMaterial({ map: glow, color: "#fff4d6", transparent: true, blending: THREE.AdditiveBlending, depthWrite: false }));
-    halo.scale.setScalar(v.roof === "open" ? 26 : 16);
+    const halo = new THREE.Sprite(new THREE.SpriteMaterial({ map: glow, color: "#e9f1ff", transparent: true, blending: THREE.AdditiveBlending, depthWrite: false }));
+    halo.scale.setScalar(v.roof === "open" ? 30 : 18);
     halo.position.set(x, y, z);
-    g.add(panel, halo);
+    g.add(halo);
   }
-  return g;
+  return { group: g, cheer };
+}
+
+/** A night sky: deep at the top, a floodlit haze glowing over the bowl at the horizon. */
+function skyDome(sky: string): THREE.Mesh {
+  const c = document.createElement("canvas");
+  c.width = 4;
+  c.height = 256;
+  const g = c.getContext("2d")!;
+  const grd = g.createLinearGradient(0, 0, 0, 256);
+  grd.addColorStop(0, "#03050b");
+  grd.addColorStop(0.55, sky);
+  grd.addColorStop(0.8, "#1d2a52");
+  grd.addColorStop(0.92, "#3b3f78");
+  grd.addColorStop(1, "#2a2350");
+  g.fillStyle = grd;
+  g.fillRect(0, 0, 4, 256);
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  const dome = new THREE.Mesh(new THREE.SphereGeometry(420, 32, 16), new THREE.MeshBasicMaterial({ map: tex, side: THREE.BackSide, fog: false, depthWrite: false }));
+  return dome;
+}
+
+/** Edge darkening and a cool, slightly lifted grade: the broadcast look. */
+const VIGNETTE = {
+  uniforms: { tDiffuse: { value: null }, strength: { value: 0.55 } },
+  vertexShader: "varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }",
+  fragmentShader: `uniform sampler2D tDiffuse; uniform float strength; varying vec2 vUv;
+    void main() {
+      vec4 c = texture2D(tDiffuse, vUv);
+      float d = distance(vUv, vec2(0.5, 0.55));
+      c.rgb *= mix(1.0, 1.0 - strength, smoothstep(0.35, 0.85, d));
+      c.rgb = mix(c.rgb, c.rgb * vec3(0.94, 1.0, 1.08), 0.35);
+      gl_FragColor = c;
+    }`,
+};
+
+/** A glowing arc for a pass: it grows with the ball, then fades, so the last few passes trace the move. */
+type Trail = { mesh: THREE.Mesh; tip: THREE.Mesh; born: number; t0: number; dur: number; total: number };
+function trail(from: THREE.Vector2, to: THREE.Vector2, lift: number, colour: string): Omit<Trail, "born" | "t0" | "dur"> {
+  const height = Math.max(0.6, lift);
+  const curve = new THREE.QuadraticBezierCurve3(
+    new THREE.Vector3(from.x, 0.3, from.y), new THREE.Vector3((from.x + to.x) / 2, height * 2, (from.y + to.y) / 2), new THREE.Vector3(to.x, 0.3, to.y));
+  const geo = new THREE.TubeGeometry(curve, 64, 0.2, 8, false);
+  // Brightest at the ball's end, fading back towards the passer, like a comet.
+  const base = new THREE.Color(colour);
+  const cols: number[] = [];
+  const pos = geo.attributes.position;
+  for (let i = 0; i < pos.count; i++) {
+    const along = Math.floor(i / 9) / 64;                                          // 9 vertices round each ring
+    const k = 0.15 + 0.85 * along * along;
+    cols.push(base.r * k, base.g * k, base.b * k);
+  }
+  geo.setAttribute("color", new THREE.Float32BufferAttribute(cols, 3));
+  const mesh = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ vertexColors: true, transparent: true, opacity: 0.95, toneMapped: false,
+    blending: THREE.AdditiveBlending, depthWrite: false }));
+  const tip = new THREE.Mesh(new THREE.RingGeometry(0.6, 0.85, 32), new THREE.MeshBasicMaterial({ color: colour, transparent: true, opacity: 0, toneMapped: false, side: THREE.DoubleSide }));
+  tip.rotation.x = -Math.PI / 2;
+  tip.position.set(to.x, 0.05, to.y);
+  return { mesh, tip, total: geo.index!.count };
 }
 
 /** Mountains on the horizon for a high-altitude city. */
@@ -270,28 +440,6 @@ function ballTexture(): THREE.CanvasTexture {
   const t = new THREE.CanvasTexture(c);
   t.colorSpace = THREE.SRGBColorSpace;
   return t;
-}
-
-/** Spectators on the stands: fans in both teams' colours among the seats. */
-function crowd(v: VenueStyle, homeColours: string[], awayColours: string[]): THREE.Points {
-  const pts: number[] = [];
-  const colours: number[] = [];
-  const palette = [...homeColours, ...homeColours, ...awayColours, v.seats[0], v.seats[1], "#2b3550", "#8a97b3", "#c9a27e"].map((c) => new THREE.Color(c));
-  for (let i = 0; i < 9000 + v.tiers * 5000; i++) {
-    const side = 1 + (i % 3);                                                     // not the near stand, behind the camera
-    const depth = Math.random() * (v.tiers * 9 + 3);
-    const along = (Math.random() - 0.5) * (side < 2 ? 140 : 90);
-    const h = 1.6 + depth * 0.62 + Math.floor(depth / 9) * 1.5;
-    const [x, z] = side === 0 ? [along, PITCH_H / 2 + 9 + depth] : side === 1 ? [along, -PITCH_H / 2 - 9 - depth]
-      : side === 2 ? [PITCH_W / 2 + 10 + depth, along] : [-PITCH_W / 2 - 10 - depth, along];
-    pts.push(x, h, z);
-    const c = palette[i % palette.length];
-    colours.push(c.r, c.g, c.b);
-  }
-  const geo = new THREE.BufferGeometry();
-  geo.setAttribute("position", new THREE.Float32BufferAttribute(pts, 3));
-  geo.setAttribute("color", new THREE.Float32BufferAttribute(colours, 3));
-  return new THREE.Points(geo, new THREE.PointsMaterial({ size: 0.45, vertexColors: true, transparent: true, opacity: 0.9 }));
 }
 
 function shirtTexture(kit: Kit, shirtNo: number): THREE.CanvasTexture {
@@ -431,7 +579,17 @@ export function Pitch3D({ events, home, away, homeColor, awayColor, label, feed,
 
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(venue.sky);
-    scene.fog = new THREE.Fog(venue.sky, 120, 260);
+    scene.fog = new THREE.Fog(venue.sky, 130, 300);
+    const cinematic = !ballColour;                                                         // the feed stays plain for the detector
+    if (cinematic) {
+      scene.add(skyDome(venue.sky));
+      // Image-based light, so kits, boards and roofs pick up the floodlights instead of looking flat.
+      const pmrem = new THREE.PMREMGenerator(renderer);
+      scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+      scene.environmentIntensity = 0.26;
+      renderer.toneMappingExposure = 0.95;
+      pmrem.dispose();
+    }
     scene.add(new THREE.HemisphereLight("#d6e4ff", "#173017", 0.85));
     // The floodlights' combined key light, casting the players' shadows on the grass.
     const sun = new THREE.DirectionalLight("#fff6e8", 2.1);
@@ -442,6 +600,10 @@ export function Pitch3D({ events, home, away, homeColor, awayColor, label, feed,
     sun.shadow.bias = -0.0004;
     sun.shadow.normalBias = 0.02;
     scene.add(sun);
+    // A cool rim light from the far stand, so players stand out from the grass.
+    const rim = new THREE.DirectionalLight("#9cc3ff", cinematic ? 1.1 : 0);
+    rim.position.set(0, 25, -70);
+    scene.add(rim);
     const fill = new THREE.DirectionalLight("#9fb8ff", 0.5);
     fill.position.set(-40, 50, -30);
     scene.add(fill);
@@ -452,13 +614,17 @@ export function Pitch3D({ events, home, away, homeColor, awayColor, label, feed,
     scene.add(surround);
     const turf = pitchTexture(venue.mowing);
     turf.anisotropy = renderer.capabilities.getMaxAnisotropy();
-    const pitch = new THREE.Mesh(new THREE.PlaneGeometry(PITCH_W, PITCH_H), new THREE.MeshStandardMaterial({ map: turf, roughness: 0.92 }));
+    const pitch = new THREE.Mesh(new THREE.PlaneGeometry(PITCH_W, PITCH_H), new THREE.MeshStandardMaterial({
+      map: turf, roughness: 0.88,
+      // The markings glow a little under the bloom, like floodlit paint.
+      ...(cinematic ? { emissiveMap: pitchTexture(venue.mowing, true), emissive: new THREE.Color("#ffffff"), emissiveIntensity: 0.22 } : {}),
+    }));
     pitch.rotation.x = -Math.PI / 2;
     pitch.receiveShadow = true;
     surround.receiveShadow = true;
     const homeKit = kitFor(home, null), awayKit = kitFor(away, null);
-    scene.add(pitch, goal(1), goal(-1), stadium(venue), boards(venue.city),
-      crowd(venue, [homeKit.shirt, homeKit.stripe ?? homeKit.shorts], [awayKit.shirt, awayKit.stripe ?? awayKit.shorts]));
+    const ground = stands(venue, [homeKit.shirt, homeKit.stripe ?? homeKit.shorts], [awayKit.shirt, awayKit.stripe ?? awayKit.shorts]);
+    scene.add(pitch, goal(1), goal(-1), ground.group, boards(venue.city));
     if (venue.mountains) scene.add(mountains(venue));
 
     // Players: a figure per squad member, shown while they're on the pitch.
@@ -488,6 +654,8 @@ export function Pitch3D({ events, home, away, homeColor, awayColor, label, feed,
     const line = new THREE.MeshBasicMaterial({ color: "#e8eef5" });
     type Coach = { fig: Figure; x: number; team: string; cheerUntil: number; phase: number };
     const coaches: Coach[] = [];
+    const warmers: { fig: Figure; id: string; centre: number; phase: number }[] = [];
+    const benchFigs = new Map<string, Figure>();
     const seat = (f: Figure, x: number) => {
       f.ring.visible = false;
       f.legs.forEach((l) => (l.rotation.x = -1.45));
@@ -499,20 +667,24 @@ export function Pitch3D({ events, home, away, homeColor, awayColor, label, feed,
     for (const sd of sides) {
       const x0 = (sd.isHome ? -1 : 1) * 12;
       const kit = kitFor(sd.team, null);
+      // A modern dugout: a curved glass canopy over padded seats in the team's colour.
       const shelter = new THREE.Group();
-      const bench = new THREE.Mesh(new THREE.BoxGeometry(10, 0.5, 1.2), shell);
-      bench.position.set(0, 0.25, -0.2);
-      const back = new THREE.Mesh(new THREE.BoxGeometry(10.4, 3, 0.25), shell);
-      back.position.set(0, 1.5, -1.2);
-      const top = new THREE.Mesh(new THREE.BoxGeometry(10.6, 0.15, 3.2), perspex);
-      top.position.set(0, 3.1, 0.2);
-      top.rotation.x = -0.12;
-      shelter.add(bench, back, top);
-      for (const end of [-1, 1]) {
-        const wall = new THREE.Mesh(new THREE.BoxGeometry(0.15, 3, 3), perspex);
-        wall.position.set(end * 5.2, 1.5, 0.2);
-        shelter.add(wall);
+      const floor = new THREE.Mesh(new THREE.BoxGeometry(10.6, 0.12, 2.6), shell);
+      floor.position.set(0, 0.06, 0);
+      const canopy = new THREE.Mesh(new THREE.CylinderGeometry(2, 2, 10.6, 28, 1, true, 0, Math.PI), perspex);
+      canopy.rotation.z = Math.PI / 2;
+      canopy.rotation.y = Math.PI / 2;
+      canopy.position.set(0, 1.1, -0.2);
+      const seatMat = new THREE.MeshStandardMaterial({ color: kit.shirt === "#ffffff" || kit.shirt === "#FFFFFF" ? kit.shorts : kit.shirt, roughness: 0.5 });
+      for (let i = 0; i < 9; i++) {
+        const sx = -4.2 + i * 1.05;
+        const cushion = new THREE.Mesh(new THREE.BoxGeometry(0.75, 0.16, 0.6), seatMat);
+        cushion.position.set(sx, 0.5, -0.25);
+        const rest = new THREE.Mesh(new THREE.BoxGeometry(0.75, 0.9, 0.14), seatMat);
+        rest.position.set(sx, 0.95, -0.6);
+        shelter.add(cushion, rest);
       }
+      shelter.add(floor, canopy);
       shelter.position.set(x0, 0, dugoutZ - 1.4);
       scene.add(shelter);
       // The technical area, marked on the grass in front of the dugout.
@@ -522,11 +694,23 @@ export function Pitch3D({ events, home, away, homeColor, awayColor, label, feed,
         m.position.set(x, 0.02, z);
         scene.add(m);
       }
-      const subs = sd.team.players.filter((p) => !p.starter).slice(0, 7);
+      const subs = sd.team.players.filter((p) => !p.starter);
       const bib: Kit = { shirt: BIBS[sd.isHome ? "home" : "away"], shorts: kit.shorts, socks: kit.socks, number: "#111111" };
       const tracksuit: Kit = { shirt: kit.shorts, shorts: kit.shorts, socks: kit.shorts, number: kit.shorts };
-      const seated = [...subs.map((p) => ({ k: bib, n: p.shirt })), { k: tracksuit, n: 30 }, { k: tracksuit, n: 31 }];
-      seated.forEach((st, i) => seat(figure(st.k, st.n, sd.colour, people), x0 - 4.2 + (8.4 * i) / Math.max(1, seated.length - 1)));
+      // Three substitutes warm up along the touchline near their corner; the rest sit with two of the staff.
+      subs.slice(0, 3).forEach((p, i) => {
+        const f = figure(bib, p.shirt, sd.colour, people);
+        f.ring.visible = false;
+        f.body.traverse((o) => { if ((o as THREE.Mesh).isMesh) o.castShadow = true; });
+        scene.add(f.group);
+        warmers.push({ fig: f, id: p.player_id, centre: (sd.isHome ? -1 : 1) * (36 + i * 3), phase: i * 1.7 });
+      });
+      const seated = [...subs.slice(3, 9).map((p) => ({ k: bib, n: p.shirt, id: p.player_id })), { k: tracksuit, n: 30, id: "" }, { k: tracksuit, n: 31, id: "" }];
+      seated.forEach((st, i) => {
+        const f = figure(st.k, st.n, sd.colour, people);
+        seat(f, x0 - 4.2 + i * 1.05);
+        if (st.id) benchFigs.set(st.id, f);
+      });
       const suit: Kit = { shirt: "#1f2937", shorts: "#111827", socks: "#111827", number: "#1f2937" };
       const manager = figure(suit, sd.isHome ? 40 : 41, sd.colour, people);
       manager.ring.visible = false;
@@ -534,12 +718,44 @@ export function Pitch3D({ events, home, away, homeColor, awayColor, label, feed,
       manager.group.position.set(x0, 0, dugoutZ + 1.4);
       scene.add(manager.group);
       coaches.push({ fig: manager, x: x0, team: sd.team.team_id, cheerUntil: 0, phase: sd.isHome ? 0 : 2 });
+      // An assistant stands at the edge of the technical area, arms folded.
+      const assistant = figure(tracksuit, sd.isHome ? 42 : 43, sd.colour, people);
+      assistant.ring.visible = false;
+      assistant.arms.forEach((a) => (a.rotation.x = -0.9));
+      assistant.group.position.set(x0 + (sd.isHome ? 4 : -4), 0, dugoutZ + 0.9);
+      assistant.group.rotation.y = 0;
+      scene.add(assistant.group);
     }
     const fourth = figure({ shirt: "#111111", shorts: "#111111", socks: "#111111", number: "#111111" }, 4, "#000000", people);
     fourth.ring.visible = false;
     fourth.group.position.set(0, 0, dugoutZ + 1);
     scene.add(fourth.group);
+    // The fourth official's substitution board: raised with the real numbers off (red) and on (green).
+    const boardCanvas = document.createElement("canvas");
+    boardCanvas.width = 256;
+    boardCanvas.height = 128;
+    const boardTex = new THREE.CanvasTexture(boardCanvas);
+    boardTex.colorSpace = THREE.SRGBColorSpace;
+    const board = new THREE.Mesh(new THREE.BoxGeometry(1.3, 0.75, 0.08), new THREE.MeshBasicMaterial({ map: boardTex, toneMapped: false }));
+    board.visible = false;
+    scene.add(board);
+    let boardUntil = 0;
+    const showBoard = (off: number | undefined, on: number | undefined, now: number) => {
+      const g = boardCanvas.getContext("2d")!;
+      g.fillStyle = "#050505";
+      g.fillRect(0, 0, 256, 128);
+      g.font = "800 64px Inter, system-ui, sans-serif";
+      g.textAlign = "center";
+      g.textBaseline = "middle";
+      g.fillStyle = "#ff3b3b";
+      g.fillText(String(off ?? "–"), 68, 66);
+      g.fillStyle = "#3bff6e";
+      g.fillText(String(on ?? "–"), 188, 66);
+      boardTex.needsUpdate = true;
+      boardUntil = now + 6;
+    };
     let lastScore = "";
+    let crowdCheerUntil = 0;
 
     const ballR = ballColour ? FEED_BALL_RADIUS : 0.3;
     const ball = new THREE.Mesh(new THREE.IcosahedronGeometry(ballR, 3), ballColour
@@ -586,10 +802,47 @@ export function Pitch3D({ events, home, away, homeColor, awayColor, label, feed,
     let shownId = "";
     let actorId: string | undefined;
 
+    // Post-processing for the broadcast view: bloom on lights and lines, vignette and grade, 4x MSAA.
+    const composer = cinematic
+      ? new EffectComposer(renderer, new THREE.WebGLRenderTarget(640, 360, { samples: 4, type: THREE.HalfFloatType }))
+      : null;
+    const bloom = new UnrealBloomPass(new THREE.Vector2(640, 360), 0.5, 0.4, 0.87);    // lights, lines, trails and white kits glow softly
+    if (composer) {
+      composer.addPass(new RenderPass(scene, camera));
+      composer.addPass(bloom);
+      composer.addPass(new ShaderPass(VIGNETTE));
+      composer.addPass(new OutputPass());
+    }
+
+    // Camera flashes sparkling in the crowd.
+    const flashes: { sprite: THREE.Sprite; until: number }[] = [];
+    if (cinematic) {
+      const fg = glowTexture();
+      for (let i = 0; i < 36; i++) {
+        const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: fg, color: "#ffffff", transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false }));
+        sprite.visible = false;
+        scene.add(sprite);
+        flashes.push({ sprite, until: 0 });
+      }
+    }
+    const trails: Trail[] = [];
+    const passTag = labelSprite();
+    passTag.sprite.scale.multiplyScalar(0.8);
+    passTag.sprite.visible = false;
+    scene.add(passTag.sprite);
+    let passTagAt = -10;
+    const glowUnder = new THREE.Mesh(new THREE.CircleGeometry(2.2, 32), new THREE.MeshBasicMaterial({
+      map: glowTexture(), color: "#5eead4", transparent: true, opacity: cinematic ? 0.55 : 0, blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false }));
+    glowUnder.rotation.x = -Math.PI / 2;
+    glowUnder.position.y = 0.04;
+    scene.add(glowUnder);
+
     const resize = () => {
       const w = el.clientWidth || 640;
       const h = Math.round(w * (ballColour ? 9 / 16 : 0.56));
       renderer.setSize(w, h, false);
+      composer?.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      composer?.setSize(w, h);
       renderer.domElement.style.width = "100%";
       renderer.domElement.style.height = "auto";
       camera.aspect = w / h;
@@ -628,14 +881,36 @@ export function Pitch3D({ events, home, away, homeColor, awayColor, label, feed,
           flight.t0 = now + glide.dur + (ballColour ? 0.3 : 0.05);
           flight.dur = ballColour ? (kmh ? dist / (kmh / 3.6) : Math.max(0.3, dist / 6)) : Math.min(1.1, Math.max(0.25, dist / 30));
           flight.lift = e.type === "shot" ? Math.min(2.2, dist / 14) : LOFTED.has(e.pass_type ?? "") || (e.pass_length ?? 0) > 28 ? Math.min(9, dist / 5) : 0;
+          if (cinematic && (e.type === "pass" || e.type === "shot") && dist > 3) {
+            const t = trail(flight.from, flight.to, flight.lift, e.type === "shot" ? "#ffb347" : e.team_id === home.team_id ? "#5eead4" : "#a78bfa");
+            t.mesh.geometry.setDrawRange(0, 0);
+            scene.add(t.mesh, t.tip);
+            trails.push({ ...t, born: now, t0: flight.t0, dur: flight.dur });
+            const kmh = e.type === "shot" ? e.shot_speed_kmh : e.ball_speed_kmh;
+            const metres = e.pass_length ?? dist;
+            passTag.set(`${e.type === "shot" ? "Shot · " : ""}${Math.round(metres)} m${kmh ? ` · ${Math.round(kmh)} km/h` : ""}`);
+            passTag.sprite.position.set((flight.from.x + flight.to.x) / 2, Math.max(3.2, flight.lift * 2 + 2.4), (flight.from.y + flight.to.y) / 2);
+            passTagAt = flight.t0;
+            while (trails.length > 6) {
+              const old = trails.shift()!;
+              scene.remove(old.mesh, old.tip);
+              old.mesh.geometry.dispose();
+              old.tip.geometry.dispose();
+            }
+          }
         }
         actorId = e.player_id;
+        if (e.type === "substitution") {
+          const squad = (e.team_id === home.team_id ? home : away).players;
+          showBoard(squad.find((p) => p.player_id === e.sub_out)?.shirt, squad.find((p) => p.player_id === e.sub_in)?.shirt, now);
+        }
         // A goal: that team's manager celebrates.
         const score = `${e.score?.home ?? 0}-${e.score?.away ?? 0}`;
         if (lastScore && score !== lastScore) {
           const [h0, a0] = lastScore.split("-").map(Number);
           const scorer = (e.score?.home ?? 0) > h0 ? home.team_id : (e.score?.away ?? 0) > a0 ? away.team_id : null;
           for (const c of coaches) if (c.team === scorer) c.cheerUntil = now + 3.5;
+          if (scorer) crowdCheerUntil = now + 4;
         }
         lastScore = score;
         const team = e.team_id;
@@ -696,12 +971,14 @@ export function Pitch3D({ events, home, away, homeColor, awayColor, label, feed,
           if (!f.pos.lengthSq()) f.pos.copy(target);
           const prevX = f.pos.x;
           const prevZ = f.pos.y;
-          f.pos.lerp(target, 1 - Math.exp(-dt * 3.2));
+          const receiving = !!e && p.player_id === e.recipient_id;
+          f.pos.lerp(target, 1 - Math.exp(-dt * (receiving ? 5.5 : 3.2)));
           f.group.position.set(f.pos.x, 0, f.pos.y);
           const isActor = p.player_id === actorId;
           f.ring.visible = !ballColour;
           (f.ring.material as THREE.MeshBasicMaterial).color.set(isActor ? ACTOR_RING : s.colour);
           f.ring.scale.setScalar(isActor ? 1.3 : 1);
+        (f.ring.material as THREE.MeshBasicMaterial).opacity = isActor ? 0.95 : 0.55;
           if (isActor) tag.sprite.position.set(f.pos.x, 5.8, f.pos.y);
 
           // Run cycle from the speed; face the way they run, or the ball when standing.
@@ -725,6 +1002,28 @@ export function Pitch3D({ events, home, away, homeColor, awayColor, label, feed,
         }
       }
       tag.sprite.visible = !!actorId && !ballColour;
+
+      ground.cheer(now, crowdCheerUntil);
+      const onNow = new Set([...xi.values()].flatMap((sl) => sl.map((x) => x.player.player_id)));
+      for (const w of warmers) {
+        w.fig.group.visible = !onNow.has(w.id);
+        const t = now * 0.5 + w.phase;
+        const x = w.centre + Math.sin(t) * 5;
+        const vx = Math.cos(t) * 2.5;
+        w.fig.group.position.set(x, 0, dugoutZ + 1.6 + Math.sin(w.phase) * 0.6);
+        w.fig.group.rotation.y = vx > 0 ? Math.PI / 2 : -Math.PI / 2;
+        w.fig.phase += dt * 7;
+        const sw = Math.sin(w.fig.phase) * 0.7;
+        w.fig.legs[0].rotation.x = sw;
+        w.fig.legs[1].rotation.x = -sw;
+        w.fig.arms[0].rotation.x = -sw * 0.7;
+        w.fig.arms[1].rotation.x = sw * 0.7;
+      }
+      for (const [id, f] of benchFigs) f.group.visible = !onNow.has(id);
+      const raising = now < boardUntil;
+      board.visible = raising;
+      fourth.arms.forEach((a) => (a.rotation.x = raising ? -2.9 : 0));
+      if (raising) board.position.set(fourth.group.position.x, 2.2 * people + 0.6, fourth.group.position.z + 0.2);
 
       // Managers pace their technical areas, facing the play; arms up and a hop after a goal.
       for (const c of coaches) {
@@ -755,11 +1054,41 @@ export function Pitch3D({ events, home, away, homeColor, awayColor, label, feed,
         onFrame.current?.(renderer.domElement);
         return;
       }
+      // Trails grow with the ball, then fade; the newest is brightest.
+      trails.forEach((t, i) => {
+        const grow = Math.min(1, Math.max(0, (now - t.t0) / t.dur));
+        t.mesh.geometry.setDrawRange(0, Math.floor((t.total * grow) / 3) * 3);
+        const age = now - t.born;
+        const fade = Math.max(0, 1 - age / 7) * (0.35 + 0.65 * ((i + 1) / trails.length));
+        (t.mesh.material as THREE.MeshBasicMaterial).opacity = 0.95 * fade;
+        const landed = grow >= 1 ? Math.min(1, (now - t.t0 - t.dur) / 0.6) : 0;
+        (t.tip.material as THREE.MeshBasicMaterial).opacity = landed > 0 ? (1 - landed) * 0.9 * fade + 0.2 * fade : 0;
+        t.tip.scale.setScalar(1 + landed * 1.5);
+      });
+      // The pass label shows while the ball travels and a moment after, then fades.
+      const sincePass = now - passTagAt;
+      passTag.sprite.visible = cinematic && sincePass > 0 && sincePass < 2.4;
+      (passTag.sprite.material as THREE.SpriteMaterial).opacity = Math.min(1, Math.max(0, 2.4 - sincePass));
+      const actorFig = actorId ? figures.get(actorId) : undefined;
+      if (actorFig?.group.visible) glowUnder.position.set(actorFig.pos.x, 0.04, actorFig.pos.y);
+      glowUnder.visible = !!actorFig?.group.visible;
+      for (const f of flashes) {
+        if (now > f.until && Math.random() < dt * 0.9) {
+          // Somewhere in the far stand, where the camera sees the crowd.
+          const depth = Math.random() * 22;
+          f.sprite.position.set((Math.random() - 0.5) * 120, 2.5 + depth * 0.62, -(PITCH_H / 2 + 9 + depth));
+          f.sprite.scale.setScalar(1.2 + Math.random());
+          f.until = now + 0.08 + Math.random() * 0.08;
+        }
+        f.sprite.visible = now < f.until;
+      }
+
       const want = reduceMotion ? 0 : THREE.MathUtils.clamp(bx * 0.6, -22, 22);
       camX += (want - camX) * (1 - Math.exp(-dt * 1.6));
-      camera.position.set(camX, 40, 68);
-      camera.lookAt(camX, 0, 3);
-      renderer.render(scene, camera);
+      camera.position.set(camX, 34, 66);
+      camera.lookAt(camX, 2, -4);
+      if (composer) composer.render();
+      else renderer.render(scene, camera);
     };
     frame();
 
@@ -775,6 +1104,7 @@ export function Pitch3D({ events, home, away, homeColor, awayColor, label, feed,
           m.dispose();
         });
       });
+      composer?.dispose();
       renderer.dispose();
       renderer.domElement.remove();
     };
