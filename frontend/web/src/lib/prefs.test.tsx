@@ -64,8 +64,8 @@ describe("match helpers", () => {
   it("derives goals from score changes, player maps, colours and the current chain", () => {
     const evs = [
       event({ score: { home: 0, away: 0 }, possession_id: 1 }),
-      event({ score: { home: 1, away: 0 }, minute: 55, player_name: "Gordon", possession_id: 2 }),
-      event({ score: { home: 1, away: 1 }, minute: 90, added_minute: 3, player_name: "Martínez", possession_id: 3 }),
+      event({ type: "shot", score: { home: 1, away: 0 }, minute: 55, player_name: "Gordon", possession_id: 2 }),
+      event({ type: "shot", score: { home: 1, away: 1 }, minute: 90, added_minute: 3, player_name: "Martínez", possession_id: 3 }),
       event({ score: { home: 1, away: 1 }, possession_id: 3 }),
     ];
     expect(goalsFromEvents(evs).map((g) => [g.side, g.label, g.minute])).toEqual([["home", "55' Gordon", 55], ["away", "90' Martínez", 90.3]]);

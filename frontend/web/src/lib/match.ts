@@ -3,12 +3,19 @@ import { distinctAway } from "./format";
 
 export type Goal = { minute: number; side: "home" | "away"; label: string; event_id: string };
 
-/** Goals derived from score changes, so own goals and penalties are handled uniformly. */
+/**
+ * Goals derived from score changes, so own goals and penalties are handled uniformly. Only a shot scores (own goals are
+ * shots too): a stream joined after a goal starts at 1-0 on a pass, which must not be credited to that passer.
+ */
 export function goalsFromEvents(events: MatchEvent[]): Goal[] {
   const goals: Goal[] = [];
   let prev: Score = { home: 0, away: 0 };
   for (const e of events) {
     if (!e.score) continue;
+    if (e.type !== "shot") {
+      prev = e.score;
+      continue;
+    }
     if (e.score.home > prev.home) goals.push({ minute: e.minute + (e.added_minute ?? 0) / 10, side: "home", label: `${e.minute}' ${e.player_name ?? ""}`, event_id: e.id });
     if (e.score.away > prev.away) goals.push({ minute: e.minute + (e.added_minute ?? 0) / 10, side: "away", label: `${e.minute}' ${e.player_name ?? ""}`, event_id: e.id });
     prev = e.score;

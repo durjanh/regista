@@ -14,6 +14,8 @@ type Props = {
   goals: Goal[];
   ended: boolean;
   colours: { home: string; away: string };
+  /** The current match minute: a goal more than a minute and a half old (reached by a jump) gets no banner. */
+  minute?: number;
 };
 
 /** "21' Lionel Messi" → "21' Messi"; "21' Pakistan No. 10" stays as "21' No. 10" (no name in the dataset). */
@@ -25,7 +27,7 @@ function shortGoal(label: string): string {
   return `${minute} ${unnamed ? unnamed[0] : name.split(" ").slice(-1)[0]}`.trim();
 }
 
-export function BroadcastOverlay({ match, score, clockLabel, goals, ended, colours }: Props) {
+export function BroadcastOverlay({ match, score, clockLabel, goals, ended, colours, minute }: Props) {
   // A banner for goals that go in while watching, not for those already scored when the view opened or seeked.
   const seen = useRef<Set<string> | null>(null);
   const [banner, setBanner] = useState<Goal | null>(null);
@@ -34,13 +36,14 @@ export function BroadcastOverlay({ match, score, clockLabel, goals, ended, colou
       seen.current = new Set(goals.map((g) => g.event_id));
       return;
     }
-    const fresh = goals.filter((g) => !seen.current!.has(g.event_id));
-    fresh.forEach((g) => seen.current!.add(g.event_id));
+    const unseen = goals.filter((g) => !seen.current!.has(g.event_id));
+    unseen.forEach((g) => seen.current!.add(g.event_id));
+    const fresh = minute === undefined ? unseen : unseen.filter((g) => minute - g.minute <= 1.5);
     if (!fresh.length) return;
     setBanner(fresh[fresh.length - 1]);
     const id = window.setTimeout(() => setBanner(null), 4500);
     return () => window.clearTimeout(id);
-  }, [goals]);
+  }, [goals]); // eslint-disable-line react-hooks/exhaustive-deps -- `minute` is read at the moment a goal arrives
 
   const so = match.shootout;
   const real = match.source?.kind === "real_result";

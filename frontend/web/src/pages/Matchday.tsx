@@ -1,6 +1,6 @@
 import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
-import { narrationService, truthService } from "../api";
+import { matchService, narrationService, truthService } from "../api";
 import type { Evidence, MatchEvent, Narrative } from "../api/types";
 import { ChaosBand, ChaosMeter, EventDetail } from "../components/ChaosMeter";
 import { EventLayer } from "../components/EventLayer";
@@ -92,8 +92,20 @@ export function Matchday() {
 
   const momentumSeries = useMemo(() => state.snapshots.map((s) => ({ minute: s.minute, value: s.momentum })), [state.snapshots]);
   const wpSeries = useMemo(() => state.snapshots.map((s) => ({ minute: s.minute, ...s.win_prob })), [state.snapshots]);
-  const goals = useMemo(() => goalsFromEvents(state.events), [state.events]);
+  // Goals from the match's shots, not the streamed window: after a jump to 58' the stream starts past a 55' goal.
+  const [shots, setShots] = useState<MatchEvent[] | null>(null);
+  useEffect(() => {
+    let live = true;
+    setShots(null);
+    quietly(() => matchService.events(match.match_id, { types: ["shot"] })).then((s) => live && setShots(s)).catch(() => undefined);
+    return () => { live = false; };
+  }, [match.match_id]);
   const lastEvent = state.events[state.events.length - 1];
+  const nowT = lastEvent?.t ?? state.t;
+  const goals = useMemo(
+    () => (shots ? goalsFromEvents(shots.filter((e) => e.t <= nowT)) : goalsFromEvents(state.events)),
+    [shots, nowT, state.events],
+  );
   const clockLabel = lastEvent ? clock(lastEvent.minute, lastEvent.added_minute) : state.status === "ended" ? "FT" : "0'";
 
   // Pitch content: evidence takes priority over the live possession chain.
@@ -449,7 +461,7 @@ export function Matchday() {
                     venue={venue} camera={camMode} label={`3D live pitch at ${venue.label}: ${pitch.caption}`} />
                 </Suspense>
                 <BroadcastOverlay match={match} score={state.score} clockLabel={clockLabel} goals={goals}
-                  ended={state.status === "ended"} colours={colors} />
+                  ended={state.status === "ended"} colours={colors} minute={lastEvent ? lastEvent.minute + (lastEvent.added_minute ?? 0) / 10 : undefined} />
               </div>
             ) : (
             <Pitch label="Live pitch view">

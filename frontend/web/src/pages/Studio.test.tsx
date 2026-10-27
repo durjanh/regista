@@ -48,6 +48,7 @@ const renderStudio = () =>
 
 const stream = () => FakeEventSource.last;
 const push = async (name: string, data: unknown) => {
+  await waitFor(() => expect(stream()).toBeDefined());       // the page connects once its first requests return
   await act(async () => {
     stream().emit(name, data);
     await new Promise((r) => requestAnimationFrame(() => r(null)));
@@ -58,7 +59,7 @@ describe("Studio control room", () => {
   it("connects the live stream in the analyst register and renders the match, queue and governance", async () => {
     renderStudio();
     expect((await screen.findAllByText(/England/i)).length).toBeGreaterThan(0);
-    expect(stream().url).toBe(`/api/matches/${HERO}/live?speed=30&start_t=0&persona=analyst&language=en`);
+    await waitFor(() => expect(stream()?.url).toBe(`/api/matches/${HERO}/live?speed=30&start_t=0&persona=analyst&language=en`));
     expect(await screen.findByText("Win probability swing", { selector: ".gfx div" })).toBeInTheDocument();
     expect(screen.getByText("41% → 63%")).toBeInTheDocument();
     expect(await screen.findByRole("option", { name: "UK + Europe (EN / FR / ES)" })).toBeInTheDocument();
@@ -142,6 +143,7 @@ describe("Studio control room", () => {
   it("pauses, resumes and jumps to 58:00 on the real second-half clock", async () => {
     renderStudio();
     await screen.findByText("Win probability swing", { selector: ".gfx div" });
+    await waitFor(() => expect(stream()).toBeDefined());
     await act(async () => stream().onopen?.());
     await userEvent.click(screen.getByRole("button", { name: "Pause" }));
     expect(stream().closed).toBe(true);
@@ -157,6 +159,7 @@ describe("Studio control room", () => {
   it("stops and offers to resume when the stream drops", async () => {
     renderStudio();
     await screen.findByText("Win probability swing", { selector: ".gfx div" });
+    await waitFor(() => expect(stream()).toBeDefined());
     await act(async () => stream().onerror?.());
     expect(stream().closed).toBe(true);
     expect(screen.getByRole("button", { name: "Resume" })).toBeInTheDocument();
