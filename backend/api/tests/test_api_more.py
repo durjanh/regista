@@ -227,6 +227,7 @@ def test_replay_uses_cited_match_reports_when_the_dataset_has_no_scorers_yet(cli
 
 def test_supplement_never_overrides_the_dataset_or_contradicts_the_score(tmp_path):
     from collections import defaultdict
+
     from app.forge.reference import ReferenceData
     ref = object.__new__(ReferenceData)
     ref.former, ref.goal_rows, ref.scorer_sources = {}, [], {}

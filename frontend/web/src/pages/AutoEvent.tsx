@@ -43,6 +43,7 @@ function useDetector(ballColour: string, kits: { home: string[]; away: string[] 
   const [detections, setDetections] = useState<Detection[]>([]);
   const [seen, setSeen] = useState<[number, number] | null>(null);                 // match seconds analysed
   const [ballFound, setBallFound] = useState(0);
+  const [frames, setFrames] = useState({ read: 0, clocked: 0 });                  // clocked: carried the feed's timecode
 
   const reset = useCallback(() => {
     tracker.current = new BallTracker();
@@ -50,6 +51,7 @@ function useDetector(ballColour: string, kits: { home: string[]; away: string[] 
     setDetections([]);
     setSeen(null);
     setBallFound(0);
+    setFrames({ read: 0, clocked: 0 });
   }, []);
 
   /** Analyse one frame shown at match second `t` (throttled to ~15 a second). */
@@ -67,7 +69,9 @@ function useDetector(ballColour: string, kits: { home: string[]; away: string[] 
     ctx.drawImage(source, 0, 0, ANALYSIS.width, ANALYSIS.height);
     const img = ctx.getImageData(0, 0, ANALYSIS.width, ANALYSIS.height);
     const frame: Frame = { data: img.data, width: img.width, height: img.height };
-    t = readTimecode(frame) ?? t;                                                     // the frame's own clock when it has one
+    const stamped = readTimecode(frame);
+    t = stamped ?? t;                                                                 // the frame's own clock when it has one
+    setFrames((f) => ({ read: f.read + 1, clocked: f.clocked + (stamped === null ? 0 : 1) }));
     setSeen((s) => (s ? [s[0], t] : [t, t]));
     const px = findBall(frame, ballColour, lastBall.current);
     if (!px) return;
@@ -84,7 +88,7 @@ function useDetector(ballColour: string, kits: { home: string[]; away: string[] 
     }
   }, [ballColour, kits]);
 
-  return { analyse, detections, seen, ballFound, reset };
+  return { analyse, detections, seen, ballFound, frames, reset };
 }
 
 function pct(v: number | null) {
@@ -177,6 +181,8 @@ export function AutoEvent() {
   }, [mode, clip, det]);
 
   const truth = mode === "live" ? live.state.events : clipTruth;
+  // About three seconds of an uploaded clip with neither the feed's timecode nor its ball: not footage this detector reads.
+  const notFeed = mode === "clip" && det.frames.read >= 45 && det.frames.clocked === 0 && det.ballFound === 0;
   const window: [number, number] | null = det.seen ? [det.seen[0] + 1, det.seen[1] - 3] : null;
   const { graded, score } = useMemo(() => grade(det.detections, truth, match.home.team_id, window),
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -260,6 +266,7 @@ export function AutoEvent() {
           ) : null}
           <div className="xs muted mt-8">
             Ball sightings: <span className="tnum">{det.ballFound}</span>
+            {mode === "clip" && clip ? <> · frames read <span className="tnum">{det.frames.read}</span> · with feed time code <span className="tnum">{det.frames.clocked}</span></> : null}
             {mode === "clip" && clip && !clip.matchId ? " · name the file as recorded (regista-feed_<match>_t<seconds>.webm) to grade it" : null}
           </div>
         </section>
@@ -292,6 +299,20 @@ export function AutoEvent() {
                 </li>
               ))}
             </ul>
+          ) : notFeed ? (
+            <div className="note" role="status">
+              <strong>This clip isn't a Regista feed, so there is nothing to read.</strong>
+              <p className="small mt-6 mb-0">
+                The detector reads Regista's own broadcast: a fixed camera whose calibration turns pixels into metres, a
+                high-visibility match ball, and a time code in every frame that lets each detection be checked against the
+                event data. After <span className="tnum">{det.frames.read}</span> frames this clip has none of the three,
+                so it can't measure passes or check itself. Real broadcast footage needs a trained player and ball detector
+                and per-shot camera calibration; that's on the roadmap.
+              </p>
+              <p className="small mt-6 mb-0">
+                To see it work: switch to <b>Live feed</b> and press Play, or <b>Record clip</b> there and upload the file.
+              </p>
+            </div>
           ) : (
             <EmptyState>{mode === "live" ? "Press Play: detections appear as the ball moves." : "Play the clip: detections appear as the ball moves."}</EmptyState>
           )}

@@ -1,29 +1,29 @@
 {
-  "date": "2026-10-26",
+  "date": "2026-10-27",
   "matches": 48,
   "control_matches": 12,
-  "plants": 63,
-  "unobservable": 9,
-  "recall": 0.413,
-  "false_alarms_per_match": 0.92,
-  "control_false_alarms_per_match": 0.92,
-  "median_seconds_to_detect": 508,
+  "plants": 61,
+  "unobservable": 11,
+  "recall": 0.459,
+  "false_alarms_per_match": 1.1,
+  "control_false_alarms_per_match": 0.58,
+  "median_seconds_to_detect": 420,
   "explanation_accuracy": 1.0,
   "by_difficulty": [
     {
       "difficulty": "obvious",
-      "recall": 0.375,
-      "plants": 24
+      "recall": 0.48,
+      "plants": 25
     },
     {
       "difficulty": "moderate",
-      "recall": 0.462,
-      "plants": 26
+      "recall": 0.44,
+      "plants": 25
     },
     {
       "difficulty": "subtle",
-      "recall": 0.385,
-      "plants": 13
+      "recall": 0.455,
+      "plants": 11
     }
   ],
   "by_mechanism": [
@@ -34,27 +34,27 @@
     },
     {
       "mechanism": "tiring_fullback",
-      "recall": 0.3,
+      "recall": 0.4,
       "plants": 10
     },
     {
       "mechanism": "chaos_spell",
-      "recall": 0.562,
+      "recall": 0.688,
       "plants": 16
     },
     {
       "mechanism": "hot_streak",
-      "recall": 0.2,
-      "plants": 5
+      "recall": 0.0,
+      "plants": 4
     },
     {
       "mechanism": "set_piece_routine",
-      "recall": 0.4,
-      "plants": 5
+      "recall": 0.25,
+      "plants": 4
     },
     {
       "mechanism": "shape_change",
-      "recall": 0.385,
+      "recall": 0.462,
       "plants": 13
     }
   ]
