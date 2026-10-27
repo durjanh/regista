@@ -53,7 +53,8 @@ export function ReplayFinder() {
       </div>
       <p className="small muted mb-12 max-70ch">
         Pick a team to see its real results since 1872. Replay rebuilds a match with its real score, scorers and goal minutes,
-        and synthetic play between them, so you can watch it with live narration, tactics and Ask Regista.
+        and synthetic play between them, so you can watch it with live narration, tactics and Ask Regista. Where the dataset
+        doesn't record who scored, the score stays real and the goals are modelled, with nobody named.
       </p>
       <div className="row gap-10 wrap mb-12">
         <select className="select" value={team} onChange={(e) => { setTeam(e.target.value); setOpponent(""); }} aria-label="Team">
@@ -88,10 +89,17 @@ export function ReplayFinder() {
                   <td className="xs muted">{r.tournament}<div className="faint">{r.city}</div></td>
                   <td className="text-end">
                     {r.replayable ? (
-                      <button className="btn sm primary" onClick={() => void replay(r)} disabled={building !== null}
-                        aria-busy={building === r.match_id}>
-                        <IconPlay /> {t("live.play")}
-                      </button>
+                      <div className="stack gap-4 items-end">
+                        <button className="btn sm primary" onClick={() => void replay(r)} disabled={building !== null}
+                          aria-busy={building === r.match_id}>
+                          <IconPlay /> {t("live.play")}
+                        </button>
+                        {r.goals_modelled && r.home_score + r.away_score > 0 ? (
+                          <span className="xs muted" title="The dataset has this score but not who scored or when: the replay models the goal minutes and names nobody">
+                            Scorers not recorded: goals modelled
+                          </span>
+                        ) : null}
+                      </div>
                     ) : (
                       <span className="xs faint" title={r.reason ?? undefined}>{r.reason}</span>
                     )}

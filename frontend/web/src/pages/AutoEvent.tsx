@@ -9,7 +9,7 @@ import { useLiveMatch } from "../hooks/useLiveMatch";
 import { ANALYSIS, BallTracker, clipName, findBall, grade, hiVisBall, parseClipName, readTimecode, teamAt, unproject, worldToHome, FEED_BALL_RADIUS,
   type Detection, type Frame } from "../lib/autoEvent";
 import { clock, cx, teamColor } from "../lib/format";
-import { BIBS, kitFor } from "../lib/kits";
+import { BIBS, matchKits } from "../lib/kits";
 import { usePrefs } from "../lib/prefs";
 import { webglAvailable } from "../lib/webgl";
 import { venueStyle } from "../lib/venue";
@@ -21,7 +21,7 @@ const EVERY_MS = 66;                                                     // ~15 
 
 /** The colours the detector uses: the hi-vis ball, and each team's shirt (and stripe) to tell passer and receiver. */
 function palette(match: MatchMeta) {
-  const home = kitFor(match.home, null), away = kitFor(match.away, null);
+  const { home, away } = matchKits(match.home, match.away);                     // the kits the feed actually shows
   const avoid = [home.shirt, home.shorts, home.socks, away.shirt, away.shorts, away.socks, "#f5c518", "#22c55e", "#ffffff", "#c9a27e", "#8d5a3b", BIBS.home, BIBS.away];
   if (home.stripe) avoid.push(home.stripe);
   if (away.stripe) avoid.push(away.stripe);

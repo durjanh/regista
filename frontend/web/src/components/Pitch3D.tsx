@@ -6,9 +6,10 @@ import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
 import { ShaderPass } from "three/examples/jsm/postprocessing/ShaderPass.js";
 import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import type { MatchEvent, Team } from "../api/types";
 import { PITCH_H, PITCH_W, toHomeFrame } from "../lib/format";
-import { BIBS, kitFor, type Kit } from "../lib/kits";
+import { BIBS, kitFor, matchKits, type Kit } from "../lib/kits";
 import { hash, type VenueStyle } from "../lib/venue";
 import { FEED_BALL_RADIUS, FEED_CAMERA, TIMECODE, timecodeCells } from "../lib/autoEvent";
 import { ballPath, currentXI, possessionTeam, shiftedSpot, withPlayer } from "../lib/pitchShape";
@@ -32,6 +33,9 @@ type Props = {
   feed?: { ballColour: string; onFrame: (canvas: HTMLCanvasElement) => void; clock: () => number };
   /** The ground for this match's venue (lib/venue.ts). */
   venue: VenueStyle;
+  /** "wide": the whole stadium, both goals and every stand, drag to look round and scroll to zoom;
+   *  "follow": the broadcast camera that tracks the ball. */
+  camera?: "wide" | "follow";
 };
 
 type Figure = {
@@ -105,28 +109,67 @@ function pitchTexture(mowing: VenueStyle["mowing"] = "stripes", linesOnly = fals
   return tex;
 }
 
-function goal(side: 1 | -1): THREE.Group {
+/** Net mesh: a fine white grid on transparency. */
+function netTexture(): THREE.CanvasTexture {
+  const c = document.createElement("canvas");
+  c.width = c.height = 64;
+  const g = c.getContext("2d")!;
+  g.strokeStyle = "rgba(255,255,255,0.75)";
+  g.lineWidth = 2;
+  for (let i = 0; i <= 64; i += 16) {
+    g.beginPath(); g.moveTo(i, 0); g.lineTo(i, 64); g.stroke();
+    g.beginPath(); g.moveTo(0, i); g.lineTo(64, i); g.stroke();
+  }
+  const t = new THREE.CanvasTexture(c);
+  t.wrapS = t.wrapT = THREE.RepeatWrapping;
+  return t;
+}
+
+/** A goal: thick white posts and bar, a stanchion and a meshed net. `scale` matches the goal to the figures, which
+ *  are drawn larger than life so they read from the broadcast camera. */
+function goal(side: 1 | -1, scale = 1): THREE.Group {
   const g = new THREE.Group();
-  const white = new THREE.MeshStandardMaterial({ color: "#f4f6f8", roughness: 0.4 });
-  const post = new THREE.CylinderGeometry(0.06, 0.06, 2.44, 8);
-  for (const z of [-3.66, 3.66]) {
+  const white = new THREE.MeshStandardMaterial({ color: "#ffffff", roughness: 0.3, emissive: "#d8dde6", emissiveIntensity: 0.25 });
+  const W = 7.32, H = 2.44, D = 2;
+  const post = new THREE.CylinderGeometry(0.11, 0.11, H, 12);
+  for (const z of [-W / 2, W / 2]) {
     const p = new THREE.Mesh(post, white);
-    p.position.set(0, 1.22, z);
+    p.position.set(0, H / 2, z);
+    p.castShadow = true;
     g.add(p);
   }
-  const bar = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 7.32, 8), white);
+  const bar = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.11, W + 0.22, 12), white);
   bar.rotation.x = Math.PI / 2;
-  bar.position.set(0, 2.44, 0);
+  bar.position.set(0, H, 0);
+  bar.castShadow = true;
   g.add(bar);
-  const net = new THREE.Mesh(new THREE.BoxGeometry(1.8, 2.44, 7.32), new THREE.MeshBasicMaterial({ color: "#ffffff", transparent: true, opacity: 0.12, wireframe: true }));
-  net.position.set(side * 0.9, 1.22, 0);
-  g.add(net);
+  const tex = netTexture();
+  const net = (w: number, h: number, rep: [number, number]) => {
+    const t = tex.clone();
+    t.repeat.set(...rep);
+    t.needsUpdate = true;
+    return new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ map: t, transparent: true, opacity: 0.85, side: THREE.DoubleSide, depthWrite: false }));
+  };
+  const back = net(W, H * 0.7, [14, 4]);
+  back.rotation.y = Math.PI / 2;
+  back.position.set(side * D, H * 0.35, 0);
+  const roof = net(Math.hypot(D, H * 0.3), W, [4, 14]);
+  roof.rotation.set(-Math.PI / 2, 0, 0);
+  roof.rotation.y = side * Math.atan2(H * 0.3, D);
+  roof.position.set((side * D) / 2, H * 0.85, 0);
+  g.add(back, roof);
+  for (const z of [-W / 2, W / 2]) {
+    const wing = net(D, H, [4, 5]);
+    wing.position.set((side * D) / 2, H / 2, z);
+    g.add(wing);
+  }
+  g.scale.setScalar(scale);
   g.position.set((side * PITCH_W) / 2, 0, 0);
   return g;
 }
 
 /** A stand: stepped rows of seats rising from behind the boards, with the fans sitting in them. */
-type Stands = { group: THREE.Group; cheer: (now: number, until: number) => void };
+type Stands = { group: THREE.Group; near: THREE.Group; cheer: (now: number, until: number) => void };
 
 /**
  * The stadium for this venue: stepped stands on the far side and both ends (the broadcast camera sits in the near
@@ -142,12 +185,18 @@ function stands(v: VenueStyle, homeColours: string[], awayColours: string[]): St
   const roofMat = new THREE.MeshStandardMaterial({ color: "#0d121c", roughness: 0.5, metalness: 0.4 });
   const ROWS = 11, RISE = 0.55, DEPTH = 0.9;
   // Side stands: [centre x, z, length, rotation]; local +z points away from the pitch.
+  // The near stand comes last and is kept apart: it fills the foreground of the wide shot, and the follow camera
+  // (which sits in it, as a broadcast camera does) hides it.
   const sides: [number, number, number, number][] = [
-    [0, -PITCH_H / 2 - 8, 132, Math.PI], [PITCH_W / 2 + 9, 0, 88, Math.PI / 2], [-PITCH_W / 2 - 9, 0, 88, -Math.PI / 2],
+    [0, -PITCH_H / 2 - 8, 132, Math.PI], [PITCH_W / 2 + 9, 0, 88, Math.PI / 2], [-PITCH_W / 2 - 9, 0, 88, -Math.PI / 2], [0, PITCH_H / 2 + 8, 132, 0],
   ];
+  const near = new THREE.Group();
   const world: THREE.Vector3[] = [];                                                     // every seat, in world space
+  const nearWorld: THREE.Vector3[] = [];
   const top = 2 + v.tiers * (ROWS * RISE + 3);
-  for (const [cx, cz, len, rot] of sides) {
+  sides.forEach(([cx, cz, len, rot], sideIndex) => {
+    const isNear = sideIndex === 3;
+    const seatsOut = isNear ? nearWorld : world;
     const side = new THREE.Group();
     const toWorld = new THREE.Matrix4().makeRotationY(rot).setPosition(cx, 0, cz);
     for (let t = 0; t < v.tiers; t++) {
@@ -159,7 +208,7 @@ function stands(v: VenueStyle, homeColours: string[], awayColours: string[]): St
         step.receiveShadow = true;
         side.add(step);
         for (let x = -len / 2 + 0.5; x < len / 2; x += 0.78)
-          world.push(new THREE.Vector3(x, baseY + r * RISE + RISE / 2, baseZ + r * DEPTH).applyMatrix4(toWorld));
+          seatsOut.push(new THREE.Vector3(x, baseY + r * RISE + RISE / 2, baseZ + r * DEPTH).applyMatrix4(toWorld));
       }
       if (t) {                                                                          // the balcony front of an upper tier
         const lip = new THREE.Mesh(new THREE.BoxGeometry(len, 1.6, 0.6), concrete);
@@ -167,10 +216,13 @@ function stands(v: VenueStyle, homeColours: string[], awayColours: string[]): St
         side.add(lip);
       }
     }
-    const back = new THREE.Mesh(new THREE.BoxGeometry(len, top + 4, 1), concrete);
-    back.position.set(0, (top + 4) / 2, v.tiers * ROWS * DEPTH - (v.tiers - 1) * 2 + 1.5);
-    side.add(back);
-    if (v.roof !== "open") {
+    // The near stand has no back wall or roof: the wide camera looks over its fans onto the pitch.
+    if (!isNear) {
+      const back = new THREE.Mesh(new THREE.BoxGeometry(len, top + 4, 1), concrete);
+      back.position.set(0, (top + 4) / 2, v.tiers * ROWS * DEPTH - (v.tiers - 1) * 2 + 1.5);
+      side.add(back);
+    }
+    if (v.roof !== "open" && !isNear) {
       const depth = v.tiers * ROWS * DEPTH + 8;
       const lid = new THREE.Mesh(new THREE.BoxGeometry(len + 2, 0.8, depth), roofMat);
       lid.position.set(0, top + 5, depth / 2 - 6);
@@ -183,8 +235,8 @@ function stands(v: VenueStyle, homeColours: string[], awayColours: string[]): St
     }
     side.position.set(cx, 0, cz);
     side.rotation.y = rot;
-    g.add(side);
-  }
+    (isNear ? near : g).add(side);
+  });
   if (v.roof === "bowl") {
     for (const x of [-1, 1]) {
       const corner = new THREE.Mesh(new THREE.CylinderGeometry(20, 12, top + 4, 8, 1, true, 0, Math.PI / 2),
@@ -215,34 +267,38 @@ function stands(v: VenueStyle, homeColours: string[], awayColours: string[]): St
     return m;
   };
   const fanMat = () => animated(new THREE.MeshLambertMaterial());
-  const bodies = new THREE.InstancedMesh(new THREE.CapsuleGeometry(0.2, 0.36, 2, 8), fanMat(), filled.length);
-  const heads = new THREE.InstancedMesh(new THREE.SphereGeometry(0.13, 8, 6), fanMat(), filled.length);
-  const hair = new THREE.InstancedMesh(new THREE.SphereGeometry(0.14, 8, 4, 0, Math.PI * 2, 0, Math.PI / 2), fanMat(), filled.length);
-  const scarfIdx = filled.map((_, n) => n).filter((n) => Math.abs(Math.sin(n * 3.17)) % 1 < 0.13);
-  const scarves = new THREE.InstancedMesh(new THREE.BoxGeometry(1.0, 0.14, 0.04), fanMat(), scarfIdx.length);
-  const colour = new THREE.Color();
-  const mat = new THREE.Matrix4();
-  const HAIRS = ["#1b1410", "#3b2516", "#6b4a2b", "#a87b45", "#d7b77a", "#2a2a2a"];
-  filled.forEach((p, n) => {
-    const r = Math.abs(Math.sin(n * 78.233) * 43758.5453) % 1;
-    const shirt = r < 0.4 ? homeColours[n % homeColours.length] : r < 0.7 ? awayColours[n % awayColours.length] : everyday[n % everyday.length];
-    const standing = Math.abs(Math.sin(n * 1.7)) % 1 < 0.22 ? 0.35 : 0;
-    const y = p.y + 0.38 + standing;
-    bodies.setMatrixAt(n, mat.makeTranslation(p.x, y, p.z));
-    bodies.setColorAt(n, colour.set(shirt));
-    heads.setMatrixAt(n, mat.makeTranslation(p.x, y + 0.5, p.z));
-    heads.setColorAt(n, colour.set(SKINS[n % SKINS.length]));
-    hair.setMatrixAt(n, mat.makeTranslation(p.x, y + 0.52, p.z));
-    hair.setColorAt(n, colour.set(HAIRS[(n * 7) % HAIRS.length]));
-  });
-  scarfIdx.forEach((n, i) => {
-    const p = filled[n];
-    const r = Math.abs(Math.sin(n * 78.233) * 43758.5453) % 1;
-    mat.makeRotationZ(Math.sin(n) * 0.25).setPosition(p.x, p.y + 1.55, p.z);
-    scarves.setMatrixAt(i, mat);
-    scarves.setColorAt(i, colour.set(r < 0.55 ? homeColours[0] : awayColours[0]));
-  });
-  g.add(bodies, heads, hair, scarves);
+  const fans = (pts: THREE.Vector3[]): THREE.InstancedMesh[] => {
+    const bodies = new THREE.InstancedMesh(new THREE.CapsuleGeometry(0.2, 0.36, 2, 8), fanMat(), pts.length);
+    const heads = new THREE.InstancedMesh(new THREE.SphereGeometry(0.13, 8, 6), fanMat(), pts.length);
+    const hair = new THREE.InstancedMesh(new THREE.SphereGeometry(0.14, 8, 4, 0, Math.PI * 2, 0, Math.PI / 2), fanMat(), pts.length);
+    const scarfIdx = pts.map((_, n) => n).filter((n) => Math.abs(Math.sin(n * 3.17)) % 1 < 0.13);
+    const scarves = new THREE.InstancedMesh(new THREE.BoxGeometry(1.0, 0.14, 0.04), fanMat(), scarfIdx.length);
+    const colour = new THREE.Color();
+    const mat = new THREE.Matrix4();
+    const HAIRS = ["#1b1410", "#3b2516", "#6b4a2b", "#a87b45", "#d7b77a", "#2a2a2a"];
+    pts.forEach((p, n) => {
+      const r = Math.abs(Math.sin(n * 78.233) * 43758.5453) % 1;
+      const shirt = r < 0.4 ? homeColours[n % homeColours.length] : r < 0.7 ? awayColours[n % awayColours.length] : everyday[n % everyday.length];
+      const standing = Math.abs(Math.sin(n * 1.7)) % 1 < 0.22 ? 0.35 : 0;
+      const y = p.y + 0.38 + standing;
+      bodies.setMatrixAt(n, mat.makeTranslation(p.x, y, p.z));
+      bodies.setColorAt(n, colour.set(shirt));
+      heads.setMatrixAt(n, mat.makeTranslation(p.x, y + 0.5, p.z));
+      heads.setColorAt(n, colour.set(SKINS[n % SKINS.length]));
+      hair.setMatrixAt(n, mat.makeTranslation(p.x, y + 0.52, p.z));
+      hair.setColorAt(n, colour.set(HAIRS[(n * 7) % HAIRS.length]));
+    });
+    scarfIdx.forEach((n, i) => {
+      const p = pts[n];
+      const r = Math.abs(Math.sin(n * 78.233) * 43758.5453) % 1;
+      mat.makeRotationZ(Math.sin(n) * 0.25).setPosition(p.x, p.y + 1.55, p.z);
+      scarves.setMatrixAt(i, mat);
+      scarves.setColorAt(i, colour.set(r < 0.55 ? homeColours[0] : awayColours[0]));
+    });
+    return [bodies, heads, hair, scarves];
+  };
+  g.add(...fans(filled));
+  near.add(...fans(nearWorld.filter((_, n) => (Math.sin(n * 12.9898) * 43758.5453) % 1 > -0.84)));
 
   // Big flags waving in the stands, in both teams' colours.
   const flagMat = (c: string[]) => {
@@ -294,7 +350,7 @@ function stands(v: VenueStyle, homeColours: string[], awayColours: string[]): St
     halo.position.set(x, y, z);
     g.add(halo);
   }
-  return { group: g, cheer };
+  return { group: g, near, cheer };
 }
 
 /** A night sky: deep at the top, a floodlit haze glowing over the bowl at the horizon. */
@@ -398,7 +454,7 @@ function boards(city: string): THREE.Group {
   g.font = "800 40px Inter, system-ui, sans-serif";
   g.fillStyle = "#d7ff3a";
   g.textBaseline = "middle";
-  const text = `REGISTA · ${city.toUpperCase()}`;
+  const text = city && !/neutral/i.test(city) ? `REGISTA · ${city.toUpperCase()}` : "REGISTA · LIVE";
   const step = g.measureText(text).width + 80;
   for (let x = 20; x < c.width; x += step) g.fillText(text, x, 34);
   const tex = new THREE.CanvasTexture(c);
@@ -553,7 +609,9 @@ function labelSprite(): { sprite: THREE.Sprite; set: (text: string) => void } {
   return { sprite, set };
 }
 
-export function Pitch3D({ events, home, away, homeColor, awayColor, label, feed, venue }: Props) {
+export function Pitch3D({ events, home, away, homeColor, awayColor, label, feed, venue, camera: cameraMode = "wide" }: Props) {
+  const mode = useRef(cameraMode);
+  mode.current = cameraMode;
   const host = useRef<HTMLDivElement>(null);
   const latest = useRef(events);
   latest.current = events;
@@ -622,9 +680,11 @@ export function Pitch3D({ events, home, away, homeColor, awayColor, label, feed,
     pitch.rotation.x = -Math.PI / 2;
     pitch.receiveShadow = true;
     surround.receiveShadow = true;
-    const homeKit = kitFor(home, null), awayKit = kitFor(away, null);
+    const kits = matchKits(home, away);
+    const homeKit = kits.home, awayKit = kits.away;
     const ground = stands(venue, [homeKit.shirt, homeKit.stripe ?? homeKit.shorts], [awayKit.shirt, awayKit.stripe ?? awayKit.shorts]);
-    scene.add(pitch, goal(1), goal(-1), ground.group, boards(venue.city));
+    const goalScale = ballColour ? 1.25 : 1.7;                                               // in proportion to the figures
+    scene.add(pitch, goal(1, goalScale), goal(-1, goalScale), ground.group, ground.near, boards(venue.city));
     if (venue.mountains) scene.add(mountains(venue));
 
     // Players: a figure per squad member, shown while they're on the pitch.
@@ -635,7 +695,7 @@ export function Pitch3D({ events, home, away, homeColor, awayColor, label, feed,
     ];
     for (const s of sides)
       for (const p of s.team.players) {
-        const kit = kitFor(s.team, p.position === "GK" ? (s.isHome ? "home" : "away") : null);
+        const kit = p.position === "GK" ? kitFor(s.team, s.isHome ? "home" : "away") : s.isHome ? kits.home : kits.away;
         // In the feed players are drawn closer to life size, as a wide broadcast camera sees them.
         const f = figure(kit, p.shirt, s.colour, ballColour ? 1.5 : SCALE);
         f.body.traverse((o) => { if ((o as THREE.Mesh).isMesh) o.castShadow = true; });
@@ -666,7 +726,7 @@ export function Pitch3D({ events, home, away, homeColor, awayColor, label, feed,
     };
     for (const sd of sides) {
       const x0 = (sd.isHome ? -1 : 1) * 12;
-      const kit = kitFor(sd.team, null);
+      const kit = sd.isHome ? kits.home : kits.away;
       // A modern dugout: a curved glass canopy over padded seats in the team's colour.
       const shelter = new THREE.Group();
       const floor = new THREE.Mesh(new THREE.BoxGeometry(10.6, 0.12, 2.6), shell);
@@ -794,6 +854,22 @@ export function Pitch3D({ events, home, away, homeColor, awayColor, label, feed,
       tcTex.needsUpdate = true;
     };
     let camX = 0;
+    let zoom = 0;
+    // Wide view: the whole stadium from high above the near stand; drag to orbit, scroll to zoom.
+    const orbit = new OrbitControls(camera, renderer.domElement);
+    orbit.enableDamping = true;
+    orbit.enablePan = false;
+    orbit.minDistance = 45;
+    orbit.maxDistance = 190;
+    orbit.maxPolarAngle = 1.32;
+    orbit.target.set(0, 0, -4);
+    camera.position.set(0, 62, 104);
+    orbit.update();
+    if (ballColour) {                                   // the auto-eventing feed keeps its fixed, calibrated camera
+      orbit.enabled = false;
+      ground.near.visible = false;
+    }
+    let lastMode = "";
 
     // The ball's current flight: from → to over `dur` seconds, with an arc for lofted balls.
     const flight = { from: new THREE.Vector2(), to: new THREE.Vector2(), t0: 0, dur: 0.01, lift: 0 };
@@ -917,9 +993,11 @@ export function Pitch3D({ events, home, away, homeColor, awayColor, label, feed,
         const squad = (team === home.team_id ? home : away).players;
         for (const sd of sides) xi.set(sd.team.team_id, currentXI(sd.team, evs));          // substitutions so far
         xi.set(team, withPlayer(withPlayer(xi.get(team) ?? [], squad, e.player_id), squad, e.recipient_id));
-        const name = e.player_name?.split(" ").slice(-1)[0];
         const shirt = squad.find((p) => p.player_id === e.player_id)?.shirt;
-        tag.set(name ? `${shirt ?? ""} ${name}`.trim() : "");
+        // "Pakistan No. 10" (no name in the dataset) reads "No. 10"; a named player reads "10 Kane".
+        const unnamed = /No\. \d+$/.test(e.player_name ?? "");
+        const name = e.player_name?.split(" ").slice(-1)[0];
+        tag.set(unnamed ? `No. ${shirt ?? name}` : name ? `${shirt ?? ""} ${name}`.trim() : "");
       }
 
       // Ball: running to the touch, resting for it, then along its flight (constant speed in the feed).
@@ -1083,10 +1161,29 @@ export function Pitch3D({ events, home, away, homeColor, awayColor, label, feed,
         f.sprite.visible = now < f.until;
       }
 
-      const want = reduceMotion ? 0 : THREE.MathUtils.clamp(bx * 0.6, -22, 22);
+      const wide = mode.current === "wide";
+      if (wide !== (lastMode === "wide")) {
+        lastMode = mode.current;
+        ground.near.visible = wide;                       // the follow camera sits in the near stand
+        orbit.enabled = wide;
+        if (wide) {
+          camera.position.set(0, 62, 104);
+          orbit.target.set(0, 0, -4);
+        }
+      }
+      if (wide) {
+        orbit.update();
+        if (composer) composer.render();
+        else renderer.render(scene, camera);
+        return;
+      }
+      // Follow the ball; in the final third the camera reaches the goal and moves in a little, as a director would.
+      const want = reduceMotion ? 0 : THREE.MathUtils.clamp(bx * 0.75, -32, 32);
       camX += (want - camX) * (1 - Math.exp(-dt * 1.6));
-      camera.position.set(camX, 34, 66);
-      camera.lookAt(camX, 2, -4);
+      const near = reduceMotion ? 0 : THREE.MathUtils.smoothstep(Math.abs(bx), 24, 44);
+      zoom += (near - zoom) * (1 - Math.exp(-dt * 1.2));
+      camera.position.set(camX, 34 - 6 * zoom, 66 - 12 * zoom);
+      camera.lookAt(camX + Math.sign(bx) * 8 * zoom, 2, -4);
       if (composer) composer.render();
       else renderer.render(scene, camera);
     };
@@ -1104,6 +1201,7 @@ export function Pitch3D({ events, home, away, homeColor, awayColor, label, feed,
           m.dispose();
         });
       });
+      orbit.dispose();
       composer?.dispose();
       renderer.dispose();
       renderer.domElement.remove();

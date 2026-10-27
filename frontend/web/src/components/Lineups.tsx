@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import type { MatchEvent, MatchMeta, Player, Team } from "../api/types";
-import { kitFor, type Kit } from "../lib/kits";
+import { kitFor, matchKits, type Kit } from "../lib/kits";
 import { currentXI } from "../lib/pitchShape";
 import { usePrefs } from "../lib/prefs";
 import { cx } from "../lib/format";
@@ -75,7 +75,7 @@ export function Lineups({ match, events }: { match: MatchMeta; events: MatchEven
           <rect x={34 - 9.16} y={sy(5.5)} width="18.32" height="5.5" />
         </g>
         {slots.map(({ player: p, spot, on }) => {
-          const kit = kitFor(team, p.position === "GK" ? keeper : null);
+          const kit = p.position === "GK" ? kitFor(team, keeper) : matchKits(match.home, match.away)[side];
           const x = sx(spot[1]);
           const y = sy(spot[0]);
           return (

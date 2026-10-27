@@ -72,7 +72,10 @@ class MatchStore:
             xt.annotate(doc["events"], self.xt_grid)
 
     def add_rebuilt(self, doc: dict, keep: int = 30) -> None:
-        """A real result a viewer asked to replay. The newest `keep` stay; older ones are dropped (they rebuild on demand)."""
+        """A real result a viewer asked to replay. The newest `keep` stay; older ones are dropped (they rebuild on demand).
+        A featured match is never demoted to a rebuilt one."""
+        if doc["meta"].get("featured"):
+            return
         doc["meta"]["rebuilt"] = True
         self._register(doc, featured=False)
         with self.lock:

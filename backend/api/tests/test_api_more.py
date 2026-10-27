@@ -187,7 +187,8 @@ def test_rebuilt_replays_are_capped(client):
     from app.api.deps import get_store
     from app.forge.reference import reference
     store, ref = get_store(), reference()
-    ids = [r["match_id"] for r in ref.search_results("brazil", limit=100) if r["replayable"]][:4]
+    featured = {m for m, d in store.docs.items() if d["meta"].get("featured")}
+    ids = [r["match_id"] for r in ref.search_results("brazil", limit=100) if r["replayable"] and r["match_id"] not in featured][:4]
     for mid in ids:
         assert client.post("/api/forge/real", json={"match_id": mid}).status_code == 200
     store.add_rebuilt(store.get(ids[-1]), keep=2)
@@ -198,3 +199,16 @@ def test_live_stream_max_gap_is_bounded(client):
     from conftest import HERO
     assert client.get(f"/api/matches/{HERO}/live", params={"max_gap": 50}).status_code == 422
     assert client.get(f"/api/matches/{HERO}/live", params={"max_gap": 0}).status_code == 422
+
+
+def test_replay_models_goals_the_dataset_does_not_record_and_names_nobody(client):
+    rows = client.get("/api/forge/real", params={"team": "pakistan", "opponent": "afghanistan", "year": 2015}).json()
+    assert rows[0]["replayable"] and rows[0]["goals_modelled"]
+    summary = client.post("/api/forge/real", json={"match_id": rows[0]["match_id"]}).json()
+    assert summary["final_score"] == {"home": 2, "away": 1}                              # the real score stands
+    assert summary["source"]["goals_modelled"] is True
+    match = client.get(f"/api/matches/{rows[0]['match_id']}").json()
+    assert match["source"]["real"]["goals"] == []                                        # no modelled goal is passed off as real
+    names = [p["name"] for side in ("home", "away") for p in match[side]["players"]]
+    assert all(" No. " in n for n in names)                                              # nobody is named
+    assert "doesn't record this match's goalscorers" in match["source"]["disclosure"]

@@ -17,7 +17,7 @@ const summary = (match_id: string, home: string, away: string) =>
 function api() {
   mockApi([
     HEALTH,
-    { match: /\/forge\/teams$/, reply: [ref("argentina", "Argentina"), ref("france", "France")] },
+    { match: /\/reference\/teams/, reply: [{ ...ref("argentina", "Argentina"), elo: 2254, rank: 2, played: 1060 }, { ...ref("france", "France"), elo: 2176, rank: 4, played: 900 }] },
     { match: /\/scouting\/players/, reply: [mbappe] },
     { match: /\/matches$/, reply: [summary("m1", "england", "argentina"), summary("m2", "france", "spain"), summary("m3", "japan", "brazil")] },
   ]);

@@ -237,6 +237,11 @@ class MatchSimulator:
             self.new_possession()
             att, carrier, x, y = scoring, pid, mx, my
         scorer = g.get("scorer_pid")
+        if not scorer and not g.get("own_goal"):
+            # A goal the dataset doesn't credit to anyone (modelled): an attacker on the pitch scores it.
+            outfield = att.on_pitch[1:]
+            front = [p for p in outfield if POSITION_FAMILY[att.by_id[p].position] in ("FWD", "WIDE", "AM")] or outfield
+            scorer = self.rng.choice(front)
         assister = g.get("assist_pid")
         if scorer and not g.get("own_goal"):
             self.ensure_on_pitch(att, scorer)

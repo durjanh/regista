@@ -21,12 +21,13 @@ function keepPopInView(e: SyntheticEvent<HTMLDetailsElement>) {
 export function SourceBadge({ source, compact }: { source: MatchSource | undefined; compact?: boolean }) {
   if (!source) return null;
   const real = source.kind === "real_result";
-  const label = real ? "Real result · Synthetic match events" : "What-if · Synthetic";
+  const modelled = real && source.goals_modelled;
+  const label = modelled ? "Real score · Goals modelled" : real ? "Real result · Synthetic match events" : "What-if · Synthetic";
   return (
     <details className="source-badge" onToggle={keepPopInView}>
       <summary className={real ? "pill real" : "pill warn"} aria-label={`${label}. Show data disclosure`}>
         <span aria-hidden="true">{real ? "◉" : "◌"}</span>
-        {compact ? (real ? "Real result" : "What-if") : label}
+        {compact ? (modelled ? "Real score" : real ? "Real result" : "What-if") : label}
         <span aria-hidden="true" className="faint">ⓘ</span>
       </summary>
       <div className="source-pop" role="note">

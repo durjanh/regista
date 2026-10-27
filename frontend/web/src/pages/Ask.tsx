@@ -9,6 +9,7 @@ import { ListenButton } from "../components/ListenButton";
 import { CitedText } from "../components/Markdown";
 import { ErrorState } from "../components/States";
 import { quietly } from "../lib/activity";
+import { useAnswerIn } from "../lib/answerLanguage";
 import { duration } from "../lib/format";
 import { usePrefs } from "../lib/prefs";
 import { IconAgent, IconSend, IconUser } from "../components/icons";
@@ -25,7 +26,18 @@ function Message({ from, children, live }: { from: "user" | "assistant"; childre
   );
 }
 
-type Turn = { role: "user"; content: string } | { role: "assistant"; content: string; res: AskResponse } | { role: "error"; content: string };
+type Turn = { role: "user"; content: string } | { role: "assistant"; content: string; res: AskResponse; lang: string } | { role: "error"; content: string };
+
+/** An answer in the language it was asked in, or translated into the one the viewer has switched to since. */
+function Answer({ res, lang }: { res: AskResponse; lang: string }) {
+  const { language } = usePrefs();
+  const shown = useAnswerIn(res.answer, lang, language);
+  return (
+    <div className="pre-wrap" translate="no" aria-busy={shown.translating}>
+      <CitedText text={shown.text} citations={res.citations} />
+    </div>
+  );
+}
 
 export function Ask() {
   const { id = "" } = useParams();
@@ -63,7 +75,7 @@ export function Ask() {
     try {
       // The button and the typing bubble show progress, so the page-wide indicator stays out of it.
       const res = await quietly(() => narrationService.ask({ match_id: id, question, persona, language, history }));
-      setTurns((prev) => [...prev, { role: "assistant", content: res.answer, res }]);
+      setTurns((prev) => [...prev, { role: "assistant", content: res.answer, res, lang: language }]);
     } catch (e) {
       setTurns((prev) => [...prev, { role: "error", content: e instanceof Error ? e.message : String(e) }]);
     } finally {
@@ -98,9 +110,7 @@ export function Ask() {
             </Message>
           ) : (
             <Message key={i} from="assistant">
-              <div className="pre-wrap">
-                <CitedText text={turn.res.answer} citations={turn.res.citations} />
-              </div>
+              <Answer res={turn.res} lang={turn.lang} />
               <div className="row mt-10 gap-8">
                 <EngineBadge engine={turn.res.engine} />
                 <FactCheckBadge fc={turn.res.fact_check} />

@@ -176,6 +176,21 @@ export function Matchday() {
     }
   };
   const show3d = can3d && pitchMode === "3d" && !evidence;
+  const [camMode, setCamModeRaw] = useState<"wide" | "follow">(() => {
+    try {
+      return localStorage.getItem("regista.pitchCam") === "follow" ? "follow" : "wide";
+    } catch {
+      return "wide";
+    }
+  });
+  const setCamMode = (m: "wide" | "follow") => {
+    setCamModeRaw(m);
+    try {
+      localStorage.setItem("regista.pitchCam", m);
+    } catch {
+      /* storage unavailable */
+    }
+  };
   const venue = useMemo(() => venueStyle(match), [match]);
 
   const stats = state.latest?.stats;
@@ -403,6 +418,16 @@ export function Matchday() {
               ) : (
                 <span className="xs muted">{match.home.short} attack →</span>
               )}
+              {show3d ? (
+                <div className="seg" role="group" aria-label="Camera">
+                  {(["wide", "follow"] as const).map((m) => (
+                    <button key={m} className={camMode === m ? "on" : undefined} aria-pressed={camMode === m} onClick={() => setCamMode(m)}
+                      title={m === "wide" ? "The whole stadium: drag to look round, scroll to zoom" : "The broadcast camera that follows the ball"}>
+                      {m === "wide" ? "Wide" : "Follow"}
+                    </button>
+                  ))}
+                </div>
+              ) : null}
               {can3d && !evidence ? (
                 <div className="seg" role="group" aria-label="Pitch view">
                   {(["3d", "2d"] as const).map((m) => (
@@ -416,7 +441,7 @@ export function Matchday() {
             {show3d ? (
               <Suspense fallback={<Skeleton h={320} />}>
                 <Pitch3D events={state.events} home={match.home} away={match.away} homeColor={colors.home} awayColor={colors.away}
-                  venue={venue} label={`3D live pitch at ${venue.label}: ${pitch.caption}`} />
+                  venue={venue} camera={camMode} label={`3D live pitch at ${venue.label}: ${pitch.caption}`} />
               </Suspense>
             ) : (
             <Pitch label="Live pitch view">

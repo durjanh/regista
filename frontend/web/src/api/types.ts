@@ -39,6 +39,8 @@ export type RealGoal = { minute: number; team_id: string; scorer: string; penalt
 
 export type MatchSource = {
   kind: "real_result" | "what_if";
+  /** The dataset doesn't record this real result's scorers: goal minutes and scorers are modelled, nobody is named. */
+  goals_modelled?: boolean;
   disclosure: string;
   real?: {
     date: string;
@@ -520,6 +522,8 @@ export type RealResult = {
   shootout_winner: string | null;
   replayable: boolean;
   reason: string | null;
+  /** The dataset doesn't record every scorer: a replay keeps the real score and models the goals. */
+  goals_modelled?: boolean;
 };
 
 export type ReferenceTeam = { team_id: string; name: string; elo: number; rank: number; played: number; colors: TeamRef["colors"] };

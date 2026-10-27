@@ -45,7 +45,7 @@ async def rebuild_real_match(matches: MatchStore, ref: ReferenceData, match_id: 
         result = ref.result_by_match_id(match_id)
         if not result:
             raise KeyError(match_id)
-        doc = await asyncio.to_thread(build_real_match, result["date"], result["home_team"], result["away_team"], None, ref)
+        doc = await asyncio.to_thread(build_real_match, result["date"], result["home_team"], result["away_team"], None, ref, None, True)
         matches.add_rebuilt(doc)
     return next(s for s in matches.summaries() if s["match_id"] == match_id)
 

@@ -316,6 +316,8 @@ h1, h2, h3 { margin: 0; line-height: 1.15; }
 .matchday { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(320px, 1fr); gap: 16px; align-items: start; }
 @media (max-width: 1080px) { .matchday { grid-template-columns: 1fr; } }
 .feed { display: flex; flex-direction: column; gap: 10px; max-height: 1100px; overflow-y: auto; padding-inline-end: 2px; }
+/* Cards keep their full height and the list scrolls, rather than squashing (and clipping) every card to fit. */
+.feed > * { flex-shrink: 0; }
 @media (max-width: 1080px) { .feed { max-height: none; } }
 
 /* ---------- Moment card ---------- */
@@ -656,7 +658,7 @@ button[aria-busy="true"]:disabled { opacity: 0.85; cursor: progress; }
 /* matchday grid areas */
 .matchday-areas { display: grid; gap: 16px; grid-template-columns: minmax(0, 1.55fr) minmax(320px, 1fr);
   grid-template-areas: "pulse feed" "pitch lineups" "ticker battle" "stats facts" "stats h2h"; align-items: start; }
-.matchday-areas .feed { max-height: 520px; }
+.matchday-areas .feed { max-height: 640px; scrollbar-gutter: stable; }
 @media (max-width: 1080px) {
   .matchday-areas { grid-template-columns: minmax(0, 1fr); grid-template-areas: "pulse" "feed" "pitch" "lineups" "battle" "ticker" "facts" "stats" "h2h"; }
   .matchday-areas .feed { max-height: 640px; }

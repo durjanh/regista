@@ -239,15 +239,17 @@ class ReferenceData:
         return None
 
     def replay_blocker(self, result: dict) -> str | None:
-        """Why a real result can't be rebuilt for replay, or None when it can: the engine needs every goal's record,
-        and it doesn't play extra time or shoot-outs yet."""
+        """Why a real result can't be rebuilt for replay, or None when it can: the engine doesn't play extra time or
+        shoot-outs yet. (Goals the dataset doesn't record are modelled; see goals_recorded.)"""
         key = (result["date"], result["home_team"], result["away_team"])
         goals = self.goals.get(key, [])
-        if len(goals) != result["home_score"] + result["away_score"]:
-            return "Goal records are incomplete for this match"
         if key in self.shootouts or any((g["minute"] or 0) > 100 for g in goals):
             return "Extra-time matches are not supported yet"
         return None
+
+    def goals_recorded(self, result: dict) -> bool:
+        """True when the dataset records every goal (scorer and minute) of this result."""
+        return len(self.goals.get((result["date"], result["home_team"], result["away_team"]), [])) == result["home_score"] + result["away_score"]
 
     def result_by_match_id(self, match_id: str) -> dict | None:
         """The real result a rebuilt match id ('2026-07-15-england-argentina') names, or None."""
@@ -269,7 +271,7 @@ class ReferenceData:
             out.append({**r, "home_id": slug(r["home_team"]), "away_id": slug(r["away_team"]),
                         "match_id": f"{r['date']}-{slug(r['home_team'])}-{slug(r['away_team'])}",
                         "shootout_winner": self.shootouts.get((r["date"], r["home_team"], r["away_team"])),
-                        "replayable": blocker is None, "reason": blocker})
+                        "replayable": blocker is None, "reason": blocker, "goals_modelled": not self.goals_recorded(r)})
             if len(out) >= limit:
                 break
         return out
