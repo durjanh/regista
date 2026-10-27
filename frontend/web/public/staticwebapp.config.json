@@ -1,7 +1,11 @@
 {
   "navigationFallback": {
     "rewrite": "/index.html",
-    "exclude": ["/assets/*", "/*.{svg,png,ico,json,txt,webmanifest}"]
+    "exclude": [
+      "/assets/*",
+      "/*.{svg,png,ico,json,txt,webmanifest}",
+      "/samples/*"
+    ]
   },
   "globalHeaders": {
     "X-Content-Type-Options": "nosniff",
@@ -9,8 +13,28 @@
     "Permissions-Policy": "camera=(), microphone=(), geolocation=()"
   },
   "routes": [
-    { "route": "/assets/*", "headers": { "Cache-Control": "public, max-age=31536000, immutable" } },
-    { "route": "/index.html", "headers": { "Cache-Control": "no-cache" } }
+    {
+      "route": "/assets/*",
+      "headers": {
+        "Cache-Control": "public, max-age=31536000, immutable"
+      }
+    },
+    {
+      "route": "/samples/*",
+      "headers": {
+        "Cache-Control": "public, max-age=86400"
+      }
+    },
+    {
+      "route": "/index.html",
+      "headers": {
+        "Cache-Control": "no-cache"
+      }
+    }
   ],
-  "mimeTypes": { ".json": "application/json" }
+  "mimeTypes": {
+    ".json": "application/json",
+    ".webm": "video/webm",
+    ".mp4": "video/mp4"
+  }
 }

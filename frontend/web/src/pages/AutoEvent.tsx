@@ -1,4 +1,5 @@
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import { matchService } from "../api";
 import type { MatchEvent, MatchMeta } from "../api/types";
 import { useMatch } from "../components/Layout";
@@ -19,6 +20,14 @@ import { venueStyle } from "../lib/venue";
 const Pitch3D = lazyPage(() => import("../components/Pitch3D").then((m) => ({ default: m.Pitch3D })));
 
 const STARTS = [1, 20, 46, 60, 75];
+
+/**
+ * Clips to try without footage of your own (files in public/samples). A Regista feed recording's name says which match
+ * and minute it starts at, so the detector grades it on that match; any other clip is for the AI video read.
+ */
+export const SAMPLES: { file: string; label: string; note: string }[] = [
+  { file: "tactical-graphic.mp4", label: "Tactical graphic", note: "for AI video read" },
+];
 const EVERY_MS = 66;                                                     // ~15 analysed frames a second
 
 /** The colours the detector uses: the hi-vis ball, and each team's shirt (and stripe) to tell passer and receiver. */
@@ -160,15 +169,23 @@ export function AutoEvent() {
   const video = useRef<HTMLVideoElement>(null);
   const [clip, setClip] = useState<{ url: string; name: string; matchId?: string; t: number } | null>(null);
   const [clipTruth, setClipTruth] = useState<MatchEvent[]>([]);
-  const upload = (file: File) => {
-    const info = parseClipName(file.name);
+  const openClip = (url: string, name: string) => {
+    const info = parseClipName(name);
     live.pause();
     det.reset();
     setMode("clip");
-    setClip({ url: URL.createObjectURL(file), name: file.name, matchId: info?.matchId, t: info?.t ?? 0 });
+    setClip({ url, name, matchId: info?.matchId, t: info?.t ?? 0 });
     setClipTruth([]);
     if (info?.matchId === match.match_id) void matchService.events(info.matchId).then(setClipTruth).catch(() => setClipTruth([]));
   };
+  const upload = (file: File) => openClip(URL.createObjectURL(file), file.name);
+  // ?sample=<file> opens a sample clip straight away (a feed sample links here from other matches).
+  const [params] = useSearchParams();
+  const wanted = params.get("sample");
+  useEffect(() => {
+    if (wanted && SAMPLES.some((x) => x.file === wanted)) openClip(`/samples/${wanted}`, wanted);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [wanted]);
   useEffect(() => {
     const v = video.current;
     if (mode !== "clip" || !v || !clip) return;
@@ -246,6 +263,24 @@ export function AutoEvent() {
               ⬆ Upload clip
               <input type="file" accept="video/*" className="sr-only" onChange={(e) => e.target.files?.[0] && upload(e.target.files[0])} />
             </label>
+          </div>
+          <div className="row gap-6 wrap xs mb-10" aria-label="Sample clips">
+            <span className="muted">No footage? Try a sample:</span>
+            {SAMPLES.map((x) => {
+              const info = parseClipName(x.file);
+              const here = !info || info.matchId === match.match_id;
+              return (
+                <span key={x.file} className="row gap-4">
+                  {here ? (
+                    <button className="btn sm" onClick={() => openClip(`/samples/${x.file}`, x.file)} title={x.note}>▶ {x.label}</button>
+                  ) : (
+                    <Link className="btn sm" to={`/match/${info.matchId}/video?sample=${encodeURIComponent(x.file)}`} title={`${x.note}: opens its own match`}>▶ {x.label}</Link>
+                  )}
+                  <span className="muted">{x.note} ·</span>
+                  <a className="team-link" href={`/samples/${x.file}`} download={x.file}>download</a>
+                </span>
+              );
+            })}
           </div>
           {download ? (
             <p className="xs mb-8">

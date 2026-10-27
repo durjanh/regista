@@ -40,4 +40,12 @@ describe("Auto-eventing page", () => {
     expect(screen.getByRole("button", { name: "Uploaded clip" })).toHaveAttribute("aria-pressed", "true");
     expect(screen.getByText(/Play the clip/)).toBeInTheDocument();
   });
+
+  it("opens a sample clip without any footage of your own, with a download link", async () => {
+    renderPage();
+    await userEvent.click(screen.getByRole("button", { name: /Tactical graphic/ }));
+    expect(await screen.findByLabelText("Uploaded clip tactical-graphic.mp4")).toHaveAttribute("src", "/samples/tactical-graphic.mp4");
+    expect(screen.getAllByRole("link", { name: "download" })[0]).toHaveAttribute("href", "/samples/tactical-graphic.mp4");
+    expect(screen.getByRole("region", { name: "AI video read" })).toBeInTheDocument();
+  });
 });
