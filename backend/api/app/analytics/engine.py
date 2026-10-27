@@ -164,6 +164,26 @@ class MatchAnalyzer:
             out.append({"minute": m, "value": round(prev, 3)})
         return out
 
+    def rhythm(self, events: list[dict]) -> list[dict]:
+        """Game rhythm per 15-minute window: passes a minute (tempo) and passes per possession (patience). A falling
+        tempo with shorter possessions is a stretched, broken game; a rising one, a side settling into control."""
+        windows: dict[int, dict] = {}
+        for e in events:
+            if e["type"] != "pass":
+                continue
+            m = minute_of(e["t"], self.meta)
+            w = windows.setdefault(min(m // 15, 5), {"passes": 0, "possessions": set(), "last": 0})
+            w["passes"] += 1
+            w["possessions"].add(e.get("possession_id"))
+            w["last"] = max(w["last"], m)
+        out = []
+        for i in sorted(windows):
+            w = windows[i]
+            start, end = i * 15, max(w["last"] + 1, i * 15 + 1) if i == 5 else min(i * 15 + 15, w["last"] + 1)
+            out.append({"from": start, "to": end, "passes_per_min": round(w["passes"] / max(1, end - start), 1),
+                        "passes_per_possession": round(w["passes"] / max(1, len(w["possessions"])), 1)})
+        return out
+
     @staticmethod
     def pass_profile(events: list[dict], team_id: str) -> dict:
         ps = [e for e in events if e["team_id"] == team_id and e["type"] == "pass" and "pass_length" in e]
@@ -226,6 +246,7 @@ class MatchAnalyzer:
             "top_players": players[:6],
             "prior": {"home_xg": round(self.prior[0], 2), "away_xg": round(self.prior[1], 2)},
             "control_chaos": self.control_chaos(ev),
+            "rhythm": self.rhythm(ev),
             "pass_profile": {"home": self.pass_profile(ev, self.home), "away": self.pass_profile(ev, self.away)},
         }
         if full:

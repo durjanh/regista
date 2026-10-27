@@ -40,7 +40,10 @@ GROUNDING_RULES = """RULES (non-negotiable):
 - Never invent players, events, injuries, quotes, transfer news, or history that is not in the facts.
 - Real-match facts are labelled "(real result)". Other match detail is a synthetic reconstruction: do not claim it happened historically.
 - Describe players by what they did, never by innate traits ("natural pace", "physical specimen").
-- No betting or gambling language."""
+- No betting or gambling language.
+- When a "Milestone" fact is about the goal you describe, say so: it is the human story. Use "Game rhythm" facts to
+  explain when the game sped up, slowed down or broke into short possessions.
+- Write plainly: no em dashes; use full stops, commas or colons."""
 
 
 def persona_guide(persona: str) -> str:

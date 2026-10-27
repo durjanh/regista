@@ -291,8 +291,12 @@ export type Analysis = {
   top_players: PlayerStat[];
   /** 0 = one side in control, 1 = chaos (possession flipping, low completion). */
   control_chaos?: { minute: number; value: number }[];
+  /** Game rhythm per 15-minute window (MODEL): tempo (passes a minute) and patience (passes per possession). */
+  rhythm?: RhythmWindow[];
   pass_profile?: { home: PassProfile; away: PassProfile };
 };
+
+export type RhythmWindow = { from: number; to: number; passes_per_min: number; passes_per_possession: number };
 
 export type PassProfile = {
   avg_length: number;

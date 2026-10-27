@@ -77,7 +77,7 @@ export function PlayerDNA() {
         <>
           <div className="kpis">
             <div className="kpi">
-              <div className="label">International goals</div>
+              <div className="label">Competitive int'l goals</div>
               <div className="value tnum">{real.international_goals}</div>
               <div className="sub">
                 {real.first_goal} → {real.last_goal}

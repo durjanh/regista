@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { matchService } from "../api";
 import type { Analysis, MomentDetail, PassProfile, Shot } from "../api/types";
-import { ChaosBand, EventDetail } from "../components/ChaosMeter";
+import { ChaosBand, EventDetail, RhythmChart } from "../components/ChaosMeter";
 import { ModelTag } from "../components/SourceBadge";
 import { ChannelBars, PassNetworkChart, PpdaChart, ShotMap, XgWaterfall } from "../components/charts";
 import { EventLayer } from "../components/EventLayer";
@@ -202,6 +202,18 @@ export function Tactics() {
             <span className="xs muted">green = one side in control · red = possession flipping, low completion</span>
           </div>
           <ChaosBand series={data.control_chaos} />
+        </section>
+      ) : null}
+
+      {data.rhythm && data.rhythm.length > 1 ? (
+        <section className="card">
+          <div className="card-head">
+            <h2 className="card-title">Game rhythm</h2>
+            <ModelTag />
+            <span className="spacer" />
+            <span className="xs muted">bar = tempo (passes a minute) · beneath = passes per possession</span>
+          </div>
+          <RhythmChart windows={data.rhythm} />
         </section>
       ) : null}
 

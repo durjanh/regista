@@ -61,7 +61,10 @@ async def direct(prompt: str) -> dict:
             "You configure a football match simulator. Map the user's request to JSON: "
             '{"home_team_id": str, "away_team_id": str, "scenario": one of ' + json.dumps(list(SCENARIOS)) +
             ', "intensity": 0..1, "as_of": "YYYY-MM-DD" or null, "explanation": str}. '
-            f"Valid team ids: {teams}. Use as_of only when the user mentions an era or year."))
+            f"Valid team ids: {teams}. Use as_of only when the user mentions an era or year. "
+            "The explanation is one plain sentence for the producer describing the match you set up and what to expect, "
+            "e.g. \"Argentina host Uruguay in a fierce derby at high intensity: expect plenty of fouls and cards.\" "
+            "Never mention field names, JSON or your own reasoning, and use no em dashes."))
         try:
             res = await agents.run(spec, prompt, json_mode=True, max_tokens=400)
             cfg = json.loads(res.text)

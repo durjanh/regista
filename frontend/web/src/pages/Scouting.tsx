@@ -12,7 +12,7 @@ import { IconNext } from "../components/icons";
 import { PlayerAvatar } from "../components/PlayerAvatar";
 
 const INDEX_NOTE =
-  "Profiles combine a REAL record from the international results dataset (goals, penalties, assists, venues) with MODEL tendencies " +
+  "Profiles combine a REAL record from the international results dataset (competitive goals, penalties, assists, venues; friendlies aren't in its goalscorers) with MODEL tendencies " +
   "rediscovered from Regista's synthetic match events (shot sides, feet, penalty placement, keeper dives, distance, passing).";
 
 export function Scouting() {

@@ -233,7 +233,8 @@ class ScoutingIndex:
             "first_goal": goals[0]["date"] if goals else "", "last_goal": goals[-1]["date"] if goals else "",
             "goals_by_period": [{"bin": labels[i], "goals": bins[i]} for i in range(6)],
             "venue_split": {k: venue[k] for k in ("home", "away", "neutral")}, "vs_top30_elo": strong,
-            "recent_goals": recent[-8:][::-1], "source": "International results 1872-2026 (CC0, martj42/international_results)",
+            "recent_goals": recent[-8:][::-1],
+            "source": "International results 1872-2026 (CC0, martj42/international_results); goals from competitive internationals, not friendlies",
         }
 
     # ------------------------------------------------------------------ player DNA
@@ -293,7 +294,7 @@ class ScoutingIndex:
         return {"player_key": key, "name": a["name"], "team_id": a["team_id"], "team_name": team_name, "position": pos,
                 "name_source": a["name_source"], "real": real, "model": model, "strengths": strengths, "weaknesses": weaknesses,
                 "how_to_stop": self._how_to_stop(model, real, pos, tr.foot, a["name"]),
-                "disclosure": ("REAL figures come from the CC0 international results dataset. MODEL figures are rediscovered from "
+                "disclosure": ("REAL figures come from the CC0 international results dataset, whose goalscorers cover competitive internationals (World Cups, qualifiers, continental cups), not friendlies. MODEL figures are rediscovered from "
                                f"Regista's synthetic events across {a['matches']} matches; in production the same analytics run on a licensed event feed.")}
 
     def _strengths(self, model: dict, real: dict | None, pos: str) -> tuple[list[str], list[str]]:
@@ -308,7 +309,7 @@ class ScoutingIndex:
             elif p["percentile"] <= 20:
                 w.append(f"{p['label']}: bottom {p['percentile'] + 1}% of {peers} ({p['value']}{'' if p['metric'] == 'pass_completion' else ' per 90'})")
         if real and real["international_goals"] >= 10:
-            s.insert(0, f"Proven international scorer: {real['international_goals']} goals (REAL)")
+            s.insert(0, f"Proven scorer: {real['international_goals']} competitive international goals (REAL)")
         return s[:6], w[:5]
 
     def _how_to_stop(self, model: dict, real: dict | None, pos: str, foot: str, name: str) -> list[dict]:
@@ -373,7 +374,7 @@ class ScoutingIndex:
             late = sum(b["goals"] for b in real["goals_by_period"] if b["bin"] == "76-90+")
             if real["international_goals"] >= 8 and late / real["international_goals"] >= 0.28:
                 out.append({"title": "Dangerous late", "detail": "Keep your concentration and your freshest legs on him in the last quarter.",
-                            "evidence": f"{late} of {real['international_goals']} international goals after 75' (REAL)"})
+                            "evidence": f"{late} of {real['international_goals']} competitive international goals after 75' (REAL)"})
         return out[:6]
 
     # ------------------------------------------------------------------ team report
@@ -444,7 +445,7 @@ class ScoutingIndex:
                       "attacking_channels": {k: round(t["channels"][k] / ch_tot, 3) for k in ("left", "center", "right")},
                       "penalty_takers": takers, "goalkeeper": gk},
             "danger_men": [{"player_key": k, "name": squad[k]["name"],
-                            "why": f"{p90[k]['xt']} xT and {p90[k]['xg']} xG per 90 (MODEL)" + (f"; {sc[squad[k]['name']]} international goals since 2022 (REAL)" if sc.get(squad[k]["name"]) else "")}
+                            "why": f"{p90[k]['xt']} xT and {p90[k]['xg']} xG per 90 (MODEL)" + (f"; {sc[squad[k]['name']]} competitive international goals since 2022 (REAL)" if sc.get(squad[k]["name"]) else "")}
                            for k in danger],
             "disclosure": ("REAL records come from the CC0 international results dataset. MODEL figures come from Regista's synthetic events "
                            f"across {t['matches']} matches for this team."),

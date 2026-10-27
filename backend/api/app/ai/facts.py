@@ -95,7 +95,46 @@ def base_sheet(meta: dict, analysis: dict) -> FactSheet:
     if h2h.get("played"):
         fs.add(f"Head-to-head before this match ({home['name']} wins/draws/{away['name']} wins)",
                f"{h2h['home_wins']}/{h2h['draws']}/{h2h['away_wins']} in {h2h['played']} meetings", real=True)
+    add_rhythm(fs, analysis)
     return fs
+
+
+def _ordinal(n: int) -> str:
+    return f"{n}{'th' if 10 <= n % 100 <= 20 else {1: 'st', 2: 'nd', 3: 'rd'}.get(n % 10, 'th')}"
+
+
+def add_rhythm(fs: FactSheet, analysis: dict) -> None:
+    """Game rhythm (MODEL): tempo and possession length per 15-minute window, so a line can say when the game sped up."""
+    windows = analysis.get("rhythm") or []
+    if len(windows) < 2:
+        return
+    fs.add("Game rhythm: passes a minute by 15-minute window", ", ".join(f"{w['from']}-{w['to']}' {w['passes_per_min']}" for w in windows))
+    fs.add("Game rhythm: passes per possession by 15-minute window", ", ".join(f"{w['from']}-{w['to']}' {w['passes_per_possession']}" for w in windows))
+
+
+def add_goal_milestones(fs: FactSheet, meta: dict, minute: int | None = None) -> None:
+    """REAL career context for the real goals (all, or the one at `minute`): which competitive international goal it was.
+    The CC0 goalscorers cover World Cups, qualifiers and continental cups, not friendlies, so the count is of competitive
+    goals and is labelled so. A first goal, and every tenth, is flagged as a milestone."""
+    real = (meta.get("source") or {}).get("real")
+    if not real:
+        return
+    from ..forge.reference import reference
+    ref, date = reference(), str(meta["kickoff"])[:10]
+    for g in real["goals"]:
+        if g["own_goal"] or (minute is not None and g["minute"] != minute):
+            continue
+        try:
+            n = ref.career_goal_number(g["scorer"], ref.name_of(g["team_id"]), date, g["minute"])
+        except KeyError:
+            continue
+        if not n:
+            continue
+        fs.add(f"{g['scorer']}'s competitive international goals (World Cups, qualifiers, continental cups; friendlies not "
+               "counted), including this one", n, real=True)
+        if n == 1 or n % 10 == 0:
+            fs.add("Milestone", f"{g['scorer']}'s {_ordinal(n)} competitive international goal" + (" (his first)" if n == 1 else ""),
+                   real=True)
 
 
 def add_moment(fs: FactSheet, m: dict, prefix: str = "") -> None:
@@ -114,6 +153,8 @@ def moment_sheet(meta: dict, analysis: dict, moment: dict) -> FactSheet:
     fs = base_sheet(meta, analysis)
     fs.context.append(f"FOCUS MOMENT ({_clock(moment)}): {moment['title']}. {moment['explanation']['why_it_matters']}")
     add_moment(fs, moment)
+    if moment["type"] == "goal":
+        add_goal_milestones(fs, meta, moment["minute"])
     return fs
 
 
@@ -125,6 +166,7 @@ def full_sheet(meta: dict, analysis: dict, max_moments: int = 10) -> FactSheet:
             tag = " (pen)" if g["penalty"] else " (own goal)" if g["own_goal"] else ""
             assist = f", assist {g['assist']}" if g.get("assist") else ""
             fs.add("Real goal", f"{g['scorer']}{tag} {g['minute']}'{assist}", real=True)
+        add_goal_milestones(fs, meta)
     goals = [m for m in analysis["moments"] if m["type"] in ("goal", "turning_point")]
     others = sorted((m for m in analysis["moments"] if m not in goals), key=lambda m: -m["importance"])
     top = goals + others[:max(0, max_moments - len(goals))]

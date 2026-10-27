@@ -10,6 +10,7 @@ from pathlib import Path
 
 from .analytics import xt
 from .analytics.engine import MatchAnalyzer
+from .forge import physical
 from .forge.matches import build_real_match, build_what_if
 from .forge.reference import FEATURED, REPO_ROOT, reference
 
@@ -61,6 +62,7 @@ class MatchStore:
     def _register(self, doc: dict, featured: bool) -> None:
         mid = doc["meta"]["match_id"]
         doc["meta"]["featured"] = featured
+        physical.attach(doc)   # distance-milestone tags, also on cached and restored matches
         with self.lock:
             self.docs[mid] = doc
             self.analyzers.pop(mid, None)

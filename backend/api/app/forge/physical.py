@@ -121,6 +121,54 @@ def compute(doc: dict) -> dict:
     return out
 
 
+
+# Distance milestones (km): the threshold-triggered distance indicator. Most outfield players pass 5 and 8 km; the
+# hardest-working pass 10.
+MILESTONES_KM = (5.0, 8.0, 10.0)
+
+
+def milestones(phys: dict) -> list[dict]:
+    """When each player's running distance crosses each milestone, interpolated within his 5-minute blocks."""
+    out = []
+    for pid, d in phys.items():
+        t_on, t_off = d["on"]
+        total, todo = 0.0, list(MILESTONES_KM)
+        for i, km in enumerate(d["km_by_5"]):
+            if not todo:
+                break
+            start, end = max(i * 300, t_on), min(i * 300 + 300, t_off)
+            while todo and km > 0 and total + km >= todo[0]:
+                share = (todo[0] - total) / km
+                out.append({"player_id": pid, "km": todo.pop(0), "t": round(start + share * (end - start), 1)})
+            total += km
+    return out
+
+
+def tag_milestones(doc: dict) -> int:
+    """Tag each player's first event after he crosses a milestone (``km:10``), so the feed shows it as it happens.
+    Idempotent: a match already tagged (a cached or restored document) is left as it is."""
+    if any(str(t).startswith("km:") for e in doc["events"] for t in (e.get("tags") or [])):
+        return 0
+    by_player: dict[str, list[dict]] = defaultdict(list)
+    for e in doc["events"]:
+        if e.get("player_id"):
+            by_player[e["player_id"]].append(e)
+    tagged = 0
+    for m in milestones(doc["physical"]):
+        nxt = next((e for e in by_player.get(m["player_id"], []) if e["t"] >= m["t"]), None)
+        if nxt is not None:
+            nxt["tags"] = [*(nxt.get("tags") or []), f"km:{m['km']:g}"]
+            tagged += 1
+    return tagged
+
+
+def attach(doc: dict) -> None:
+    """The physical model on a match document (computed if missing), plus its distance-milestone tags on the events."""
+    if not doc.get("physical"):
+        doc["physical"] = compute(doc)
+    tag_milestones(doc)
+
+
 def upto(phys: dict, meta: dict, t: float, end_t: float) -> dict:
     """Distance, sprints and per-window splits up to match time t (partial current window)."""
     wins = windows(meta, end_t)

@@ -205,6 +205,17 @@ class ReferenceData:
     def current(self, name: str) -> str:
         return self.former.get(name, name)
 
+    def career_goal_number(self, scorer: str, team: str, date: str, minute: int | None) -> int:
+        """Which international goal this was for the scorer (own goals excluded): 1 for his first. 0 if unknown."""
+        if not hasattr(self, "_career"):
+            career: dict[tuple, list] = defaultdict(list)
+            for g in self.goal_rows:
+                if not g["own_goal"]:
+                    career[(g["scorer"], g["team"])].append((g["date"], g["minute"] or 0))
+            self._career = {k: sorted(v) for k, v in career.items()}
+        goals = self._career.get((scorer, self.current(team)), [])
+        return bisect.bisect_right(goals, (date, minute or 0))
+
     def name_of(self, team_id: str) -> str:
         if team_id not in self.names:
             raise KeyError(team_id)

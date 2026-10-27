@@ -200,3 +200,41 @@ def test_judge_uses_azure_evaluation_when_available(monkeypatch):
     monkeypatch.setitem(sys.modules, "azure.ai.evaluation", types.SimpleNamespace(GroundednessEvaluator=Evaluator))
     out = asyncio.run(run._judge([{"text": "x", "citations": []}, {"report_md": "y"}]))
     assert out == {"evaluator": "azure-ai-evaluation GroundednessEvaluator", "mean": 4.0}
+
+
+def test_distance_milestones_tag_the_next_event_once(loaded_store):
+    """Each player's running distance passing 5, 8 and 10 km tags his next event (km:5...), at increasing times."""
+    from app.forge import physical
+    doc = loaded_store.get(HERO)
+    tags = [(e["player_id"], e["t"], t) for e in doc["events"] for t in (e.get("tags") or []) if str(t).startswith("km:")]
+    assert {t for _, _, t in tags} == {"km:5", "km:8", "km:10"}
+    by_player: dict[str, list] = {}
+    for pid, t, tag in tags:
+        by_player.setdefault(pid, []).append((t, float(tag[3:])))
+    assert all([km for _, km in sorted(v)] == sorted(km for _, km in v) for v in by_player.values())   # 5 before 8 before 10
+    first5 = min(t for _, t, tag in tags if tag == "km:5")
+    assert 25 * 60 < first5 < 50 * 60        # the hardest runners pass 5 km before half-time, not in the first minutes
+    assert physical.tag_milestones(doc) == 0   # idempotent: a cached or restored match isn't tagged twice
+
+
+def test_career_goal_number_counts_competitive_goals_in_order(loaded_store):
+    """REAL milestones: the Nth competitive international goal, counted from the CC0 goalscorers up to the minute."""
+    from app.forge.reference import reference
+    ref = reference()
+    assert ref.career_goal_number("Lionel Messi", "Argentina", "2022-11-22", 10) == 48      # the penalty v Saudi Arabia
+    assert ref.career_goal_number("Lionel Messi", "Argentina", "2022-11-22", 9) == 47       # one minute before it
+    assert ref.career_goal_number("Nobody Atall", "Argentina", "2022-11-22", 10) == 0
+
+
+def test_fact_sheets_carry_rhythm_and_goal_milestones(loaded_store):
+    """Narratives get game rhythm (MODEL) on every sheet and competitive-goal career context (REAL) for real goals."""
+    from app.ai import facts
+    doc, an = loaded_store.get(HERO), loaded_store.analyzer(HERO).analyze()
+    assert len(an["rhythm"]) == 6 and all(w["passes_per_min"] > 0 and w["passes_per_possession"] > 0 for w in an["rhythm"])
+    labels = {f.label: f for f in facts.full_sheet(doc["meta"], an).by_id().values()}
+    assert any(label.startswith("Game rhythm: passes a minute") for label in labels)
+    career = [f for label, f in labels.items() if "competitive international goals" in label]
+    assert career and all(f.real and int(f.value) >= 1 for f in career)
+    goal = next(m for m in an["moments"] if m["type"] == "goal")
+    sheet = facts.moment_sheet(doc["meta"], an, goal)
+    assert any("competitive international goals" in f.label for f in sheet.by_id().values())

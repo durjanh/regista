@@ -1,5 +1,6 @@
 import { useId } from "react";
-import type { MatchEvent } from "../api/types";
+import type { MatchEvent, RhythmWindow } from "../api/types";
+import { cx } from "../lib/format";
 import { usePrefs } from "../lib/prefs";
 
 /** 0 = one side in control, 1 = chaos (possession flipping back and forth, low completion). */
@@ -68,7 +69,34 @@ export function ChaosBand({ series, maxMinute = 90 }: { series: { minute: number
   );
 }
 
-/** Brief features on a single event: pass length, difficulty, ball/shot/carry speed, sprint tag. */
+/** Game rhythm: one bar per 15-minute window, its height the tempo (passes a minute), passes per possession beneath. */
+export function RhythmChart({ windows }: { windows: RhythmWindow[] }) {
+  if (windows.length < 2) return null;
+  const top = Math.max(...windows.map((w) => w.passes_per_min));
+  const avg = windows.reduce((s, w) => s + w.passes_per_min, 0) / windows.length;
+  return (
+    <div className="rhythm" role="img"
+      aria-label={`Game rhythm: ${windows.map((w) => `${w.from}-${w.to}' ${w.passes_per_min} passes a minute, ${w.passes_per_possession} per possession`).join("; ")}`}>
+      {windows.map((w) => (
+        <div key={w.from} className="rhythm-col">
+          <b className="tnum small">{w.passes_per_min}</b>
+          <div className="rhythm-track">
+            <span className={cx("rhythm-bar", w.passes_per_min >= avg * 1.12 ? "fast" : w.passes_per_min <= avg * 0.88 ? "slow" : undefined)}
+              style={{ height: `${Math.max(6, (w.passes_per_min / top) * 100)}%` }} />
+          </div>
+          <span className="xs muted tnum">{w.from}–{w.to}'</span>
+          <span className="xs faint tnum">{w.passes_per_possession} / poss.</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/** Distance milestones on an event (`km:10` tags): the player has just passed that distance (MODEL). */
+export const distanceMilestones = (e: MatchEvent) =>
+  (e.tags ?? []).filter((t) => t.startsWith("km:")).map((t) => Number(t.slice(3)));
+
+/** Brief features on a single event: pass length, difficulty, ball/shot/carry speed, sprint and distance-milestone tags. */
 export function EventDetail({ e }: { e: MatchEvent | undefined }) {
   if (!e) return null;
   const items: { k: string; v: string }[] = [];
@@ -77,7 +105,8 @@ export function EventDetail({ e }: { e: MatchEvent | undefined }) {
   if (e.shot_speed_kmh !== undefined) items.push({ k: "Shot", v: `${e.shot_speed_kmh.toFixed(0)} km/h` });
   if (e.speed_kmh !== undefined) items.push({ k: "Speed", v: `${e.speed_kmh.toFixed(0)} km/h` });
   const sprint = e.tags?.includes("sprint");
-  if (!items.length && e.difficulty === undefined && !sprint) return null;
+  const km = distanceMilestones(e);
+  if (!items.length && e.difficulty === undefined && !sprint && !km.length) return null;
   return (
     <span className="event-detail">
       {e.difficulty !== undefined ? (
@@ -94,6 +123,11 @@ export function EventDetail({ e }: { e: MatchEvent | undefined }) {
         </span>
       ))}
       {sprint ? <span className="pill warn" title="Speed ≥ 25 km/h">⚡ sprint</span> : null}
+      {km.map((k) => (
+        <span key={k} className="pill accent" title={`Distance milestone: ${k} km covered (MODEL)`}>
+          🏃 {k} km
+        </span>
+      ))}
     </span>
   );
 }
@@ -106,5 +140,6 @@ export function eventDetailText(e: MatchEvent): string {
   if (e.shot_speed_kmh !== undefined) parts.push(`shot ${e.shot_speed_kmh.toFixed(0)} km/h`);
   if (e.speed_kmh !== undefined) parts.push(`${e.speed_kmh.toFixed(0)} km/h`);
   if (e.tags?.includes("sprint")) parts.push("⚡ sprint");
+  for (const k of distanceMilestones(e)) parts.push(`🏃 ${k} km covered`);
   return parts.length ? ` · ${parts.join(" · ")}` : "";
 }
