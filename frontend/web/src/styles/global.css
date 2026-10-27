@@ -503,6 +503,7 @@ button[aria-busy="true"]:disabled { opacity: 0.85; cursor: progress; }
 .table td { padding: 8px; border-bottom: 1px solid var(--border); vertical-align: top; }
 .table .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12.5px; white-space: nowrap; }
 .table-wrap { overflow-x: auto; }
+.year-input { width: 9.5rem; }
 .potm { display: flex; gap: 14px; align-items: center; }
 .potm .badge { width: 56px; height: 56px; border-radius: 16px; display: grid; place-items: center; font-family: var(--font-display); font-weight: 800; font-size: 26px; }
 .check { display: flex; gap: 10px; align-items: flex-start; font-size: 13.5px; }

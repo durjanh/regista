@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { matchService } from "../api";
 import type { MatchSummary } from "../api/types";
 import { ReferenceStrip } from "../components/ReferenceStrip";
+import { ReplayFinder } from "../components/ReplayFinder";
 import { SourceBadge } from "../components/SourceBadge";
 import { EmptyState, ErrorState, Skeleton } from "../components/States";
 import { TeamLink, TeamSwatch } from "../components/TeamSwatch";
@@ -119,6 +120,8 @@ export function Hub() {
       </section>
 
       <ReferenceStrip />
+
+      <ReplayFinder />
 
       <section>
         <div className="row justify-between mb-12">

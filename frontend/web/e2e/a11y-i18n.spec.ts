@@ -25,7 +25,8 @@ test("i18n: Spanish translates the chrome; Arabic switches to right-to-left", as
   const language = page.getByRole("combobox", { name: "Language" });
   await language.selectOption("es");
   await expect(page.getByRole("link", { name: /Abrir partido/ }).first()).toBeVisible();
-  await expect(page.getByRole("navigation", { name: "Primary" }).getByText("Partidos")).toBeVisible();
+  // The page translator also translates the menu's screen-reader label ("Primary" → "Principal").
+  await expect(page.getByRole("navigation", { name: "Principal" }).getByText("Partidos")).toBeVisible();
 
   await page.getByRole("combobox", { name: "Idioma" }).selectOption("ar");
   await expect(page.locator("html")).toHaveAttribute("dir", "rtl");

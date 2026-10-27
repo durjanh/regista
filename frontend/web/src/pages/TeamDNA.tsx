@@ -53,6 +53,9 @@ export function TeamDNA() {
         </div>
         <span className="grow" />
         <FavouriteToggle name={data.name} on={favClubs.includes(data.team_id)} onToggle={() => toggleFavClub(data.team_id)} />
+        <Link to={`/?replay=${encodeURIComponent(data.team_id)}`} className="btn sm">
+          ▶ Replay a real match
+        </Link>
         <Link to={teamReportPath(data.team_id)} className="btn sm primary">
           🔎 Scouting report
         </Link>

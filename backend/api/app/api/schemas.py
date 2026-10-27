@@ -91,6 +91,10 @@ class BriefRequest(BaseModel):
     language: str = "en"
 
 
+class ReplayRequest(BaseModel):
+    match_id: str = Field(..., pattern=r"^\d{4}-\d{2}-\d{2}-[a-z0-9-]+$", max_length=120)
+
+
 class ScenarioRequest(BaseModel):
     prompt: str = Field(..., min_length=3, max_length=500)
 

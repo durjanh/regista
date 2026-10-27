@@ -40,7 +40,7 @@ def test_every_domain_has_its_own_router():
     prefixes = {r.prefix for r in ROUTERS}
     assert {"/api/matches", "/api/studio", "/api/forge", "/api/scouting", "/api/reference"} <= prefixes
     operations = [m for ops in app.openapi()["paths"].values() for m in ops]
-    assert len(operations) == 45   # the same 45 endpoints the single main.py had
+    assert len(operations) == 47   # the 45 endpoints the single main.py had, plus the real-match search and replay
 
 
 def test_forge_generate_rejects_unknown_teams(client):

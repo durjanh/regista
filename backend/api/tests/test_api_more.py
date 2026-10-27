@@ -158,3 +158,37 @@ def test_translate_rejects_oversized_or_malformed_requests(client):
     assert client.post("/api/translate", json={"texts": ["x" * 2001], "to": "es"}).status_code == 422
     assert client.post("/api/translate", json={"texts": ["Hi"], "to": "es&x=1"}).status_code == 422
     assert client.post("/api/translate", json={"texts": ["Hi"], "to": "zh-Hans"}).status_code == 200
+
+
+def test_search_real_results_and_replay_one(client):
+    rows = client.get("/api/forge/real", params={"team": "argentina", "opponent": "england", "year": 1986}).json()
+    assert [(r["date"], r["home_score"], r["away_score"], r["replayable"]) for r in rows] == [("1986-06-22", 2, 1, True)]
+    mid = rows[0]["match_id"]
+    summary = client.post("/api/forge/real", json={"match_id": mid}).json()
+    assert summary["match_id"] == mid and summary["rebuilt"] and summary["source"]["kind"] == "real_result"
+    assert summary["final_score"] == {"home": 2, "away": 1}
+    events = client.get(f"/api/matches/{mid}/events").json()
+    scorers = [e["player_name"] for e in events if e["type"] == "shot" and e["outcome"] == "success"]
+    assert scorers == ["Diego Maradona", "Diego Maradona", "Gary Lineker"]          # the real scorers, in order
+    assert client.post("/api/forge/real", json={"match_id": mid}).json()["match_id"] == mid   # already built: returned
+
+
+def test_replay_explains_what_cannot_be_rebuilt(client):
+    rows = client.get("/api/forge/real", params={"team": "argentina", "year": 2026}).json()
+    blocked = next(r for r in rows if not r["replayable"])
+    assert blocked["reason"] in ("Goal records are incomplete for this match", "Extra-time matches are not supported yet")
+    assert client.post("/api/forge/real", json={"match_id": blocked["match_id"]}).status_code == 422
+    assert client.post("/api/forge/real", json={"match_id": "1900-01-01-nowhere-nobody"}).status_code == 404
+    assert client.post("/api/forge/real", json={"match_id": "../etc"}).status_code == 422
+    assert client.get("/api/forge/real", params={"team": "atlantis"}).status_code == 404
+
+
+def test_rebuilt_replays_are_capped(client):
+    from app.api.deps import get_store
+    from app.forge.reference import reference
+    store, ref = get_store(), reference()
+    ids = [r["match_id"] for r in ref.search_results("brazil", limit=100) if r["replayable"]][:4]
+    for mid in ids:
+        assert client.post("/api/forge/real", json={"match_id": mid}).status_code == 200
+    store.add_rebuilt(store.get(ids[-1]), keep=2)
+    assert sum(1 for d in store.docs.values() if d["meta"].get("rebuilt")) == 2

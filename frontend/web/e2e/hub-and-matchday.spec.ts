@@ -6,7 +6,7 @@ test.describe("Hub", () => {
     await page.goto("/");
     await expect(page.getByText("49,945").first()).toBeVisible();
     await expect(page.getByText("1872").first()).toBeVisible();
-    await expect(page.getByText("Argentina").first()).toBeVisible();
+    await expect(page.locator(".fixtures").getByText("Argentina").first()).toBeVisible();
     const openButtons = page.getByRole("link", { name: /Open match/ });
     expect(await openButtons.count()).toBeGreaterThanOrEqual(5);
 

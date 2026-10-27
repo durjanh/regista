@@ -71,6 +71,17 @@ class MatchStore:
         if self.xt_grid:
             xt.annotate(doc["events"], self.xt_grid)
 
+    def add_rebuilt(self, doc: dict, keep: int = 30) -> None:
+        """A real result a viewer asked to replay. The newest `keep` stay; older ones are dropped (they rebuild on demand)."""
+        doc["meta"]["rebuilt"] = True
+        self._register(doc, featured=False)
+        with self.lock:
+            rebuilt = [m for m in self.order if self.docs[m]["meta"].get("rebuilt")]
+            for old in rebuilt[:-keep] if len(rebuilt) > keep else []:
+                self.order.remove(old)
+                self.docs.pop(old, None)
+                self.analyzers.pop(old, None)
+
     def add_generated(self, doc: dict, persist: bool = True) -> None:
         self._register(doc, featured=False)
         if persist:

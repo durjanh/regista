@@ -10,8 +10,9 @@ export class ReferenceService {
     return this.http.get<ReferenceSummary>("/reference/summary");
   }
 
-  teams() {
-    return this.http.get<ReferenceTeam[]>("/reference/teams");
+  /** Teams ranked by Elo; `limit` up to 400 covers every national team in the dataset. */
+  teams(limit?: number) {
+    return this.http.get<ReferenceTeam[]>(`/reference/teams${qs({ limit })}`);
   }
 
   team(teamId: string) {

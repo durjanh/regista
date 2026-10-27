@@ -5,7 +5,7 @@ from __future__ import annotations
 import asyncio
 
 from ..forge.calibration import run_calibration
-from ..forge.matches import build_what_if
+from ..forge.matches import build_real_match, build_what_if
 from ..forge.reference import ReferenceData
 from ..integrations import persistence
 from ..store import MatchStore
@@ -36,6 +36,18 @@ async def forge_teams(ref: ReferenceData, limit: int) -> list[dict]:
             out.append({**profile.payload(), "rank": t["rank"]})
         return out
     return await asyncio.to_thread(build)
+
+
+async def rebuild_real_match(matches: MatchStore, ref: ReferenceData, match_id: str) -> dict:
+    """Rebuild a real result for replay (real score, scorers and minutes; synthetic play between them) and return its
+    summary. Already in the store: returned at once. KeyError for an unknown result, MatchBuildError when it can't be built."""
+    if match_id not in matches.docs:
+        result = ref.result_by_match_id(match_id)
+        if not result:
+            raise KeyError(match_id)
+        doc = await asyncio.to_thread(build_real_match, result["date"], result["home_team"], result["away_team"], None, ref)
+        matches.add_rebuilt(doc)
+    return next(s for s in matches.summaries() if s["match_id"] == match_id)
 
 
 async def generate_match(matches: MatchStore, cfg: dict) -> dict:

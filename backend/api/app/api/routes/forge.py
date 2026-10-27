@@ -7,11 +7,11 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from ...ai.director import direct
 from ...forge.matches import MatchBuildError
 from ...forge.reference import ReferenceData
-from ...services.forge import calibration_report, generate_match
+from ...services.forge import calibration_report, generate_match, rebuild_real_match
 from ...services.forge import forge_teams as list_forge_teams
 from ...store import MatchStore
 from ..deps import get_reference, get_store
-from ..schemas import ForgeConfig, ScenarioRequest
+from ..schemas import ForgeConfig, ReplayRequest, ScenarioRequest
 
 router = APIRouter(prefix="/api/forge", tags=["forge"])
 
@@ -34,6 +34,27 @@ async def forge_generate(cfg: ForgeConfig, ref: ReferenceData = Depends(get_refe
         return await generate_match(store, cfg.model_dump())
     except (MatchBuildError, KeyError, ValueError) as exc:
         raise HTTPException(400, str(exc)) from None
+
+
+@router.get("/real")
+async def forge_real_results(team: str, opponent: str | None = None, year: int | None = Query(None, ge=1872, le=2100),
+                             limit: int = Query(40, ge=1, le=100), ref: ReferenceData = Depends(get_reference)):
+    """A team's real results, newest first, each marked replayable or with the reason it isn't."""
+    try:
+        return ref.search_results(team, opponent, year, limit)
+    except KeyError as exc:
+        raise HTTPException(404, f"Unknown team {exc}") from None
+
+
+@router.post("/real")
+async def forge_replay_real(req: ReplayRequest, ref: ReferenceData = Depends(get_reference), store: MatchStore = Depends(get_store)):
+    """Rebuild a real result for replay and return its match summary (at once when it is already built)."""
+    try:
+        return await rebuild_real_match(store, ref, req.match_id)
+    except KeyError:
+        raise HTTPException(404, f"No real result {req.match_id}") from None
+    except MatchBuildError as exc:
+        raise HTTPException(422, str(exc)) from None
 
 
 @router.get("/calibration")

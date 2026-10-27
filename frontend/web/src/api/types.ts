@@ -503,6 +503,25 @@ export type ReferenceSummary = {
   licence: string;
 };
 
+/** A real result from the CC0 dataset, as the replay search lists it. */
+export type RealResult = {
+  match_id: string;
+  date: string;
+  home_team: string;
+  away_team: string;
+  home_id: string;
+  away_id: string;
+  home_score: number;
+  away_score: number;
+  tournament: string;
+  city: string;
+  country: string;
+  neutral: boolean;
+  shootout_winner: string | null;
+  replayable: boolean;
+  reason: string | null;
+};
+
 export type ReferenceTeam = { team_id: string; name: string; elo: number; rank: number; played: number; colors: TeamRef["colors"] };
 
 export type TeamDNA = {

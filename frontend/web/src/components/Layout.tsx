@@ -1,5 +1,5 @@
 import { NavLink, Outlet, useOutletContext, useParams } from "react-router-dom";
-import { matchService } from "../api";
+import { ApiError, forgeService, matchService } from "../api";
 import type { MatchMeta } from "../api/types";
 import { useAsync } from "../hooks/useAsync";
 import { usePrefs } from "../lib/prefs";
@@ -45,7 +45,14 @@ export function useMatch(): MatchMeta {
 export function MatchLayout() {
   const { id = "" } = useParams();
   const { t } = usePrefs();
-  const { data: match, error, loading, reload } = useAsync(() => matchService.get(id), [id]);
+  // A replayed real result is rebuilt on demand: after an API restart its link still works.
+  const { data: match, error, loading, reload } = useAsync(
+    () => matchService.get(id).catch((e: unknown) => {
+      if (e instanceof ApiError && e.status === 404 && /^\d{4}-\d{2}-\d{2}-/.test(id)) return forgeService.replay(id).then(() => matchService.get(id));
+      throw e;
+    }),
+    [id],
+  );
 
   if (error) return <ErrorState message={error} onRetry={reload} />;
   if (loading || !match)

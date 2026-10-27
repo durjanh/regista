@@ -203,6 +203,8 @@ type StudioItem = {
 | `GET /api/forge/teams` | query `limit` | `Team[]`: real national teams (top N by Elo) with squads from recorded scorers |
 | `POST /api/forge/scenario` | `{ prompt }` | `{ config: ForgeConfig, explanation: string, engine }` |
 | `POST /api/forge/generate` | `ForgeConfig` | `{ match: MatchSummary, calibration: Calibration }` (the new match is immediately available under `/api/matches/{id}`) |
+| `GET /api/forge/real` | query `team`, optional `opponent`, `year`, `limit` (default 40) | `RealResult[]`: the team's real results, newest first, each with `match_id`, `replayable` and the `reason` when it isn't (incomplete goal records, extra time) |
+| `POST /api/forge/real` | `{ match_id }` | `MatchSummary` with `rebuilt: true`: the real result rebuilt for replay (real score, scorers and minutes; synthetic play between them), at once when already built. 404 unknown result, 422 not replayable. The newest 30 rebuilt matches stay in memory; a match page rebuilds an older one on demand |
 | `GET /api/forge/calibration` | query `n` (default 60) | `Calibration`: backtest on `n` real fixtures + event benchmarks + Brier score |
 
 ```ts
