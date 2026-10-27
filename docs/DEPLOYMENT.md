@@ -104,7 +104,7 @@ scripts/setup-azure-devops.sh --org https://dev.azure.com/<org> --project <proje
 ```
 
 **One command per environment.** `scripts/deploy-env.sh --profile containerapps|aks|aks-enterprise --email you@example.com [--fabric]`
-does all of this section for one environment: it prepares the azd environment (region, `gpt-5-mini`, video-safe mode,
+does all of this section for one environment: it prepares the azd environment (region, models, video-safe mode,
 emails, a warm API instance for Container Apps), runs `setup-azure-devops.sh`, grants the enterprise permissions
 below, runs the pipelines in order (enterprise: *Infrastructure*, then *Full environment*) waiting for each (you
 approve the what-if in the browser), optionally runs the Fabric step, and smoke-tests the API. `--no-pipelines` stops

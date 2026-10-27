@@ -60,9 +60,10 @@ setenv() { azd -C "$DIR" env set "$1" "$2" >/dev/null && echo "  $1=$2"; }
 setenv AZURE_LOCATION "$LOC"; setenv AZURE_SUBSCRIPTION_ID "$SUBSCRIPTION"
 setenv AZURE_RESOURCE_GROUP "$RG"
 setenv DEPLOYMENT_PROFILE "$PROFILE"
-# gpt-5-mini: the model this subscription has quota for (the template defaults have none). 150 units per environment.
-setenv CHAT_MODEL_NAME gpt-5-mini; setenv CHAT_MODEL_VERSION 2025-08-07
-setenv REASONING_MODEL_NAME gpt-5-mini; setenv REASONING_MODEL_VERSION 2025-08-07
+# The template's models, written out so the pipeline variable group carries them: gpt-5.4-mini for live narration,
+# gpt-5.5 for recaps and analysis. Without quota for them, set gpt-5-mini (2025-08-07) for both. 150 units per environment.
+setenv CHAT_MODEL_NAME gpt-5.4-mini; setenv CHAT_MODEL_VERSION 2026-03-17
+setenv REASONING_MODEL_NAME gpt-5.5; setenv REASONING_MODEL_VERSION 2026-04-24
 setenv API_SERVICE_SETTINGS "REGISTA_VIDEO_SAFE=$VIDEO_SAFE"
 setenv BUDGET_EMAIL "$EMAIL"
 setup_args=()

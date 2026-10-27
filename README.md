@@ -255,7 +255,7 @@ runs (API Management Standard v2 is most of it), so tear it down when you're don
 | **Managed DevOps Pools** cores for the agent (`Standard DADSv5 Family`) | 2. New subscriptions can start at 0 for every family | Portal → Quotas → **Managed DevOps Pools** → Request adjustment (usually approved in moments) |
 | API Management **Standard v2** in the region | 1 instance | No quota page: if Azure has paused new Standard v2 instances in the region (`ApiServiceCreationDisabledForSubscription`), retry later or use another region for the whole profile (API Management and the VNet must share a region) |
 
-Model quota (`gpt-5-mini`) as in step 2b. The agent size is `Standard_D2ads_v5` on purpose: Azure Pipelines agent
+Model quota (`gpt-5.4-mini` and `gpt-5.5`, or `gpt-5-mini` as the fallback) as in step 2b. The agent size is `Standard_D2ads_v5` on purpose: Azure Pipelines agent
 images don't support v6/v7 sizes.
 
 **Choosing the region.** Every service in this profile must be offered in the region, and API Management must share it
