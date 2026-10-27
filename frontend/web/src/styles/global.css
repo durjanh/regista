@@ -508,6 +508,35 @@ button[aria-busy="true"]:disabled { opacity: 0.85; cursor: progress; }
 .year-input { width: 9.5rem; }
 .pitch-3d { border-radius: 12px; overflow: hidden; line-height: 0; background: #070b14; min-height: 200px; }
 .pitch-3d canvas { display: block; }
+/* Broadcast graphics over the 3D pitch: score bug, goal banner, full-time card. */
+.pitch3d-wrap { position: relative; }
+.bc-overlay { position: absolute; inset: 0; pointer-events: none; font-family: var(--font); color: #fff; }
+.bc-bug { position: absolute; top: 14px; left: 14px; display: flex; align-items: center; gap: 8px; padding: 6px 10px;
+  background: rgba(7, 11, 20, 0.86); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 10px; font-weight: 800;
+  font-size: 14px; letter-spacing: 0.04em; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35); }
+.bc-swatch { width: 5px; height: 16px; border-radius: 2px; flex: none; box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.25); }
+.bc-swatch.lg { width: 10px; height: 34px; border-radius: 3px; }
+.bc-score { background: #f4f6fa; color: #0b1220; border-radius: 6px; padding: 1px 10px; font-size: 15px; }
+.bc-clock { color: #ffd166; padding-inline-start: 6px; border-inline-start: 1px solid rgba(255, 255, 255, 0.2); }
+.bc-goal { position: absolute; left: 50%; bottom: 22px; transform: translateX(-50%); display: flex; align-items: center; gap: 10px;
+  padding: 10px 16px; background: rgba(7, 11, 20, 0.9); border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.14);
+  font-size: 16px; white-space: nowrap; animation: bcIn 0.35s ease-out; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45); }
+.bc-goal-tag { background: var(--accent); color: var(--accent-ink); font-weight: 900; letter-spacing: 0.12em; border-radius: 6px; padding: 2px 8px; }
+@keyframes bcIn { from { opacity: 0; transform: translate(-50%, 12px); } to { opacity: 1; transform: translate(-50%, 0); } }
+.bc-ft { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(460px, 86%); padding: 18px 22px;
+  background: rgba(7, 11, 20, 0.88); backdrop-filter: blur(6px); border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.55); animation: bcFade 0.5s ease-out; }
+@keyframes bcFade { from { opacity: 0; } to { opacity: 1; } }
+.bc-ft-title { text-align: center; color: #ffd166; font-weight: 900; letter-spacing: 0.24em; font-size: 13px; margin-bottom: 12px; }
+.bc-ft-row { display: flex; align-items: center; gap: 12px; padding: 6px 0; }
+.bc-ft-team { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+.bc-ft-team b { font-size: 20px; text-transform: uppercase; letter-spacing: 0.03em; }
+.bc-ft-goals { font-size: 12.5px; color: rgba(255, 255, 255, 0.72); }
+.bc-ft-score { background: #f4f6fa; color: #0b1220; font-weight: 900; font-size: 26px; border-radius: 8px; padding: 2px 14px; }
+.bc-ft-rule { height: 1px; background: rgba(255, 255, 255, 0.15); margin: 4px 0; }
+.bc-ft-note { text-align: center; margin-top: 10px; font-weight: 700; }
+.bc-ft-foot { text-align: center; margin-top: 10px; font-size: 11.5px; color: rgba(255, 255, 255, 0.55); }
+@media (max-width: 600px) { .bc-bug { font-size: 12px; top: 8px; left: 8px; } .bc-goal { font-size: 13px; } .bc-ft-team b { font-size: 16px; } }
 .shootout { padding: 12px 16px; }
 .shootout-rows { display: grid; gap: 6px; max-width: 420px; }
 .shootout-team { width: 3em; font-weight: 700; }

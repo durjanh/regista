@@ -31,6 +31,7 @@ import { IconBack } from "../components/icons";
 import { quietly } from "../lib/activity";
 import { Lineups } from "../components/Lineups";
 import { ShootoutPanel } from "../components/Shootout";
+import { BroadcastOverlay } from "../components/BroadcastOverlay";
 import { ModelTag } from "../components/SourceBadge";
 import { webglAvailable } from "../lib/webgl";
 import { venueStyle } from "../lib/venue";
@@ -441,10 +442,14 @@ export function Matchday() {
               ) : null}
             </div>
             {show3d ? (
-              <Suspense fallback={<Skeleton h={320} />}>
-                <Pitch3D events={state.events} home={match.home} away={match.away} homeColor={colors.home} awayColor={colors.away}
-                  venue={venue} camera={camMode} label={`3D live pitch at ${venue.label}: ${pitch.caption}`} />
-              </Suspense>
+              <div className="pitch3d-wrap">
+                <Suspense fallback={<Skeleton h={320} />}>
+                  <Pitch3D events={state.events} home={match.home} away={match.away} homeColor={colors.home} awayColor={colors.away}
+                    venue={venue} camera={camMode} label={`3D live pitch at ${venue.label}: ${pitch.caption}`} />
+                </Suspense>
+                <BroadcastOverlay match={match} score={state.score} clockLabel={clockLabel} goals={goals}
+                  ended={state.status === "ended"} colours={colors} />
+              </div>
             ) : (
             <Pitch label="Live pitch view">
               <EventLayer

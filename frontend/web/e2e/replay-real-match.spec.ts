@@ -32,7 +32,9 @@ test.describe("Replay a match decided on penalties", () => {
     await expect(page).toHaveURL(/\/match\/2022-12-18-argentina-france/);
     await page.getByRole("button", { name: /Skip to full time/ }).click();
     await expect.poll(() => scoreBugLabel(page), { timeout: 60_000 }).toMatch(/^Argentina 3, France 3/);
-    await expect(page.getByText("After extra time")).toBeVisible({ timeout: 30_000 });
-    await expect(page.getByText(/Argentina win \d–\d on penalties/)).toBeVisible();
+    const panel = page.getByRole("region", { name: "Extra time and penalties" });
+    await expect(panel.getByText("After extra time")).toBeVisible({ timeout: 30_000 });
+    await expect(panel.getByText(/Argentina win \d–\d on penalties/)).toBeVisible();
+    await expect(page.locator(".bc-ft")).toContainText("AFTER EXTRA TIME");                 // and on the full-time card
   });
 });
