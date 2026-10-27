@@ -4,6 +4,7 @@ import type { MatchEvent, MatchMeta } from "../api/types";
 import { useMatch } from "../components/Layout";
 import { ModelTag } from "../components/SourceBadge";
 import { EmptyState, Skeleton } from "../components/States";
+import { VideoReader } from "../components/VideoReader";
 import { IconPause, IconPlay } from "../components/icons";
 import { useLiveMatch } from "../hooks/useLiveMatch";
 import { ANALYSIS, BallTracker, clipName, findBall, grade, hiVisBall, parseClipName, readTimecode, teamAt, unproject, worldToHome, FEED_BALL_RADIUS,
@@ -310,7 +311,8 @@ export function AutoEvent() {
                 and per-shot camera calibration; that's on the roadmap.
               </p>
               <p className="small mt-6 mb-0">
-                To see it work: switch to <b>Live feed</b> and press Play, or <b>Record clip</b> there and upload the file.
+                For this clip, use <b>AI video read</b> below: the reasoning model reads any footage frame by frame. To see the
+                calibrated detector measure and grade itself, switch to <b>Live feed</b> and press Play.
               </p>
             </div>
           ) : (
@@ -318,6 +320,15 @@ export function AutoEvent() {
           )}
         </section>
       </div>
+
+      {mode === "clip" && clip ? (
+        <VideoReader src={clip.url} name={clip.name} onSeek={(t) => {
+          const v = video.current;
+          if (!v) return;
+          v.currentTime = t;
+          v.scrollIntoView({ behavior: "smooth", block: "center" });
+        }} />
+      ) : null}
     </div>
   );
 }

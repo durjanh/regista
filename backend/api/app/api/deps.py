@@ -8,11 +8,13 @@ from collections.abc import Awaitable, Callable
 from fastapi import Depends, HTTPException
 
 from ..ai import services as azure_ai
+from ..ai import video
 from ..forge.reference import ReferenceData, reference
 from ..store import MatchStore, store
 
 Synthesize = Callable[[str, str, str | None], Awaitable[bytes]]
 Translate = Callable[[list[str], str], Awaitable[list[str]]]
+ReadFrames = Callable[[list[dict], dict | None], Awaitable[dict]]
 
 
 def get_store() -> MatchStore:
@@ -31,6 +33,11 @@ def get_synthesizer() -> Synthesize:
 def get_translator() -> Translate:
     """Azure AI Translator."""
     return azure_ai.translate
+
+
+def get_video_reader() -> ReadFrames:
+    """The reasoning model reading sampled video frames."""
+    return video.read_frames
 
 
 def ensure_match(matches: MatchStore, match_id: str) -> str:

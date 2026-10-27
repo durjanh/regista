@@ -1103,3 +1103,8 @@ html.overlay-mode body { overflow: hidden; }
 .area-ticker { grid-area: ticker; }
 .area-h2h { grid-area: h2h; }
 }
+
+/* AI video read */
+.text-center { text-align: center; }
+.video-read table td:first-child, .video-read table th:first-child { text-align: start; }
+.video-read table td:last-child, .video-read table th:last-child { text-align: end; }

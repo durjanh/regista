@@ -12,6 +12,7 @@ import { ScoutingService } from "./services/ScoutingService";
 import { StudioService } from "./services/StudioService";
 import { SystemService } from "./services/SystemService";
 import { TruthService } from "./services/TruthService";
+import { VideoService } from "./services/VideoService";
 
 export { API_ORIGIN } from "./http/AxiosHttpClient";
 export { ApiError } from "./http/ApiError";
@@ -31,3 +32,4 @@ export const scoutingService = new ScoutingService(http);
 export const studioService = new StudioService(http);
 export const systemService = new SystemService(http);
 export const truthService = new TruthService(http);
+export const videoService = new VideoService(http);

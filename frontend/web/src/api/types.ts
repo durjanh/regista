@@ -883,3 +883,17 @@ export type BroadcastStatus = {
 export type RealtimeNegotiate =
   | { enabled: false }
   | { enabled: true; url: string; groups: string[]; hub: string };
+
+/** Video reading: the reasoning model's account of a batch of frames. Teams are "a" and "b" by kit; nothing is measured. */
+export type VideoTeams = Partial<Record<"a" | "b", { kit: string | null; name: string | null }>>;
+export type VideoEventType = "pass" | "shot" | "goal" | "save" | "tackle" | "foul" | "corner" | "free_kick" | "throw_in"
+  | "goal_kick" | "offside" | "card" | "substitution" | "replay" | "celebration";
+export type VideoFrameRead = {
+  t: number;
+  view: "live" | "replay" | "close_up" | "graphic" | "crowd" | "other";
+  possession: "a" | "b" | null;
+  zone: "defensive_third" | "middle_third" | "attacking_third" | null;
+  scoreboard: string | null;
+};
+export type VideoEventRead = { t: number; type: VideoEventType; team: "a" | "b" | null; description: string };
+export type VideoRead = { teams: VideoTeams; frames: VideoFrameRead[]; events: VideoEventRead[]; summary: string; model?: string };

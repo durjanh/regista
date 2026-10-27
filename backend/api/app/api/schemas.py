@@ -49,6 +49,22 @@ class TranslateRequest(BaseModel):
     to: str = Field(..., pattern=r"^[a-z]{2,3}(-[A-Za-z]{2,4})?$")
 
 
+class VideoFrame(BaseModel):
+    t: float = Field(..., ge=0, le=7200)
+    # A JPEG or PNG data URL, sampled small by the browser (about 512 px wide is ~40 kB).
+    image: str = Field(..., max_length=400_000, pattern=r"^data:image/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$")
+
+
+class VideoTeam(BaseModel):
+    kit: str | None = Field(None, max_length=40)
+    name: str | None = Field(None, max_length=40)
+
+
+class VideoReadRequest(BaseModel):
+    frames: list[VideoFrame] = Field(..., min_length=1, max_length=10)
+    teams: dict[Annotated[str, Field(pattern="^[ab]$")], VideoTeam] | None = None   # labels from earlier batches
+
+
 class StudioAction(BaseModel):
     action: str = Field(..., pattern="^(approve|reject|on_air|edit|kill)$")
     title: str | None = None

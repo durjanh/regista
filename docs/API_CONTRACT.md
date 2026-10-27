@@ -197,6 +197,7 @@ type StudioItem = {
 | `POST /api/ask` | `{ match_id, question, persona, language, upto_t?, history?: {role, content}[] }` | `{ answer: string, citations: Citation[], tool_calls: { tool: string, args: object, ms: number }[], engine, fact_check: FactCheck, agent_trace: AgentStep[] }` |
 | `POST /api/speech` | `{ text, language, persona? }` | `audio/mpeg` bytes, or **HTTP 501** when Speech is not configured (frontend then falls back to `window.speechSynthesis`) |
 | `POST /api/translate` | `{ texts: string[], to: string }` | `{ texts: string[], engine }` |
+| `POST /api/video/read` | `{ frames: [{ t, image }] (1–10, JPEG/PNG/WebP data URLs), teams?: { a?, b?: { kit, name } } }` | `{ teams, frames: [{ t, view, possession, zone, scoreboard }], events: [{ t, type, team, description }], summary, model }` read by the reasoning deployment (gpt-5.5); times are snapped to the frames sent and unknown event types dropped. **HTTP 501** without Azure OpenAI, **502** if the model fails |
 | `GET /api/studio/{match_id}/queue` | query `upto_t` | `StudioItem[]` |
 | `POST /api/studio/{match_id}/items/{item_id}` | `{ action: "approve"\|"reject"\|"on_air"\|"edit", title?, body? }` | `StudioItem` |
 | `GET /api/studio/{match_id}/overlay` | | **SSE**: `event: on_air` `data: StudioItem` whenever an item goes on air; `event: clear` `data: {id}` |
