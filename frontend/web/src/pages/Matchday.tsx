@@ -33,7 +33,10 @@ import { quietly } from "../lib/activity";
 export function Matchday() {
   const { id = "" } = useParams();
   const match = useMatch();
-  const { persona, language, t, accessible, setAccessible, autoplayAudio, setAutoplayAudio } = usePrefs();
+  const { persona, language, t, accessible, setAccessible, autoplayAudio, setAutoplayAudio, favClubs, favPlayers } = usePrefs();
+  // Club and player focus open on the viewer's favourites when they play in this match (a link's ?side / ?player wins).
+  const favSide = favClubs.includes(match.away.team_id) && !favClubs.includes(match.home.team_id) ? "away" : "home";
+  const favPlayer = [...match.home.players, ...match.away.players].find((p) => p.player_key && favPlayers.includes(p.player_key));
   const live = useLiveMatch(id, { persona, language, initialSpeed: accessible ? 10 : 30 });
   // Live broadcast: one shared timeline over Azure Web PubSub, chosen by default when the match is on air. Replay:
   // the viewer's own SSE stream with speed and seek. Every view renders either source (same LiveState shape).
@@ -221,11 +224,11 @@ export function Matchday() {
 
       {view === "casual" ? <CasualView match={match} state={state} colors={colors} narratives={narratives} /> : null}
       {view === "player" ? (
-        <PlayerFocusView match={match} state={state} colors={colors} playerId={params.get("player")} onPlayer={(p) => setParam("player", p)} />
+        <PlayerFocusView match={match} state={state} colors={colors} playerId={params.get("player") ?? favPlayer?.player_id ?? null} onPlayer={(p) => setParam("player", p)} />
       ) : null}
       {view === "club" ? (
         <ClubFocusView match={match} state={state} colors={colors} narratives={narratives}
-          side={params.get("side") === "away" ? "away" : "home"} onSide={(x) => setParam("side", x)} />
+          side={(params.get("side") ?? favSide) === "away" ? "away" : "home"} onSide={(x) => setParam("side", x)} />
       ) : null}
       {view === "metric" ? (
         <SingleMetricView match={match} state={state} colors={colors}

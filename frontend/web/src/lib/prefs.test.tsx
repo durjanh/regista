@@ -32,6 +32,18 @@ describe("PrefsProvider", () => {
     expect(result.current.health?.mode).toBe("offline");
   });
 
+  it("remembers favourite clubs and players, and toggles them off again", async () => {
+    mockApi([HEALTH]);
+    const { result } = renderHook(() => usePrefs(), { wrapper });
+    expect(result.current.favClubs).toEqual([]);
+    await act(async () => result.current.toggleFavClub("argentina"));
+    await act(async () => result.current.toggleFavPlayer("argentina:lionel-messi"));
+    expect(result.current.favClubs).toEqual(["argentina"]);
+    expect(JSON.parse(localStorage.getItem("regista.favPlayers")!)).toEqual(["argentina:lionel-messi"]);
+    await act(async () => result.current.toggleFavClub("argentina"));
+    expect(result.current.favClubs).toEqual([]);
+  });
+
   it("survives broken storage and a failing health check", async () => {
     mockApi([{ match: /health/, status: 500, reply: {} }]);
     const broken = { getItem: () => { throw new Error("x"); }, setItem: () => { throw new Error("x"); }, clear: () => undefined };

@@ -18,6 +18,7 @@ import { PlayerLink } from "./ScoutViz";
 import { ModelTag } from "./SourceBadge";
 import { EmptyState, Skeleton } from "./States";
 import { TeamSwatch } from "./TeamSwatch";
+import { FavouriteToggle } from "./FavouriteToggle";
 import { PlayerAvatar } from "./PlayerAvatar";
 
 // ---------------------------------------------------------------- view state (URL first, then this browser's last choice)
@@ -223,7 +224,7 @@ const fmtKm = (v: number | undefined) => (v === undefined ? "–" : v.toFixed(1)
 export function PlayerFocusView({ match, state, colors, playerId, onPlayer }: {
   match: MatchMeta; state: LiveState; colors: Colors; playerId: string | null; onPlayer: (id: string) => void;
 }) {
-  const { t } = usePrefs();
+  const { t, favPlayers, toggleFavPlayer } = usePrefs();
   const id = match.match_id;
   const roster = useMemo(() => [...match.home.players, ...match.away.players], [match]);
   const fallback = useMemo(
@@ -276,6 +277,9 @@ export function PlayerFocusView({ match, state, colors, playerId, onPlayer }: {
               </div>
               <div className="xs muted">{player.position} · {match[side].name}{st?.goals ? ` · ⚽ ${st.goals}` : ""}{st?.assists ? ` · 🅰 ${st.assists}` : ""}</div>
             </div>
+            {player.player_key ? (
+              <FavouriteToggle name={player.name} on={favPlayers.includes(player.player_key)} onToggle={() => toggleFavPlayer(player.player_key!)} />
+            ) : null}
           </div>
           <label className="row gap-6">
             <span className="xs muted">{t("player.pick")}</span>
@@ -375,7 +379,7 @@ function Spark({ values, color, label }: { values: { minute: number; value: numb
 export function ClubFocusView({ match, state, colors, side, onSide, narratives }: {
   match: MatchMeta; state: LiveState; colors: Colors; side: Side; onSide: (s: Side) => void; narratives: Record<string, Narrative>;
 }) {
-  const { t, language, persona } = usePrefs();
+  const { t, language, persona, favClubs, toggleFavClub } = usePrefs();
   const team = match[side];
   const opp = match[side === "home" ? "away" : "home"];
   const other: Side = side === "home" ? "away" : "home";
@@ -407,6 +411,7 @@ export function ClubFocusView({ match, state, colors, side, onSide, narratives }
               <div className="xs muted">{t("club.pick")}</div>
               <div className="pf-name">{team.name}</div>
             </div>
+            <FavouriteToggle name={team.name} on={favClubs.includes(team.team_id)} onToggle={() => toggleFavClub(team.team_id)} />
           </div>
           <div className="seg" role="group" aria-label={t("club.pick")}>
             {(["home", "away"] as Side[]).map((x) => (

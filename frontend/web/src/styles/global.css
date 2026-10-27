@@ -901,6 +901,9 @@ html.overlay-mode body { overflow: hidden; }
 .ht-table td { padding: 3px 4px; border-top: 1px dashed var(--border); }
 .ht-table td.tnum { text-align: end; font-weight: 750; }
 
+/* Favourite toggle: a filled star in the accent colour once saved. */
+.btn.fav.on { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); }
+
 /* Game rhythm: tempo bars per 15-minute window; fast and slow spells relative to the match's own average. */
 .rhythm { display: grid; grid-template-columns: repeat(auto-fit, minmax(64px, 1fr)); gap: 10px; align-items: end; }
 .rhythm-col { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 0; }

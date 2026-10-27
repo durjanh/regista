@@ -16,8 +16,9 @@ function formatDate(iso: string): string {
 }
 
 function Fixture({ m }: { m: MatchSummary }) {
-  const { t } = usePrefs();
+  const { t, favClubs } = usePrefs();
   const real = m.source?.real;
+  const mine = [m.home, m.away].filter((x) => favClubs.includes(x.team_id));
   return (
     <article className="card fixture">
       <div className="fixture-meta">
@@ -45,6 +46,7 @@ function Fixture({ m }: { m: MatchSummary }) {
         </div>
         <div className="row justify-center gap-6 mt-8">
           <SourceBadge source={m.source} compact />
+          {mine.length ? <span className="pill accent">★ {t("fav.yourClub")}: {mine.map((x) => x.short ?? x.name).join(", ")}</span> : null}
           {m.headline_hint ? <span className="pill">{m.headline_hint}</span> : null}
           {m.planted_changes ? (
             <span className="pill truth-pill" title={`${m.planted_changes} hidden planted change${m.planted_changes === 1 ? "" : "s"}: open the Studio or Matchday and switch on truth mode`}>
@@ -71,9 +73,14 @@ function Fixture({ m }: { m: MatchSummary }) {
 }
 
 export function Hub() {
-  const { t } = usePrefs();
+  const { t, favClubs } = usePrefs();
   const { data, error, loading, reload } = useAsync(() => matchService.list(), []);
-  const sorted = data ? [...data].sort((a, b) => (b.source?.real?.date ?? b.kickoff).localeCompare(a.source?.real?.date ?? a.kickoff)) : [];
+  // Matches with a favourite club first, then newest first.
+  const isMine = (m: MatchSummary) => favClubs.includes(m.home.team_id) || favClubs.includes(m.away.team_id);
+  const sorted = data
+    ? [...data].sort((a, b) => Number(isMine(b)) - Number(isMine(a)) ||
+        (b.source?.real?.date ?? b.kickoff).localeCompare(a.source?.real?.date ?? a.kickoff))
+    : [];
 
   return (
     <div className="stack gap-22">

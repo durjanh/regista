@@ -16,6 +16,11 @@ type Prefs = {
   setTheme: (t: Theme) => void;
   setAccessible: (a: boolean) => void;
   setAutoplayAudio: (a: boolean) => void;
+  /** Favourite clubs (team ids) and players (stable player keys): match pages open on them, the hub lists them first. */
+  favClubs: string[];
+  favPlayers: string[];
+  toggleFavClub: (teamId: string) => void;
+  toggleFavPlayer: (playerKey: string) => void;
   t: (key: I18nKey) => string;
   health: Health | null;
 };
@@ -57,6 +62,16 @@ export function PrefsProvider({ children }: { children: ReactNode }) {
   const [theme, setTheme] = usePersisted<Theme>("theme", "dark");
   const [accessible, setAccessibleRaw] = usePersisted<boolean>("accessible", false);
   const [autoplayAudio, setAutoplayAudio] = usePersisted<boolean>("autoplayAudio", false);
+  const [favClubs, setFavClubs] = usePersisted<string[]>("favClubs", []);
+  const [favPlayers, setFavPlayers] = usePersisted<string[]>("favPlayers", []);
+  const toggleFavClub = useCallback(
+    (id: string) => setFavClubs(favClubs.includes(id) ? favClubs.filter((x) => x !== id) : [...favClubs, id]),
+    [favClubs, setFavClubs],
+  );
+  const toggleFavPlayer = useCallback(
+    (key: string) => setFavPlayers(favPlayers.includes(key) ? favPlayers.filter((x) => x !== key) : [...favPlayers, key]),
+    [favPlayers, setFavPlayers],
+  );
   const [health, setHealth] = useState<Health | null>(null);
 
   useEffect(() => {
@@ -103,10 +118,12 @@ export function PrefsProvider({ children }: { children: ReactNode }) {
     () => ({
       persona, language, theme, accessible, autoplayAudio,
       setPersona, setLanguage, setTheme, setAccessible, setAutoplayAudio,
+      favClubs, favPlayers, toggleFavClub, toggleFavPlayer,
       t: (key: I18nKey) => translate(language, key),
       health,
     }),
-    [persona, language, theme, accessible, autoplayAudio, setPersona, setLanguage, setTheme, setAccessible, setAutoplayAudio, health],
+    [persona, language, theme, accessible, autoplayAudio, setPersona, setLanguage, setTheme, setAccessible, setAutoplayAudio,
+      favClubs, favPlayers, toggleFavClub, toggleFavPlayer, health],
   );
 
   return <PrefsContext.Provider value={value}>{children}</PrefsContext.Provider>;
