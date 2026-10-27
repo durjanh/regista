@@ -137,6 +137,17 @@ export function Matchday() {
     }
   };
 
+  // A persona change shows at once: the latest big moment is rewritten in the new voice. Later lines follow on their
+  // own in the viewer's replay; the shared broadcast keeps one broadcaster voice for everyone.
+  const shownPersona = useRef(persona);
+  useEffect(() => {
+    if (persona === shownPersona.current) return;
+    shownPersona.current = persona;
+    const latest = sortedMoments.find((m) => m.importance >= 45) ?? sortedMoments[0];
+    if (latest) void narrate(latest.id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [persona]);
+
   const stats = state.latest?.stats;
 
   // Truth loop: detected changes stream in live; truth mode reveals what was planted and how the agents scored.
@@ -190,6 +201,7 @@ export function Matchday() {
             <SourceSwitch source={usingBroadcast ? "broadcast" : "replay"} onChange={chooseSource} />
             {usingBroadcast ? <LiveBadge connection={bc.connection} latencyMs={bc.latencyMs} /> : null}
             <span className="xs muted">{usingBroadcast ? t("bc.liveHint") : t("bc.replayHint")}</span>
+            {usingBroadcast && persona !== "broadcaster" ? <span className="xs muted">{t("bc.personaHint")}</span> : null}
             {wantBroadcast && bc.available === false ? <span className="xs muted">{t("bc.unavailable")}</span> : null}
           </div>
         ) : null}

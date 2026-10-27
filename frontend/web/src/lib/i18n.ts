@@ -199,6 +199,7 @@ const en = {
   "bc.replay": "Replay",
   "bc.liveHint": "Shared timeline: everyone sees the same moment",
   "bc.replayHint": "Your own replay: choose the speed and jump around",
+  "bc.personaHint": "One broadcaster voice for everyone; your persona rewrites the latest moment, and Replay uses it for every line",
   "bc.badge": "Live",
   "bc.connecting": "Connecting to the live broadcast…",
   "bc.reconnecting": "Reconnecting…",

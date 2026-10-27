@@ -71,6 +71,17 @@ describe("Matchday page", () => {
     expect(document.querySelector(".metric-stage")).toHaveTextContent("0.85");
   });
 
+  it("rewrites the latest moment in the new voice as soon as the persona changes", async () => {
+    renderMatchday();
+    await feed();
+    await userEvent.selectOptions(screen.getByRole("combobox", { name: "Persona" }), "kids");
+    await waitFor(() => {
+      const call = fetch.mock.calls.find(([url, init]) => String(url).endsWith("/api/narrate") && String(init?.body).includes('"persona":"kids"'));
+      expect(call).toBeTruthy();
+    });
+    expect(FakeEventSource.last.url).toContain("persona=kids");                   // and the replay carries on in it
+  });
+
   it("opens Player focus and Team focus from the URL", async () => {
     renderMatchday("?view=club&side=away");
     await feed();
