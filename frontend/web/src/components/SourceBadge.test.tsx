@@ -16,6 +16,13 @@ describe("SourceBadge", () => {
     expect(screen.getByRole("link", { name: "bolavip.com" })).toBeInTheDocument();
   });
 
+  it("says a what-if never happened and credits the dataset only for team strength", () => {
+    render(<SourceBadge source={{ kind: "what_if", disclosure: "", dataset }} />);
+    expect(screen.getByText(/This match never happened/)).toBeInTheDocument();
+    expect(screen.getByText(/Team strength \(Elo\) and calibration from real results/)).toBeInTheDocument();
+    expect(screen.queryByText(/^Dataset:/)).not.toBeInTheDocument();
+  });
+
   it("labels modelled goals and shows no report links", () => {
     render(<SourceBadge source={{ kind: "real_result", goals_modelled: true, disclosure: "Modelled.", dataset }} />);
     expect(screen.getByText("Real score · Goals modelled", { selector: "strong" })).toBeInTheDocument();
