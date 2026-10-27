@@ -6,6 +6,8 @@ Built for the Microsoft + Premier League *Inside the Game* Developer Hackathon w
 
 **Try it live:** https://lively-mushroom-048c7b70f.2.azurestaticapps.net (no login; [judge mode](#judge-mode) below). One API instance stays warm, so there's no cold start.
 
+**Demo video (under 2 min):** https://www.youtube.com/watch?v=aktUtgPtDq0
+
 ![Control room at 77': a tiring full-back explained with cited evidence, the Verifier drill catching a planted wrong number before air, and the truth panel scoring both planted changes (recall 100%, 0 false alarms, the press switch detected in 4 min 46 s)](docs/screenshots/studio-hero.png)
 
 > A *regista* is the deep-lying playmaker who sees the whole pitch and dictates the tempo. Regista does that for every viewer, producer and manager: what happened, **why it mattered**, with the evidence.
