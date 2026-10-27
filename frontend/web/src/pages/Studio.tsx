@@ -422,6 +422,10 @@ function StudioConsole({ match }: { match: MatchMeta }) {
       />
       <div className="card p-12">
         <LiveControls {...live} />
+        <div className="xs muted mt-6">
+          Your preview: only you see this clock, so you can run ahead and prepare graphics. Viewers on Matchday follow the
+          broadcast in <b>Go live to all viewers</b> below, at its own speed.
+        </div>
         <div className="row mt-10 gap-12">
           <label className="toggle" title="Reveal the hidden planted changes and the Grader's verdicts">
             <input type="checkbox" checked={truthMode} onChange={(e) => setTruthMode(e.target.checked)} />

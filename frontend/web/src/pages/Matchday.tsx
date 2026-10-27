@@ -4,6 +4,7 @@ import { matchService, narrationService, truthService } from "../api";
 import type { Evidence, MatchEvent, Narrative } from "../api/types";
 import { ChaosBand, ChaosMeter, EventDetail } from "../components/ChaosMeter";
 import { EventLayer } from "../components/EventLayer";
+import { ShapeLayer } from "../components/ShapeLayer";
 import {
   CasualView, ClubFocusView, EventTicker, KeyBattle, PlayerFocusView, SingleMetricView, ViewSwitch, useMatchdayView, type Metric,
 } from "../components/FanViews";
@@ -465,6 +466,9 @@ export function Matchday() {
               </div>
             ) : (
             <Pitch label="Live pitch view">
+              {!evidence ? (
+                <ShapeLayer events={state.events} home={match.home} away={match.away} homeColor={colors.home} awayColor={colors.away} />
+              ) : null}
               <EventLayer
                 events={pitch.events as MatchEvent[]}
                 homeId={match.home.team_id}
