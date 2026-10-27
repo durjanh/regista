@@ -179,8 +179,12 @@ type Stands = { group: THREE.Group; near: THREE.Group; cheer: (now: number, unti
  * ring lined with floodlights. City landmarks: London gets a great illuminated arch over the far stand, Mexico City a
  * steep three-tier bowl. The near side is a separate group: it fills the foreground of the wide shot, and the follow
  * camera (which sits in it, as a broadcast camera does) and the auto-eventing feed hide it.
+ *
+ * `soft` is for the auto-eventing feed's high, wide camera, which sees the seat rows more than the fans: one muted seat
+ * colour instead of alternating rows (they read as stripes from up there) and fans toned down, so the crowd reads as a
+ * crowd. Only the stands change; the pitch, ball and kits the detector reads are untouched.
  */
-function stands(v: VenueStyle, homeColours: string[], awayColours: string[]): Stands {
+function stands(v: VenueStyle, homeColours: string[], awayColours: string[], soft = false): Stands {
   const g = new THREE.Group();
   const near = new THREE.Group();
   const roofMat = new THREE.MeshStandardMaterial({ color: "#0d121c", roughness: 0.45, metalness: 0.5, side: THREE.DoubleSide });
@@ -247,8 +251,9 @@ function stands(v: VenueStyle, homeColours: string[], awayColours: string[]): St
         b.idx.push(base, base + 1, firstV, base + 1, firstV + 1, firstV);
     }
   };
-  const seatA = new THREE.Color(v.seats[0]), seatB = new THREE.Color(v.seats[1]);
   const dark = new THREE.Color("#1b2230"), led = new THREE.Color("#0f6e4f");
+  const seatA = new THREE.Color(v.seats[0]), seatB = soft ? seatA : new THREE.Color(v.seats[1]);
+  if (soft) seatA.lerp(dark, 0.72);
   const world: THREE.Vector3[] = [], nearWorld: THREE.Vector3[] = [];
   for (let t = 0; t < v.tiers; t++) {
     for (let r = 0; r < ROWS; r++) {
@@ -328,7 +333,7 @@ function stands(v: VenueStyle, homeColours: string[], awayColours: string[]): St
       const standing = Math.abs(Math.sin(n * 1.7)) % 1 < 0.22 ? 0.35 : 0;
       const y = p.y + 0.38 + standing;
       bodies.setMatrixAt(n, mat.makeTranslation(p.x, y, p.z));
-      bodies.setColorAt(n, colour.set(shirt));
+      bodies.setColorAt(n, soft ? colour.set(shirt).lerp(dark, 0.3) : colour.set(shirt));
       heads.setMatrixAt(n, mat.makeTranslation(p.x, y + 0.5, p.z));
       heads.setColorAt(n, colour.set(SKINS[n % SKINS.length]));
       hair.setMatrixAt(n, mat.makeTranslation(p.x, y + 0.52, p.z));
@@ -731,7 +736,7 @@ export function Pitch3D({ events, home, away, homeColor, awayColor, label, feed,
     surround.receiveShadow = true;
     const kits = matchKits(home, away);
     const homeKit = kits.home, awayKit = kits.away;
-    const ground = stands(venue, [homeKit.shirt, homeKit.stripe ?? homeKit.shorts], [awayKit.shirt, awayKit.stripe ?? awayKit.shorts]);
+    const ground = stands(venue, [homeKit.shirt, homeKit.stripe ?? homeKit.shorts], [awayKit.shirt, awayKit.stripe ?? awayKit.shorts], !!ballColour);
     const goalScale = ballColour ? 1.25 : 1.7;                                               // in proportion to the figures
     scene.add(pitch, goal(1, goalScale), goal(-1, goalScale), ground.group, ground.near, boards(venue.city));
     if (venue.mountains) scene.add(mountains(venue));
