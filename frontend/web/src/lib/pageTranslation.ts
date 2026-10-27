@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { languageService } from "../api";
 import { quietly } from "./activity";
 import { glossary } from "./glossary";
@@ -206,14 +206,45 @@ export function startPageTranslation(language: string, root: HTMLElement = docum
   };
 }
 
-/** Translate the whole page into `language`; English restores the originals. */
+/** Text left in another script after switching back to English: not the language menu, not text kept as is. */
+export function leftoverForeignText(root: HTMLElement = document.body): string[] {
+  const foreign = /[\u0600-\u06FF\u0900-\u097F\u3040-\u30FF\u4E00-\u9FFF]/;
+  const out: string[] = [];
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+    const text = n.nodeValue ?? "";
+    if (foreign.test(text) && !n.parentElement?.closest(`${SKIP_TEXT}, select, option`)) out.push(text.trim());
+  }
+  return out;
+}
+
+const RELOAD_KEY = "regista.txReloadAt";
+
+/**
+ * Translate the whole page into `language`; English restores the originals. As a safety net, if any text is still in
+ * another script a moment after switching back to English (a label both React and the translator wrote), the page
+ * reloads once in English, which always renders clean: the language choice is saved. At most once a minute.
+ */
 export function usePageTranslation(language: string) {
+  const previous = useRef(language);
   useEffect(() => {
+    const from = previous.current;
+    previous.current = language;
     const stop = startPageTranslation(language);
-    if (language === "en") {
-      stop();                                                       // the first scan restored English; nothing to watch
-      return undefined;
-    }
-    return stop;
+    if (language !== "en") return stop;
+    stop();                                                         // the first scan restored English; nothing to watch
+    if (from === "en") return undefined;
+    const check = window.setTimeout(() => {
+      if (!leftoverForeignText().length) return;
+      try {
+        const last = Number(sessionStorage.getItem(RELOAD_KEY) ?? 0);
+        if (Date.now() - last < 60_000) return;
+        sessionStorage.setItem(RELOAD_KEY, String(Date.now()));
+      } catch {
+        return;                                                     // no storage: never risk a reload loop
+      }
+      window.location.reload();
+    }, 800);
+    return () => window.clearTimeout(check);
   }, [language]);
 }

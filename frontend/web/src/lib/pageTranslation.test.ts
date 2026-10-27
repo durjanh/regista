@@ -1,7 +1,7 @@
 import { waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { languageService } from "../api";
-import { startPageTranslation } from "./pageTranslation";
+import { leftoverForeignText, startPageTranslation } from "./pageTranslation";
 
 const fake = (texts: string[], to: string) => Promise.resolve({ texts: texts.map((s) => `[${to}] ${s}`), engine: "azure" });
 
@@ -74,5 +74,14 @@ describe("glossary", () => {
     expect(glossary("es", "GOAL")).toBe("GOL");
     expect(glossary("de", "GOAL")).toBe("TOR");
     expect(glossary("es", "ST")).toBeUndefined();
+  });
+});
+
+describe("switching back to English", () => {
+  it("finds labels left in another script, but not the language menu or text kept as is", () => {
+    const root = document.createElement("div");
+    root.innerHTML = `<nav><a>Matches</a><a>स्काउटिंग</a></nav>
+      <select><option>हिन्दी</option></select><div translate="no">日本語の回答</div><p>Nguyễn Xuân Son</p>`;
+    expect(leftoverForeignText(root)).toEqual(["स्काउटिंग"]);
   });
 });
