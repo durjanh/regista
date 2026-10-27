@@ -214,7 +214,7 @@ export function HalftimePack({ match, events, minute, ended, queue, onQueued }: 
                     <span className="row gap-6">
                       <button className="btn sm" onClick={() => copy(g, cue)}>{copied === g.key ? <><IconApprove /> {t("ht.copied")}</> : <><IconCopy /> {t("ht.copy")}</>}</button>
                       {queued ? null : (
-                        <button className="btn sm primary" onClick={() => add(g)} disabled={adding !== null}>
+                        <button className="btn sm primary" onClick={() => add(g)} disabled={adding !== null} aria-busy={adding === g.key}>
                           {adding === g.key ? t("ht.adding") : <><IconAdd /> {t("ht.add")}</>}
                         </button>
                       )}

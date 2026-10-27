@@ -193,7 +193,8 @@ export function Ask() {
           </div>
           <div className="suggestions">
             {suggestions.map((s) => (
-              <button key={s} className="suggestion" onClick={() => void send(s)} disabled={busy}>
+              <button key={s} className="suggestion" onClick={() => void send(s)} disabled={busy}
+                aria-busy={busy && turns.at(-1)?.content === s}>
                 {s}
               </button>
             ))}

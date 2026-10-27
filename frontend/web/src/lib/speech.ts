@@ -28,9 +28,11 @@ export function speakable(text: string): string {
 /**
  * Speak via Azure AI Speech (POST /api/speech). Falls back to the browser's speechSynthesis
  * when the API answers 501 (Speech not configured) or fails.
- * Resolves when playback ends.
+ * Resolves when playback ends; `onStart` fires when the audio actually starts, after synthesis.
  */
-export async function speak(text: string, language: string, persona?: string): Promise<"azure" | "browser" | "none"> {
+export async function speak(
+  text: string, language: string, persona?: string, onStart?: () => void,
+): Promise<"azure" | "browser" | "none"> {
   stopSpeaking();
   const clean = speakable(text);
   if (!clean) return "none";
@@ -43,6 +45,7 @@ export async function speak(text: string, language: string, persona?: string): P
       await new Promise<void>((resolve) => {
         audio.onended = () => resolve();
         audio.onerror = () => resolve();
+        audio.onplaying = () => onStart?.();
         audio.play().catch(() => resolve());
       });
       return "azure";
@@ -59,6 +62,7 @@ export async function speak(text: string, language: string, persona?: string): P
   await new Promise<void>((resolve) => {
     utter.onend = () => resolve();
     utter.onerror = () => resolve();
+    utter.onstart = () => onStart?.();
     window.speechSynthesis.speak(utter);
   });
   return "browser";
