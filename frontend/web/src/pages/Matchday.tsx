@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { narrationService, truthService } from "../api";
 import type { Evidence, MatchEvent, Narrative } from "../api/types";
@@ -34,10 +34,11 @@ import { ShootoutPanel } from "../components/Shootout";
 import { BroadcastOverlay } from "../components/BroadcastOverlay";
 import { ModelTag } from "../components/SourceBadge";
 import { webglAvailable } from "../lib/webgl";
+import { lazyPage } from "../lib/lazyPage";
 import { venueStyle } from "../lib/venue";
 
 // Three.js loads only when the 3D pitch is shown.
-const Pitch3D = lazy(() => import("../components/Pitch3D").then((m) => ({ default: m.Pitch3D })));
+const Pitch3D = lazyPage(() => import("../components/Pitch3D").then((m) => ({ default: m.Pitch3D })));
 type PitchMode = "3d" | "2d";
 const storedPitchMode = (): PitchMode => {
   try {

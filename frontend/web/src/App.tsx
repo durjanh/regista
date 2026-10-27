@@ -1,26 +1,27 @@
-import { lazy, Suspense } from "react";
+import { Suspense } from "react";
 import { BrowserRouter, Link, Route, Routes } from "react-router-dom";
 import { AppLayout, MatchLayout } from "./components/Layout";
-import { EmptyState, Skeleton } from "./components/States";
+import { EmptyState, Loading } from "./components/States";
 import { PrefsProvider } from "./lib/prefs";
+import { lazyPage } from "./lib/lazyPage";
 import { Hub } from "./pages/Hub";
 import { Matchday } from "./pages/Matchday";
 
 // Secondary surfaces load on demand to keep the fan view fast on mobile.
-const Tactics = lazy(() => import("./pages/Tactics").then((m) => ({ default: m.Tactics })));
-const Ask = lazy(() => import("./pages/Ask").then((m) => ({ default: m.Ask })));
-const Recap = lazy(() => import("./pages/Recap").then((m) => ({ default: m.Recap })));
-const Studio = lazy(() => import("./pages/Studio").then((m) => ({ default: m.Studio })));
-const Overlay = lazy(() => import("./pages/Overlay").then((m) => ({ default: m.Overlay })));
-const Forge = lazy(() => import("./pages/Forge").then((m) => ({ default: m.Forge })));
-const TeamDNA = lazy(() => import("./pages/TeamDNA").then((m) => ({ default: m.TeamDNA })));
-const Dugout = lazy(() => import("./pages/Dugout").then((m) => ({ default: m.Dugout })));
-const Scouting = lazy(() => import("./pages/Scouting").then((m) => ({ default: m.Scouting })));
-const PlayerDNA = lazy(() => import("./pages/PlayerDNA").then((m) => ({ default: m.PlayerDNA })));
-const TeamReport = lazy(() => import("./pages/TeamReport").then((m) => ({ default: m.TeamReport })));
-const Ops = lazy(() => import("./pages/Ops").then((m) => ({ default: m.Ops })));
-const AutoEvent = lazy(() => import("./pages/AutoEvent").then((m) => ({ default: m.AutoEvent })));
-const Favourites = lazy(() => import("./pages/Favourites").then((m) => ({ default: m.Favourites })));
+const Tactics = lazyPage(() => import("./pages/Tactics").then((m) => ({ default: m.Tactics })));
+const Ask = lazyPage(() => import("./pages/Ask").then((m) => ({ default: m.Ask })));
+const Recap = lazyPage(() => import("./pages/Recap").then((m) => ({ default: m.Recap })));
+const Studio = lazyPage(() => import("./pages/Studio").then((m) => ({ default: m.Studio })));
+const Overlay = lazyPage(() => import("./pages/Overlay").then((m) => ({ default: m.Overlay })));
+const Forge = lazyPage(() => import("./pages/Forge").then((m) => ({ default: m.Forge })));
+const TeamDNA = lazyPage(() => import("./pages/TeamDNA").then((m) => ({ default: m.TeamDNA })));
+const Dugout = lazyPage(() => import("./pages/Dugout").then((m) => ({ default: m.Dugout })));
+const Scouting = lazyPage(() => import("./pages/Scouting").then((m) => ({ default: m.Scouting })));
+const PlayerDNA = lazyPage(() => import("./pages/PlayerDNA").then((m) => ({ default: m.PlayerDNA })));
+const TeamReport = lazyPage(() => import("./pages/TeamReport").then((m) => ({ default: m.TeamReport })));
+const Ops = lazyPage(() => import("./pages/Ops").then((m) => ({ default: m.Ops })));
+const AutoEvent = lazyPage(() => import("./pages/AutoEvent").then((m) => ({ default: m.AutoEvent })));
+const Favourites = lazyPage(() => import("./pages/Favourites").then((m) => ({ default: m.Favourites })));
 
 function NotFound() {
   return (
@@ -32,7 +33,8 @@ function NotFound() {
   );
 }
 
-const fallback = <Skeleton h={420} />;
+// Only the overlay route waits here; app pages load inside the layout (components/PageBoundary).
+const fallback = <Loading />;
 
 export function App() {
   return (

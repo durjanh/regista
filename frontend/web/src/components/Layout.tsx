@@ -9,6 +9,7 @@ import { TeamLink, TeamSwatch } from "./TeamSwatch";
 import { ActivityIndicator } from "./ActivityIndicator";
 import { ErrorState, Loading, Skeleton } from "./States";
 import { TopBar } from "./TopBar";
+import { PageBoundary } from "./PageBoundary";
 import { teamReportPath } from "../lib/players";
 import { IconAsk, IconAutoEvent, IconDugout, IconMatchday, IconRecap, IconReport, IconStudio, IconTactics } from "./icons";
 
@@ -23,7 +24,9 @@ export function AppLayout() {
       <TopBar />
       <ActivityIndicator />
       <main id="main" className="main">
-        <Outlet />
+        <PageBoundary>
+          <Outlet />
+        </PageBoundary>
       </main>
       <footer className="footer">
         <span>{t("footer.disclaimer")}</span>
@@ -131,7 +134,9 @@ export function MatchLayout() {
           ))}
         </nav>
       </div>
-      <Outlet context={{ match } satisfies MatchContext} />
+      <PageBoundary>
+        <Outlet context={{ match } satisfies MatchContext} />
+      </PageBoundary>
     </div>
   );
 }

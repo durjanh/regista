@@ -1,4 +1,4 @@
-import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { matchService } from "../api";
 import type { MatchEvent, MatchMeta } from "../api/types";
 import { useMatch } from "../components/Layout";
@@ -12,9 +12,10 @@ import { clock, cx, teamColor } from "../lib/format";
 import { BIBS, matchKits } from "../lib/kits";
 import { usePrefs } from "../lib/prefs";
 import { webglAvailable } from "../lib/webgl";
+import { lazyPage } from "../lib/lazyPage";
 import { venueStyle } from "../lib/venue";
 
-const Pitch3D = lazy(() => import("../components/Pitch3D").then((m) => ({ default: m.Pitch3D })));
+const Pitch3D = lazyPage(() => import("../components/Pitch3D").then((m) => ({ default: m.Pitch3D })));
 
 const STARTS = [1, 20, 46, 60, 75];
 const EVERY_MS = 66;                                                     // ~15 analysed frames a second
