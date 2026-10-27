@@ -1108,3 +1108,4 @@ html.overlay-mode body { overflow: hidden; }
 .text-center { text-align: center; }
 .video-read table td:first-child, .video-read table th:first-child { text-align: start; }
 .video-read table td:last-child, .video-read table th:last-child { text-align: end; }
+.spinner-inline { display: inline-block; width: 12px; height: 12px; border-radius: 50%; border: 2px solid currentColor; border-top-color: transparent; animation: spin 0.8s linear infinite; vertical-align: -1px; margin-inline-end: 6px; }

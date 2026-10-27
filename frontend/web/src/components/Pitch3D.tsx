@@ -29,8 +29,10 @@ type Props = {
   awayColor: string;
   label: string;
   /** Feed mode: the clean broadcast feed that auto-eventing reads (fixed calibrated camera, hi-vis ball moving at
-   *  its real speed, no rings or name tags). `onFrame` gets the canvas right after each frame is drawn. */
-  feed?: { ballColour: string; onFrame: (canvas: HTMLCanvasElement) => void; clock: () => number };
+   *  its real speed, no rings or name tags). `onFrame` gets the canvas right after each frame is drawn. `timecode`
+   *  burns the machine-readable clock into the picture: only needed while recording a clip (the live detector is
+   *  handed the clock directly), so the flickering strip isn't on screen the rest of the time. */
+  feed?: { ballColour: string; onFrame: (canvas: HTMLCanvasElement) => void; clock: () => number; timecode?: boolean };
   /** The ground for this match's venue (lib/venue.ts). */
   venue: VenueStyle;
   /** "wide": the whole stadium, both goals and every stand, drag to look round and scroll to zoom;
@@ -664,6 +666,8 @@ export function Pitch3D({ events, home, away, homeColor, awayColor, label, feed,
   onFrame.current = feed?.onFrame;
   const feedClock = useRef(feed?.clock);
   feedClock.current = feed?.clock;
+  const burnTimecode = useRef(feed?.timecode ?? false);
+  burnTimecode.current = feed?.timecode ?? false;
   const ballColour = feed?.ballColour;
 
   useEffect(() => {
@@ -1170,10 +1174,12 @@ export function Pitch3D({ events, home, away, homeColor, awayColor, label, feed,
         camera.position.set(...FEED_CAMERA.position);                                          // fixed and calibrated
         camera.lookAt(...FEED_CAMERA.target);
         renderer.render(scene, camera);
-        stamp(feedClock.current?.() ?? 0);
-        renderer.autoClear = false;
-        renderer.render(hud, hudCam);
-        renderer.autoClear = true;
+        if (burnTimecode.current) {
+          stamp(feedClock.current?.() ?? 0);
+          renderer.autoClear = false;
+          renderer.render(hud, hudCam);
+          renderer.autoClear = true;
+        }
         onFrame.current?.(renderer.domElement);
         return;
       }

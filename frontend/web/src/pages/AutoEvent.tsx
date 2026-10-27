@@ -257,7 +257,7 @@ export function AutoEvent() {
             can3d ? (
               <Suspense fallback={<Skeleton h={360} />}>
                 <Pitch3D events={live.state.events} home={match.home} away={match.away} homeColor={teamColor(match.home)}
-                  awayColor={teamColor(match.away)} label="Broadcast feed for auto-eventing" venue={venue} feed={{ ballColour: ball, onFrame, clock: matchClock }} />
+                  awayColor={teamColor(match.away)} label="Broadcast feed for auto-eventing" venue={venue} feed={{ ballColour: ball, onFrame, clock: matchClock, timecode: recording !== null }} />
               </Suspense>
             ) : (
               <EmptyState>This browser can't render the 3D feed (no WebGL). Upload a recorded clip instead.</EmptyState>

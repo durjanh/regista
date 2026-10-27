@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { videoService } from "../api";
+import { quietly } from "../lib/activity";
 import type { VideoRead, VideoTeams } from "../api/types";
 import { BATCH, COUNTED, grabFrame, sampleTimes, tally, teamLabel, type Side } from "../lib/videoRead";
 import { ErrorState } from "./States";
@@ -51,10 +52,11 @@ export function VideoReader({ src, name, onSeek }: { src: string; name: string; 
     let i = from;
     try {
       for (; i < times.length && !stop.current; i += BATCH) {
-        const frames = [];
+        const frames: { t: number; image: string }[] = [];
         for (const t of times.slice(i, i + BATCH)) frames.push({ t, image: await grabFrame(v, t, canvas.current) });
         if (stop.current) break;
-        const read = await videoService.read(frames, teams);
+        // The panel shows its own progress, so the page-wide indicator stays out of these long calls.
+        const read = await quietly(() => videoService.read(frames, teams));
         teams = read.teams;
         setReads((r) => [...r, read]);
         setProgress({ done: Math.min(i + BATCH, times.length), total: times.length });
@@ -110,7 +112,12 @@ export function VideoReader({ src, name, onSeek }: { src: string; name: string; 
           <span className="tnum muted">{finished ? "Done" : busy ? "Reading" : "Stopped"} · {progress.done}/{progress.total} frames</span>
         </div>
       ) : busy ? (
-        <div className="small muted mb-10" role="status">Sampling the first frames…</div>
+        <div className="small muted mb-10" role="status">
+          <span className="spinner-inline" aria-hidden="true" /> gpt-5.5 is reading the first 8 frames: the figures below fill in as each batch comes back.
+        </div>
+      ) : null}
+      {busy && progress && !finished ? (
+        <div className="xs muted mb-10">gpt-5.5 is reading the next batch; each one takes a few seconds.</div>
       ) : null}
 
       {error ? <ErrorState message={error} onRetry={() => void run(resumeAt, reads)} /> : null}
