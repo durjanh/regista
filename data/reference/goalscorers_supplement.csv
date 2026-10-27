@@ -1,0 +1,1040 @@
+date,home_team,away_team,team,scorer,minute,own_goal,penalty,assist,source
+2026-07-24,Cambodia,Singapore,Singapore,Shawal Anuar,22,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_Group_A
+2026-07-24,Cambodia,Singapore,Cambodia,Ouk Sovann,55,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_Group_A
+2026-07-24,Cambodia,Singapore,Singapore,Ilhan Fandi,90,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_Group_A
+2026-07-24,Timor-Leste,Vietnam,Vietnam,Đỗ Hoàng Hên,7,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_Group_A
+2026-07-24,Timor-Leste,Vietnam,Vietnam,Nguyễn Đình Bắc,31,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_Group_A
+2026-07-24,Timor-Leste,Vietnam,Vietnam,Đỗ Hoàng Hên,41,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_Group_A
+2026-07-24,Timor-Leste,Vietnam,Vietnam,Nguyễn Đình Bắc,42,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_Group_A
+2026-07-24,Timor-Leste,Vietnam,Vietnam,Nguyễn Xuân Son,45,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_Group_A
+2026-07-24,Timor-Leste,Vietnam,Vietnam,Nguyễn Đình Bắc,65,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_Group_A
+2026-07-24,Timor-Leste,Vietnam,Vietnam,Nguyễn Quang Hải,79,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_Group_A
+2026-07-25,Laos,Thailand,Thailand,Teerasak Poeiphimai,11,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_Group_B
+2026-07-25,Laos,Thailand,Thailand,Kakana Khamyok,27,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_Group_B
+2026-07-25,Laos,Thailand,Thailand,Yotsakorn Burapha,49,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_Group_B
+2026-07-25,Laos,Thailand,Thailand,Sarach Yooyen,52,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_Group_B
+2026-07-25,Laos,Thailand,Thailand,Kakana Khamyok,59,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_Group_B
+2026-07-25,Myanmar,Malaysia,Myanmar,Myat Kaung Khant,10,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_Group_B
+2026-07-25,Myanmar,Malaysia,Malaysia,Paulo Josué,52,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_Group_B
+2026-07-25,Myanmar,Malaysia,Malaysia,Paulo Josué,57,FALSE,TRUE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_Group_B
+2026-07-27,Indonesia,Cambodia,Indonesia,Mitchell Baker,6,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_Group_A
+2026-07-27,Indonesia,Cambodia,Indonesia,Mitchell Baker,15,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_Group_A
+2026-07-27,Indonesia,Cambodia,Indonesia,Sandy Walsh,24,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_Group_A
+2026-07-27,Indonesia,Cambodia,Cambodia,Nadeo Argawinata,48,TRUE,FALSE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_Group_A
+2026-07-27,Indonesia,Cambodia,Indonesia,Mitchell Baker,56,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_Group_A
+2026-07-27,Indonesia,Cambodia,Indonesia,Jens Raven,86,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_Group_A
+2026-07-27,Singapore,Timor-Leste,Singapore,Ilhan Fandi,41,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_Group_A
+2026-07-27,Singapore,Timor-Leste,Singapore,Song Ui-young,56,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_Group_A
+2026-07-28,Malaysia,Laos,Malaysia,Paulo Josué,45,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_Group_B
+2026-07-28,Malaysia,Laos,Malaysia,Endrick,57,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_Group_B
+2026-07-28,Malaysia,Laos,Malaysia,Viengxay Sydavong,66,TRUE,FALSE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_Group_B
+2026-07-28,Malaysia,Laos,Malaysia,Wan Kuzain,84,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_Group_B
+2026-07-28,Philippines,Myanmar,Myanmar,Kyaw Min Oo,7,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_Group_B
+2026-07-28,Philippines,Myanmar,Myanmar,Than Paing,28,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_Group_B
+2026-07-28,Philippines,Myanmar,Philippines,Jarvey Gayoso,68,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_Group_B
+2026-07-28,Philippines,Myanmar,Myanmar,Win Naing Tun,81,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_Group_B
+2026-07-28,Philippines,Myanmar,Myanmar,Than Paing,83,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_Group_B
+2026-07-31,Timor-Leste,Indonesia,Indonesia,Shayne Pattynama,74,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_Group_A
+2026-07-31,Timor-Leste,Indonesia,Indonesia,Thom Haye,78,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_Group_A
+2026-07-31,Timor-Leste,Indonesia,Indonesia,Mitchell Baker,81,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_Group_A
+2026-08-01,Laos,Philippines,Laos,Damoth Thongkhamsavath,7,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_Group_B
+2026-08-01,Laos,Philippines,Philippines,John Lucero,47,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_Group_B
+2026-08-01,Laos,Philippines,Philippines,Viengxay Sidavong,52,TRUE,FALSE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_Group_B
+2026-08-01,Laos,Philippines,Philippines,Jarvey Gayoso,60,FALSE,TRUE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_Group_B
+2026-08-01,Laos,Philippines,Philippines,Daisuke Sato,88,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_Group_B
+2026-08-01,Thailand,Malaysia,Thailand,Yotsakorn Burapha,38,FALSE,TRUE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_Group_B
+2026-08-01,Thailand,Malaysia,Thailand,Teerasak Poeiphimai,56,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_Group_B
+2026-08-03,Cambodia,Timor-Leste,Cambodia,Hav Soknet,16,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_Group_A
+2026-08-03,Cambodia,Timor-Leste,Cambodia,Hav Soknet,63,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_Group_A
+2026-08-03,Cambodia,Timor-Leste,Cambodia,Mon Rado,90,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_Group_A
+2026-08-03,Indonesia,Vietnam,Vietnam,Nguyễn Văn Vĩ,6,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_Group_A
+2026-08-03,Indonesia,Vietnam,Vietnam,Nguyễn Hai Long,14,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_Group_A
+2026-08-03,Indonesia,Vietnam,Vietnam,Nguyễn Xuân Son,71,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_Group_A
+2026-08-04,Myanmar,Laos,Myanmar,Lwin Moe Aung,2,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_Group_B
+2026-08-04,Myanmar,Laos,Laos,Bounchay Chernvanglien,17,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_Group_B
+2026-08-04,Myanmar,Laos,Myanmar,Win Naing Tun,20,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_Group_B
+2026-08-04,Myanmar,Laos,Laos,Phoutthavong Sangvilay,23,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_Group_B
+2026-08-04,Myanmar,Laos,Myanmar,Win Naing Tun,41,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_Group_B
+2026-08-04,Myanmar,Laos,Myanmar,Maung Maung Lwin,45,FALSE,TRUE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_Group_B
+2026-08-04,Myanmar,Laos,Myanmar,Than Paing,52,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_Group_B
+2026-08-04,Myanmar,Laos,Myanmar,Hein Htet Aung,81,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_Group_B
+2026-08-04,Myanmar,Laos,Myanmar,Win Naing Tun,83,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_Group_B
+2026-08-04,Philippines,Thailand,Thailand,Waris Choolthong,84,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_Group_B
+2026-08-07,Singapore,Indonesia,Indonesia,Ragnar Oratmangoen,47,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_Group_A
+2026-08-07,Singapore,Indonesia,Singapore,Ilhan Fandi,66,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_Group_A
+2026-08-07,Vietnam,Cambodia,Vietnam,Nguyễn Đình Bắc,18,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_Group_A
+2026-08-07,Vietnam,Cambodia,Cambodia,Iago Bento,71,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_Group_A
+2026-08-07,Vietnam,Cambodia,Vietnam,Im Vakhim,84,TRUE,FALSE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_Group_A
+2026-08-07,Vietnam,Cambodia,Vietnam,Nguyễn Đình Bắc,89,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_Group_A
+2026-08-08,Malaysia,Philippines,Malaysia,G. Pavithran,16,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_Group_B
+2026-08-08,Thailand,Myanmar,Thailand,Worachit Kanitsribumphen,11,FALSE,TRUE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_Group_B
+2026-08-08,Thailand,Myanmar,Thailand,Jehhanafee Mamah,52,FALSE,TRUE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_Group_B
+2026-08-15,Singapore,Thailand,Thailand,Teerasak Poeiphimai,13,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_knockout_stage
+2026-08-15,Singapore,Thailand,Thailand,Teerasak Poeiphimai,26,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_knockout_stage
+2026-08-15,Singapore,Thailand,Thailand,Seksan Ratree,51,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_knockout_stage
+2026-08-15,Singapore,Thailand,Singapore,Ilhan Fandi,84,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_knockout_stage
+2026-08-16,Malaysia,Vietnam,Vietnam,Nguyễn Xuân Son,45,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_knockout_stage
+2026-08-16,Malaysia,Vietnam,Vietnam,Faris Danish,86,TRUE,FALSE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_knockout_stage
+2026-08-18,Thailand,Singapore,Singapore,Harhys Stewart,45,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_knockout_stage
+2026-08-18,Thailand,Singapore,Thailand,Kakana Khamyok,61,FALSE,TRUE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_knockout_stage
+2026-08-18,Thailand,Singapore,Singapore,Pansa Hemviboon,65,TRUE,FALSE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_knockout_stage
+2026-08-19,Vietnam,Malaysia,Vietnam,Nguyễn Xuân Son,62,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_knockout_stage
+2026-08-19,Vietnam,Malaysia,Vietnam,Nguyễn Xuân Son,89,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_knockout_stage
+2026-08-22,Thailand,Vietnam,Vietnam,Nguyễn Hai Long,62,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_final
+2026-08-22,Thailand,Vietnam,Vietnam,Nguyễn Quang Hải,69,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_final
+2026-08-26,Vietnam,Thailand,Thailand,Yotsakorn Burapha,12,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_final
+2026-08-26,Vietnam,Thailand,Vietnam,Chatchai Budprom,52,TRUE,FALSE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_final
+2026-08-26,Vietnam,Thailand,Thailand,Wanchai Jarunongkran,85,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_final
+2026-08-26,Vietnam,Thailand,Vietnam,Wanchai Jarunongkran,90,TRUE,FALSE,NA,https://en.wikipedia.org/wiki/2026_ASEAN_Championship_final
+2026-09-18,Fiji,Solomon Islands,Fiji,Roy Krishna,26,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_MSG_Prime_Minister%27s_Cup_%E2%80%93_Men%27s_football_tournament
+2026-09-18,Fiji,Solomon Islands,Solomon Islands,Rooney Riugaemai,41,FALSE,TRUE,NA,https://en.wikipedia.org/wiki/2026_MSG_Prime_Minister%27s_Cup_%E2%80%93_Men%27s_football_tournament
+2026-09-18,Fiji,Solomon Islands,Fiji,Maikah Dau,43,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_MSG_Prime_Minister%27s_Cup_%E2%80%93_Men%27s_football_tournament
+2026-09-18,Fiji,Solomon Islands,Fiji,Thomas Dunn,55,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_MSG_Prime_Minister%27s_Cup_%E2%80%93_Men%27s_football_tournament
+2026-09-18,Fiji,Solomon Islands,Solomon Islands,Jayroll Patty,82,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_MSG_Prime_Minister%27s_Cup_%E2%80%93_Men%27s_football_tournament
+2026-09-18,Fiji,Solomon Islands,Solomon Islands,Javin Wae,90,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_MSG_Prime_Minister%27s_Cup_%E2%80%93_Men%27s_football_tournament
+2026-09-18,Papua New Guinea,Vanuatu,Vanuatu,Tony Kaltak,76,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_MSG_Prime_Minister%27s_Cup_%E2%80%93_Men%27s_football_tournament
+2026-09-18,Papua New Guinea,Vanuatu,Papua New Guinea,Nalau Moses,85,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_MSG_Prime_Minister%27s_Cup_%E2%80%93_Men%27s_football_tournament
+2026-09-18,Papua New Guinea,Vanuatu,Papua New Guinea,Ezekiel Vela,89,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_MSG_Prime_Minister%27s_Cup_%E2%80%93_Men%27s_football_tournament
+2026-09-21,Dominica,Anguilla,Dominica,Reon Cuffy,49,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Anguilla_national_football_team
+2026-09-21,Fiji,Vanuatu,Vanuatu,Kaltfer Kaltak,70,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_MSG_Prime_Minister%27s_Cup_%E2%80%93_Men%27s_football_tournament
+2026-09-21,New Caledonia,Solomon Islands,Solomon Islands,Raphael Lea'i,76,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_MSG_Prime_Minister%27s_Cup_%E2%80%93_Men%27s_football_tournament
+2026-09-21,New Caledonia,Solomon Islands,Solomon Islands,Javin Wae,90,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_MSG_Prime_Minister%27s_Cup_%E2%80%93_Men%27s_football_tournament
+2026-09-23,Antigua and Barbuda,Aruba,Aruba,Mishawn Molina,90,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_C
+2026-09-23,Azerbaijan,Tajikistan,Azerbaijan,Oleg Baklov,58,TRUE,FALSE,NA,https://en.wikipedia.org/wiki/Azerbaijan_national_football_team_results_(2020%E2%80%93present)
+2026-09-23,Bahamas,Saint Martin,Saint Martin,Axel Raga,15,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_C
+2026-09-23,Bahamas,Saint Martin,Saint Martin,Jordan Alexandre,20,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_C
+2026-09-23,Bahamas,Saint Martin,Saint Martin,Yanis Montantin,23,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_C
+2026-09-23,Bahamas,Saint Martin,Saint Martin,Jordan Alexandre,32,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_C
+2026-09-23,Bahamas,Saint Martin,Saint Martin,Michael Butler,41,TRUE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_C
+2026-09-23,Bahamas,Saint Martin,Saint Martin,Axel Raga,52,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_C
+2026-09-23,Bahamas,Saint Martin,Saint Martin,Axel Raga,63,FALSE,TRUE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_C
+2026-09-23,Bahamas,Saint Martin,Saint Martin,Pierre-Bertrand Arné,80,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_C
+2026-09-23,Iraq,Oman,Iraq,Mohammed Qasim Majid,6,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/27th_Arabian_Gulf_Cup
+2026-09-23,Iraq,Oman,Oman,Nasser Al-Rawahi,67,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/27th_Arabian_Gulf_Cup
+2026-09-23,Saudi Arabia,Kuwait,Saudi Arabia,Yousef Al Haqan,73,TRUE,FALSE,NA,https://en.wikipedia.org/wiki/27th_Arabian_Gulf_Cup
+2026-09-23,Turks and Caicos Islands,Montserrat,Montserrat,Ashley Boatswain,41,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_C
+2026-09-23,Turks and Caicos Islands,Montserrat,Montserrat,Ashley Boatswain,69,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_C
+2026-09-24,Andorra,Malta,Andorra,Guillaume López,17,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_D
+2026-09-24,Andorra,Malta,Malta,Irvin Cardona,36,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_D
+2026-09-24,Andorra,Malta,Malta,Teddy Teuma,81,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_D
+2026-09-24,Austria,Israel,Austria,Romano Schmid,43,FALSE,TRUE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_B
+2026-09-24,Austria,Israel,Israel,Sayed Abu Farchi,55,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_B
+2026-09-24,Austria,Israel,Austria,Phillipp Mwene,90,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_B
+2026-09-24,Austria,Israel,Austria,Saša Kalajdžić,90,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_B
+2026-09-24,Cameroon,Comoros,Cameroon,David Nyengue,39,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_G
+2026-09-24,Cameroon,Comoros,Cameroon,Bryan Mbeumo,48,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_G
+2026-09-24,Cameroon,Comoros,Comoros,Warmed Omari,51,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_G
+2026-09-24,Cameroon,Comoros,Cameroon,Danny Namaso,81,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_G
+2026-09-24,China,Maldives,China,Wang Ziming,50,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Maldives_national_football_team
+2026-09-24,China,Maldives,China,Wang Ziming,56,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Maldives_national_football_team
+2026-09-24,China,Maldives,China,Wang Ziming,63,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Maldives_national_football_team
+2026-09-24,Costa Rica,Curaçao,Costa Rica,Orlando Sinclair,3,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_A
+2026-09-24,Costa Rica,Curaçao,Costa Rica,Carlos Mora,23,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_A
+2026-09-24,Costa Rica,Curaçao,Costa Rica,Carlos Mora,45,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_A
+2026-09-24,Costa Rica,Curaçao,Curaçao,Kenji Gorré,62,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_A
+2026-09-24,Costa Rica,Curaçao,Curaçao,Tahith Chong,66,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_A
+2026-09-24,Costa Rica,Curaçao,Curaçao,Kenji Gorré,78,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_A
+2026-09-24,Costa Rica,Curaçao,Curaçao,Jordi Paulina,82,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_A
+2026-09-24,DR Congo,Equatorial Guinea,DR Congo,Chancel Mbemba,4,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_E
+2026-09-24,DR Congo,Equatorial Guinea,DR Congo,Yoane Wissa,72,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_E
+2026-09-24,Dominican Republic,Nicaragua,Dominican Republic,Heinz Mörschel,5,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_A
+2026-09-24,Dominican Republic,Nicaragua,Dominican Republic,Mariano Díaz,15,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_A
+2026-09-24,Dominican Republic,Nicaragua,Nicaragua,Juan Luis Pérez,40,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_A
+2026-09-24,Dominican Republic,Nicaragua,Nicaragua,Byron Bonilla,84,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_A
+2026-09-24,Dominican Republic,Nicaragua,Dominican Republic,Pablo Rosario,90,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_A
+2026-09-24,Haiti,Trinidad and Tobago,Haiti,Fafà Picault,23,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_A
+2026-09-24,Haiti,Trinidad and Tobago,Trinidad and Tobago,Wayne Frederick,31,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_A
+2026-09-24,Haiti,Trinidad and Tobago,Trinidad and Tobago,Levi García,59,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_A
+2026-09-24,Haiti,Trinidad and Tobago,Haiti,Garven Metusala,90,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_A
+2026-09-24,Haiti,Trinidad and Tobago,Haiti,Wilson Isidor,90,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_A
+2026-09-24,Ivory Coast,Ghana,Ivory Coast,Malick Yalcouyé,44,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_C
+2026-09-24,Ivory Coast,Ghana,Ivory Coast,Franck Kessié,58,FALSE,TRUE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_C
+2026-09-24,Kosovo,Republic of Ireland,Kosovo,Vedat Muriqi,83,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_B
+2026-09-24,Laos,Brunei,Laos,Bounphachan Bounkong,4,FALSE,TRUE,NA,https://en.wikipedia.org/wiki/2026_FIFA_ASEAN_Cup
+2026-09-24,Laos,Brunei,Laos,Xayasith Singsavang,24,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_FIFA_ASEAN_Cup
+2026-09-24,Laos,Brunei,Brunei,Haziq Naqiuddin Syamra,45,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_FIFA_ASEAN_Cup
+2026-09-24,Laos,Brunei,Laos,Bounchay Chernvanglien,67,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_FIFA_ASEAN_Cup
+2026-09-24,Libya,Botswana,Botswana,Tumisang Orebonye,30,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_H
+2026-09-24,Libya,Botswana,Botswana,Tumisang Orebonye,42,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_H
+2026-09-24,Libya,Botswana,Libya,Maruwan Alhibeeshi,87,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_H
+2026-09-24,Libya,Botswana,Libya,Ezoo El Maremi,90,FALSE,TRUE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_H
+2026-09-24,Liechtenstein,Lithuania,Lithuania,Lukas Michelbrink,53,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_D
+2026-09-24,Liechtenstein,Lithuania,Lithuania,Artūr Dolžnikov,66,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_D
+2026-09-24,Mauritania,Central African Republic,Mauritania,Aboubakary Koïta,32,FALSE,TRUE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_F
+2026-09-24,Mauritania,Central African Republic,Central African Republic,Goduine Koyalipou,48,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_F
+2026-09-24,Mauritania,Central African Republic,Mauritania,Dawda Camara,69,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_F
+2026-09-24,Mauritania,Central African Republic,Mauritania,Mamadou Diallo,89,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_F
+2026-09-24,Myanmar,Timor-Leste,Myanmar,Win Naing Tun,19,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_FIFA_ASEAN_Cup
+2026-09-24,Myanmar,Timor-Leste,Myanmar,Than Paing,75,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_FIFA_ASEAN_Cup
+2026-09-24,Namibia,Congo,Namibia,Bethuel Muzeu,47,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_G
+2026-09-24,Netherlands,Germany,Germany,Felix Nmecha,32,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_A
+2026-09-24,Netherlands,Germany,Netherlands,Cody Gakpo,90,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_A
+2026-09-24,Norway,Denmark,Norway,Oscar Bobb,14,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_A
+2026-09-24,Norway,Denmark,Norway,Erling Haaland,18,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_A
+2026-09-24,Norway,Denmark,Denmark,Mikkel Damsgaard,25,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_A
+2026-09-24,Norway,Denmark,Denmark,Rasmus Højlund,60,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_A
+2026-09-24,Norway,Denmark,Norway,Erling Haaland,74,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_A
+2026-09-24,Palestine,New Zealand,New Zealand,Ben Waine,5,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Palestine_national_football_team_results_(2020%E2%80%93present)
+2026-09-24,Palestine,New Zealand,Palestine,Assad Al Hamlawi,27,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Palestine_national_football_team_results_(2020%E2%80%93present)
+2026-09-24,Palestine,New Zealand,New Zealand,Jesse Randall,35,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Palestine_national_football_team_results_(2020%E2%80%93present)
+2026-09-24,Palestine,New Zealand,Palestine,Oday Dabbagh,39,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Palestine_national_football_team_results_(2020%E2%80%93present)
+2026-09-24,Papua New Guinea,New Caledonia,New Caledonia,Brice Dahite,11,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_MSG_Prime_Minister%27s_Cup_%E2%80%93_Men%27s_football_tournament
+2026-09-24,Papua New Guinea,New Caledonia,Papua New Guinea,Ati Kepo,18,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_MSG_Prime_Minister%27s_Cup_%E2%80%93_Men%27s_football_tournament
+2026-09-24,Papua New Guinea,New Caledonia,New Caledonia,Willy Read,73,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_MSG_Prime_Minister%27s_Cup_%E2%80%93_Men%27s_football_tournament
+2026-09-24,Portugal,Wales,Portugal,João Félix,22,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_A
+2026-09-24,Puerto Rico,Guyana,Guyana,Osaze De Rosario,78,FALSE,TRUE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_B
+2026-09-24,Qatar,Bahrain,Qatar,Boualem Khoukhi,61,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/27th_Arabian_Gulf_Cup
+2026-09-24,Qatar,Bahrain,Qatar,Hassan Al-Haydos,90,FALSE,TRUE,NA,https://en.wikipedia.org/wiki/27th_Arabian_Gulf_Cup
+2026-09-24,Serbia,Greece,Serbia,Andrija Živković,4,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_A
+2026-09-24,Serbia,Greece,Greece,Christos Tzolis,74,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_A
+2026-09-24,Serbia,Greece,Greece,Anastasios Douvikas,90,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_A
+2026-09-24,Sierra Leone,Zimbabwe,Sierra Leone,Alie Conteh,7,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_E
+2026-09-24,Sierra Leone,Zimbabwe,Sierra Leone,Sallieu Tarawallie,27,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_E
+2026-09-24,Sierra Leone,Zimbabwe,Zimbabwe,Marshall Munetsi,72,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_E
+2026-09-24,Sierra Leone,Zimbabwe,Zimbabwe,Tawanda Chirewa,77,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_E
+2026-09-24,Sierra Leone,Zimbabwe,Zimbabwe,Marshall Munetsi,89,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_E
+2026-09-24,Solomon Islands,Vanuatu,Vanuatu,Andrew Malakai,33,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_MSG_Prime_Minister%27s_Cup_%E2%80%93_Men%27s_football_tournament
+2026-09-24,Solomon Islands,Vanuatu,Solomon Islands,Don Keana,43,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_MSG_Prime_Minister%27s_Cup_%E2%80%93_Men%27s_football_tournament
+2026-09-24,Solomon Islands,Vanuatu,Vanuatu,Tony Kaltak,47,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_MSG_Prime_Minister%27s_Cup_%E2%80%93_Men%27s_football_tournament
+2026-09-24,Solomon Islands,Vanuatu,Solomon Islands,Raphael Lea'i,67,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_MSG_Prime_Minister%27s_Cup_%E2%80%93_Men%27s_football_tournament
+2026-09-24,Solomon Islands,Vanuatu,Vanuatu,Jayson Bule,71,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_MSG_Prime_Minister%27s_Cup_%E2%80%93_Men%27s_football_tournament
+2026-09-24,Solomon Islands,Vanuatu,Solomon Islands,Javin Wae,85,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_MSG_Prime_Minister%27s_Cup_%E2%80%93_Men%27s_football_tournament
+2026-09-24,South Korea,Ecuador,South Korea,Oh Hyeon-gyu,54,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/South_Korea_national_football_team_results_(2020%E2%80%93present)
+2026-09-24,South Korea,Ecuador,South Korea,Son Heung-min,58,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/South_Korea_national_football_team_results_(2020%E2%80%93present)
+2026-09-24,South Korea,Ecuador,South Korea,Lee Dong-gyeong,86,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/South_Korea_national_football_team_results_(2020%E2%80%93present)
+2026-09-24,Tunisia,Uganda,Tunisia,Adem Arous,12,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_H
+2026-09-24,Tunisia,Uganda,Uganda,Rogers Mato,68,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_H
+2026-09-24,United Arab Emirates,Yemen,United Arab Emirates,Nicolás Giménez,26,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/27th_Arabian_Gulf_Cup
+2026-09-24,United Arab Emirates,Yemen,United Arab Emirates,Nader Sahal,36,TRUE,FALSE,NA,https://en.wikipedia.org/wiki/27th_Arabian_Gulf_Cup
+2026-09-24,United Arab Emirates,Yemen,United Arab Emirates,Luanzinho,45,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/27th_Arabian_Gulf_Cup
+2026-09-24,United Arab Emirates,Yemen,United Arab Emirates,Nicolás Giménez,51,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/27th_Arabian_Gulf_Cup
+2026-09-24,Uzbekistan,Iran,Uzbekistan,Eldor Shomurodov,10,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Uzbekistan_national_football_team_results_(2020%E2%80%93present)
+2026-09-24,Uzbekistan,Iran,Iran,Jakhongir Urozov,49,TRUE,FALSE,NA,https://en.wikipedia.org/wiki/Uzbekistan_national_football_team_results_(2020%E2%80%93present)
+2026-09-24,Uzbekistan,Iran,Uzbekistan,Eldor Shomurodov,58,FALSE,TRUE,NA,https://en.wikipedia.org/wiki/Uzbekistan_national_football_team_results_(2020%E2%80%93present)
+2026-09-24,Uzbekistan,Iran,Uzbekistan,Khusain Norchaev,90,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Uzbekistan_national_football_team_results_(2020%E2%80%93present)
+2026-09-25,Algeria,Zambia,Algeria,Jaouen Hadjam,2,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_I
+2026-09-25,Algeria,Zambia,Zambia,Fashion Sakala,57,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_I
+2026-09-25,Algeria,Zambia,Algeria,Ibrahim Maza,67,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_I
+2026-09-25,Algeria,Zambia,Algeria,Anis Hadj Moussa,74,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_I
+2026-09-25,Armenia,Latvia,Armenia,Georgy Arutyunyan,31,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_C
+2026-09-25,Armenia,Latvia,Armenia,Artur Garibyan,75,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_C
+2026-09-25,Australia,Brazil,Australia,Nestory Irankunda,68,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Australia_men's_national_soccer_team_results_(2020%E2%80%93present)
+2026-09-25,Australia,Brazil,Brazil,Rayan,90,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Australia_men's_national_soccer_team_results_(2020%E2%80%93present)
+2026-09-25,Bangladesh,Malaysia,Malaysia,Arif Aiman,18,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_FIFA_ASEAN_Cup
+2026-09-25,Bangladesh,Malaysia,Malaysia,Arif Aiman,37,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_FIFA_ASEAN_Cup
+2026-09-25,Bangladesh,Malaysia,Malaysia,Bérgson,52,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_FIFA_ASEAN_Cup
+2026-09-25,Bermuda,Guadeloupe,Bermuda,Enrique Russell,18,FALSE,TRUE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_B
+2026-09-25,Bermuda,Guadeloupe,Guadeloupe,Allan Vulgaire,84,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_B
+2026-09-25,Bermuda,Guadeloupe,Guadeloupe,Djamalee Boisné,89,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_B
+2026-09-25,Burkina Faso,Benin,Burkina Faso,Lassina Traoré,20,FALSE,TRUE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_F
+2026-09-25,Burkina Faso,Benin,Benin,Aiyegun Tosin,68,FALSE,TRUE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_F
+2026-09-25,El Salvador,Martinique,El Salvador,Brayan Gil,8,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_A
+2026-09-25,El Salvador,Martinique,El Salvador,Brayan Gil,18,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_A
+2026-09-25,El Salvador,Martinique,El Salvador,Harold Osorio,29,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_A
+2026-09-25,El Salvador,Martinique,Martinique,Janis Antiste,51,FALSE,TRUE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_A
+2026-09-25,Gambia,Somalia,Gambia,Ebrima Colley,18,FALSE,TRUE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_C
+2026-09-25,Gambia,Somalia,Somalia,Bilal Njie,72,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_C
+2026-09-25,Gambia,Somalia,Gambia,Muhammed Badamosi,83,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_C
+2026-09-25,Georgia,Northern Ireland,Northern Ireland,Shea Charles,90,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_B
+2026-09-25,Grenada,Cuba,Cuba,Greg Sandiford,19,TRUE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_B
+2026-09-25,Grenada,Cuba,Cuba,Daniel Díaz,90,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_B
+2026-09-25,Grenada,Cuba,Cuba,Didier Reinoso,90,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_B
+2026-09-25,Honduras,Suriname,Suriname,Justin Lonwijk,18,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_A
+2026-09-25,Honduras,Suriname,Honduras,Dereck Moncada,20,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_A
+2026-09-25,Honduras,Suriname,Honduras,Bryan Róchez,23,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_A
+2026-09-25,Honduras,Suriname,Suriname,Denzel Jubitana,39,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_A
+2026-09-25,Honduras,Suriname,Suriname,Luis Palma,66,TRUE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_A
+2026-09-25,Hungary,Ukraine,Ukraine,Danylo Sikan,42,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_B
+2026-09-25,India,Panama,India,Ryan Williams,41,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/India_national_football_team_results_(2020%E2%80%93present)
+2026-09-25,India,Panama,Panama,Omar Valencia,68,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/India_national_football_team_results_(2020%E2%80%93present)
+2026-09-25,Indonesia,Singapore,Indonesia,Ragnar Oratmangoen,13,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_FIFA_ASEAN_Cup
+2026-09-25,Indonesia,Singapore,Indonesia,Ole Romeny,74,FALSE,TRUE,NA,https://en.wikipedia.org/wiki/2026_FIFA_ASEAN_Cup
+2026-09-25,Italy,Belgium,Belgium,Mika Godts,20,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_A
+2026-09-25,Italy,Belgium,Belgium,Dodi Lukébakio,69,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_A
+2026-09-25,Jamaica,Guatemala,Guatemala,Óscar Santis,2,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_A
+2026-09-25,Jamaica,Guatemala,Jamaica,Kasey Palmer,37,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_A
+2026-09-25,Jamaica,Guatemala,Jamaica,Rumarn Burrell,53,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_A
+2026-09-25,Jamaica,Guatemala,Guatemala,Óscar Santis,67,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_A
+2026-09-25,Jamaica,Guatemala,Jamaica,Renaldo Cephas,90,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_A
+2026-09-25,Malawi,South Sudan,Malawi,Babatunde Adepoju,20,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_B
+2026-09-25,Malawi,South Sudan,South Sudan,Joseph Dhata,48,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_B
+2026-09-25,Malawi,South Sudan,Malawi,Lloyd Njaliwa,64,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_B
+2026-09-25,Mali,Cape Verde,Mali,Ange Martial Tia,5,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_K
+2026-09-25,Mali,Cape Verde,Cape Verde,Sidny Lopes Cabral,10,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_K
+2026-09-25,Mali,Cape Verde,Mali,Dorgeles Nene,39,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_K
+2026-09-25,Mali,Cape Verde,Mali,Dorgeles Nene,51,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_K
+2026-09-25,Montenegro,Cyprus,Cyprus,Marcus Edwards,55,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_C
+2026-09-25,Montenegro,Cyprus,Montenegro,Nikola Krstović,66,FALSE,TRUE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_C
+2026-09-25,Montenegro,Cyprus,Montenegro,Milutin Osmajić,86,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_C
+2026-09-25,Morocco,Gabon,Morocco,Noussair Mazraoui,36,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_A
+2026-09-25,Morocco,Gabon,Morocco,Soufiane Rahimi,84,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_A
+2026-09-25,Mozambique,Senegal,Senegal,Nicolas Jackson,32,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_J
+2026-09-25,Mozambique,Senegal,Mozambique,Geny Catamo,45,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_J
+2026-09-25,Niger,Lesotho,Niger,Daniel Sosah,38,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_A
+2026-09-25,Niger,Lesotho,Niger,Oumar Sako,45,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_A
+2026-09-25,Niger,Lesotho,Lesotho,Sera Motebang,85,FALSE,TRUE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_A
+2026-09-25,Nigeria,Madagascar,Madagascar,Ehsan Kari,16,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_L
+2026-09-25,Nigeria,Madagascar,Nigeria,George Ilenikhena,45,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_L
+2026-09-25,Nigeria,Madagascar,Nigeria,Moses Usor,65,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_L
+2026-09-25,Rwanda,Liberia,Rwanda,Abeddy Biramahire,2,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_K
+2026-09-25,Rwanda,Liberia,Rwanda,Leroy-Jacques Mickels,33,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_K
+2026-09-25,Rwanda,Liberia,Liberia,Sylvanus Nimely,38,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_K
+2026-09-25,Rwanda,Liberia,Rwanda,Joy-Lance Mickels,44,FALSE,TRUE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_K
+2026-09-25,Saint Kitts and Nevis,Bonaire,Bonaire,Berry Sonnenschein,7,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_B
+2026-09-25,Saint Kitts and Nevis,Bonaire,Saint Kitts and Nevis,Tiquanny Williams,36,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_B
+2026-09-25,Saint Kitts and Nevis,Bonaire,Saint Kitts and Nevis,Tiquanny Williams,89,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_B
+2026-09-25,Saint Lucia,Barbados,Barbados,Thierry Gale,8,FALSE,TRUE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_B
+2026-09-25,Saint Lucia,Barbados,Barbados,Niall Reid-Stephen,73,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_B
+2026-09-25,Sudan,Ethiopia,Sudan,Mohamed Eisa,86,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_J
+2026-09-25,Sweden,Romania,Sweden,Alexander Isak,20,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_B
+2026-09-25,Sweden,Romania,Romania,Dennis Man,29,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_B
+2026-09-25,Sweden,Romania,Sweden,Viktor Gyökeres,43,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_B
+2026-09-25,Tanzania,Guinea-Bissau,Guinea-Bissau,Franculino Djú,33,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_L
+2026-09-25,Tanzania,Guinea-Bissau,Guinea-Bissau,Mama Baldé,58,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_L
+2026-09-25,Togo,Burundi,Togo,Dermane Karim,17,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_I
+2026-09-25,Turkey,France,France,Kylian Mbappé,54,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_A
+2026-09-26,Albania,Belarus,Albania,Kristjan Asllani,34,FALSE,TRUE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_C
+2026-09-26,Albania,Belarus,Albania,Ernest Muçi,45,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_C
+2026-09-26,Antigua and Barbuda,Anguilla,Antigua and Barbuda,Christopher Douglas,1,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_C
+2026-09-26,Antigua and Barbuda,Anguilla,Antigua and Barbuda,Dion Pereira,16,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_C
+2026-09-26,Antigua and Barbuda,Anguilla,Antigua and Barbuda,Christopher Douglas,21,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_C
+2026-09-26,Antigua and Barbuda,Anguilla,Antigua and Barbuda,D'Andre Bishop,35,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_C
+2026-09-26,Antigua and Barbuda,Anguilla,Antigua and Barbuda,Kayonte George,43,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_C
+2026-09-26,Belize,Sint Maarten,Belize,Nahjib Guerra,52,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_B
+2026-09-26,Bulgaria,Luxembourg,Bulgaria,Asen Chandarov,18,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_C
+2026-09-26,Bulgaria,Luxembourg,Luxembourg,Leandro Barreiro,37,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_C
+2026-09-26,Bulgaria,Luxembourg,Luxembourg,Vincent Thill,65,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_C
+2026-09-26,Canada,Chile,Canada,Jonathan David,12,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Canada_men's_national_soccer_team
+2026-09-26,Colombia,Mexico,Colombia,Luis Suárez,9,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Mexico_national_football_team_results_(2020%E2%80%93present)
+2026-09-26,Colombia,Mexico,Mexico,Gilberto Mora,62,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Mexico_national_football_team_results_(2020%E2%80%93present)
+2026-09-26,Cook Islands,Tahiti,Tahiti,Maitere Tanerii,6,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Cook_Islands_national_football_team
+2026-09-26,Cook Islands,Tahiti,Tahiti,Maitere Tanerii,8,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Cook_Islands_national_football_team
+2026-09-26,Cook Islands,Tahiti,Tahiti,Honoura Maraetefau,62,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Cook_Islands_national_football_team
+2026-09-26,Cook Islands,Tahiti,Cook Islands,Kerim Kumsuz,84,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Cook_Islands_national_football_team
+2026-09-26,Czech Republic,Croatia,Croatia,Luka Modrić,47,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_A
+2026-09-26,Czech Republic,Croatia,Czech Republic,Adam Karabec,54,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_A
+2026-09-26,Czech Republic,Croatia,Croatia,Marco Pašalić,77,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_A
+2026-09-26,England,Spain,Spain,Lamine Yamal,2,FALSE,FALSE,NA,https://www.espn.com/soccer/match/_/gameId/401861066/spain-england
+2026-09-26,England,Spain,England,Anthony Gordon,36,FALSE,FALSE,NA,https://www.espn.com/soccer/match/_/gameId/401861066/spain-england
+2026-09-26,England,Spain,England,Harry Kane,40,FALSE,FALSE,NA,https://www.espn.com/soccer/match/_/gameId/401861066/spain-england
+2026-09-26,England,Spain,Spain,Álex Baena,60,FALSE,FALSE,Dani Olmo,https://bolavip.com/en/soccer/england-vs-spain-live-2026-27-uefa-nations-league-matchday-1
+2026-09-26,England,Spain,Spain,Mikel Oyarzabal,74,FALSE,FALSE,NA,https://www.espn.com/soccer/match/_/gameId/401861066/spain-england
+2026-09-26,Faroe Islands,Kazakhstan,Faroe Islands,Áki Samuelsen,14,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_C
+2026-09-26,Faroe Islands,Kazakhstan,Kazakhstan,Temirlan Yerlanov,26,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_C
+2026-09-26,Iceland,Estonia,Iceland,Andri Guðjohnsen,45,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_C
+2026-09-26,Iceland,Estonia,Estonia,Maksim Paskotši,64,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_C
+2026-09-26,Kenya,Eritrea,Eritrea,Nahom Netabay,36,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_D
+2026-09-26,Kenya,Eritrea,Kenya,Ryan Ogam,87,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_D
+2026-09-26,Kuwait,Iraq,Iraq,Zidane Iqbal,52,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/27th_Arabian_Gulf_Cup
+2026-09-26,Kuwait,Iraq,Kuwait,Yousef Nasser,75,FALSE,TRUE,NA,https://en.wikipedia.org/wiki/27th_Arabian_Gulf_Cup
+2026-09-26,Kuwait,Iraq,Iraq,Saif Rasheed,83,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/27th_Arabian_Gulf_Cup
+2026-09-26,Kuwait,Iraq,Kuwait,Yousef Nasser,90,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/27th_Arabian_Gulf_Cup
+2026-09-26,Kuwait,Iraq,Iraq,Karrar Nabeel,90,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/27th_Arabian_Gulf_Cup
+2026-09-26,Montserrat,British Virgin Islands,Montserrat,Brandon Barzey,58,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_C
+2026-09-26,Montserrat,British Virgin Islands,Montserrat,Lyle Taylor,67,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_C
+2026-09-26,Montserrat,British Virgin Islands,Montserrat,Lyle Taylor,71,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_C
+2026-09-26,North Macedonia,Switzerland,Switzerland,Remo Freuler,22,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_B
+2026-09-26,North Macedonia,Switzerland,Switzerland,Zeki Amdouni,41,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_B
+2026-09-26,North Macedonia,Switzerland,Switzerland,Zeki Amdouni,74,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_B
+2026-09-26,Pakistan,Thailand,Thailand,Teerasak Poeiphimai,31,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_FIFA_ASEAN_Cup
+2026-09-26,Pakistan,Thailand,Thailand,Jude Soonsup-Bell,41,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_FIFA_ASEAN_Cup
+2026-09-26,Pakistan,Thailand,Thailand,Haris Zeb,64,TRUE,FALSE,NA,https://en.wikipedia.org/wiki/2026_FIFA_ASEAN_Cup
+2026-09-26,Pakistan,Thailand,Thailand,Teerasak Poeiphimai,84,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_FIFA_ASEAN_Cup
+2026-09-26,Saint Vincent and the Grenadines,French Guiana,Saint Vincent and the Grenadines,Oalex Anderson,14,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_B
+2026-09-26,Saint Vincent and the Grenadines,French Guiana,Saint Vincent and the Grenadines,Oalex Anderson,29,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_B
+2026-09-26,Saint Vincent and the Grenadines,French Guiana,French Guiana,Yvelin Nozile,63,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_B
+2026-09-26,San Marino,Finland,Finland,Joel Pohjanpalo,5,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_C
+2026-09-26,San Marino,Finland,Finland,Adrian Svanbäck,14,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_C
+2026-09-26,San Marino,Finland,Finland,Benjamin Källman,33,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_C
+2026-09-26,San Marino,Finland,Finland,Leo Walta,50,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_C
+2026-09-26,San Marino,Finland,Finland,Leo Walta,55,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_C
+2026-09-26,San Marino,Finland,Finland,Joel Pohjanpalo,79,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_C
+2026-09-26,San Marino,Finland,Finland,Joel Pohjanpalo,88,FALSE,TRUE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_C
+2026-09-26,Saudi Arabia,Oman,Saudi Arabia,Firas Al-Buraikan,11,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/27th_Arabian_Gulf_Cup
+2026-09-26,Saudi Arabia,Oman,Saudi Arabia,Hassan Kadesh,18,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/27th_Arabian_Gulf_Cup
+2026-09-26,Saudi Arabia,Oman,Saudi Arabia,Firas Al-Buraikan,34,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/27th_Arabian_Gulf_Cup
+2026-09-26,Slovakia,Moldova,Slovakia,Ivan Schranz,32,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_C
+2026-09-26,Slovakia,Moldova,Slovakia,Ondrej Duda,40,FALSE,TRUE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_C
+2026-09-26,South Africa,Guinea,South Africa,Ime Okon,30,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_D
+2026-09-26,South Africa,Guinea,Guinea,Seydouba Cissé,69,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_D
+2026-09-26,South Africa,Guinea,South Africa,Samukelo Kabini,77,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_D
+2026-09-26,United States,Peru,United States,Justin Ellis,4,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Peru_national_football_team_results_(2020%E2%80%93present)
+2026-09-26,United States,Peru,Peru,Gianluca Lapadula,15,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Peru_national_football_team_results_(2020%E2%80%93present)
+2026-09-26,United States,Peru,United States,Malik Tillman,66,FALSE,TRUE,NA,https://en.wikipedia.org/wiki/Peru_national_football_team_results_(2020%E2%80%93present)
+2026-09-26,United States,Peru,United States,Julian Hall,72,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Peru_national_football_team_results_(2020%E2%80%93present)
+2026-09-26,United States,Peru,United States,Sebastian Berhalter,90,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Peru_national_football_team_results_(2020%E2%80%93present)
+2026-09-26,United States Virgin Islands,Saint Martin,United States Virgin Islands,Jannick Liburd,18,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_C
+2026-09-26,United States Virgin Islands,Saint Martin,United States Virgin Islands,Jannick Liburd,83,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_C
+2026-09-26,Vietnam,Philippines,Vietnam,Nguyễn Đình Bắc,25,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_FIFA_ASEAN_Cup
+2026-09-27,Austria,Kosovo,Austria,David Affengruber,23,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_B
+2026-09-27,Austria,Kosovo,Austria,Junior Adamu,45,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_B
+2026-09-27,Austria,Kosovo,Austria,Carney Chukwuemeka,61,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_B
+2026-09-27,Austria,Kosovo,Kosovo,Edon Zhegrova,83,FALSE,TRUE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_B
+2026-09-27,Bahrain,United Arab Emirates,United Arab Emirates,Ousmane Camara,30,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/27th_Arabian_Gulf_Cup
+2026-09-27,Bahrain,United Arab Emirates,United Arab Emirates,Guilherme Bala,66,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/27th_Arabian_Gulf_Cup
+2026-09-27,Bahrain,United Arab Emirates,United Arab Emirates,Ali Saleh,88,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/27th_Arabian_Gulf_Cup
+2026-09-27,Bolivia,Paraguay,Paraguay,Miguel Almirón,17,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Paraguay_national_football_team
+2026-09-27,Bolivia,Paraguay,Paraguay,Miguel Almirón,50,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Paraguay_national_football_team
+2026-09-27,Cambodia,Myanmar,Cambodia,Sin Kakada,90,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_FIFA_ASEAN_Cup
+2026-09-27,China,New Zealand,New Zealand,Tyler Bindon,4,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/New_Zealand_men's_national_football_team
+2026-09-27,China,New Zealand,New Zealand,Ben Waine,29,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/New_Zealand_men's_national_football_team
+2026-09-27,China,New Zealand,New Zealand,Owen Parker-Price,82,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/New_Zealand_men's_national_football_team
+2026-09-27,Curaçao,Nicaragua,Curaçao,Livano Comenencia,6,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_A
+2026-09-27,Curaçao,Nicaragua,Curaçao,Kenji Gorré,11,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_A
+2026-09-27,Curaçao,Nicaragua,Curaçao,Leandro Bacuna,19,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_A
+2026-09-27,Curaçao,Nicaragua,Curaçao,Juninho Bacuna,27,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_A
+2026-09-27,Curaçao,Nicaragua,Curaçao,Kenji Gorré,39,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_A
+2026-09-27,Curaçao,Nicaragua,Nicaragua,Jaime Moreno,62,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_A
+2026-09-27,Curaçao,Nicaragua,Curaçao,Jürgen Locadia,88,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_A
+2026-09-27,Denmark,Wales,Denmark,Ben Davies,53,TRUE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_A
+2026-09-27,Denmark,Wales,Denmark,Gustav Isaksen,66,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_A
+2026-09-27,Dominica,Puerto Rico,Puerto Rico,Rodolfo Sulia,4,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_B
+2026-09-27,Dominica,Puerto Rico,Puerto Rico,Wilfredo Rivera,37,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_B
+2026-09-27,Fiji,Papua New Guinea,Fiji,Roy Krishna,18,FALSE,TRUE,NA,https://en.wikipedia.org/wiki/2026_MSG_Prime_Minister%27s_Cup_%E2%80%93_Men%27s_football_tournament
+2026-09-27,Fiji,Papua New Guinea,Fiji,Sterling Vasconcellos,24,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_MSG_Prime_Minister%27s_Cup_%E2%80%93_Men%27s_football_tournament
+2026-09-27,Germany,Greece,Greece,Dimitrios Kourbelis,74,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_A
+2026-09-27,Guyana,Cayman Islands,Guyana,Liam Gordon,16,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_B
+2026-09-27,Guyana,Cayman Islands,Guyana,Osaze De Rosario,36,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_B
+2026-09-27,Haiti,Costa Rica,Haiti,Jean-Ricner Bellegarde,9,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_A
+2026-09-27,Haiti,Costa Rica,Haiti,Francisco Calvo,39,TRUE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_A
+2026-09-27,Hong Kong,Laos,Hong Kong,Sun Ming Him,12,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_FIFA_ASEAN_Cup
+2026-09-27,Hong Kong,Laos,Hong Kong,Everton Camargo,33,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_FIFA_ASEAN_Cup
+2026-09-27,Hong Kong,Laos,Hong Kong,Dudu,55,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_FIFA_ASEAN_Cup
+2026-09-27,Hong Kong,Laos,Hong Kong,Matt Orr,90,FALSE,TRUE,NA,https://en.wikipedia.org/wiki/2026_FIFA_ASEAN_Cup
+2026-09-27,Israel,Republic of Ireland,Republic of Ireland,Troy Parrott,13,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_B
+2026-09-27,Israel,Republic of Ireland,Republic of Ireland,Adam Idah,16,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_B
+2026-09-27,Israel,Republic of Ireland,Republic of Ireland,Jack Moylan,25,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_B
+2026-09-27,Jordan,Syria,Jordan,Ali Olwan,37,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Jordan_national_football_team_results_(2020%E2%80%93present)
+2026-09-27,Jordan,Syria,Syria,Can Moustfa,51,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Jordan_national_football_team_results_(2020%E2%80%93present)
+2026-09-27,Lithuania,Azerbaijan,Lithuania,Armandas Kučys,9,FALSE,TRUE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_D
+2026-09-27,Lithuania,Azerbaijan,Azerbaijan,Mahir Emreli,14,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_D
+2026-09-27,Malta,Liechtenstein,Malta,Jake Grech,37,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Liechtenstein_national_football_team_results_(2020%E2%80%93present)
+2026-09-27,Malta,Liechtenstein,Malta,Andrea Zammit,63,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Liechtenstein_national_football_team_results_(2020%E2%80%93present)
+2026-09-27,Norway,Portugal,Portugal,João Félix,17,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_A
+2026-09-27,Norway,Portugal,Norway,Erling Haaland,51,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_A
+2026-09-27,Norway,Portugal,Portugal,Gonçalo Ramos,54,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_A
+2026-09-27,Serbia,Netherlands,Netherlands,Mexx Meerdink,30,FALSE,TRUE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_A
+2026-09-27,Serbia,Netherlands,Serbia,Luka Jović,46,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_A
+2026-09-27,Serbia,Netherlands,Netherlands,Mexx Meerdink,69,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_A
+2026-09-27,Seychelles,Sri Lanka,Sri Lanka,Adhavan Rajamohan,45,FALSE,TRUE,NA,https://en.wikipedia.org/wiki/Seychelles_national_football_team
+2026-09-27,Seychelles,Sri Lanka,Sri Lanka,Adhavan Rajamohan,52,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Seychelles_national_football_team
+2026-09-27,Seychelles,Sri Lanka,Sri Lanka,Dillon De Silva,76,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Seychelles_national_football_team
+2026-09-27,Trinidad and Tobago,Dominican Republic,Trinidad and Tobago,Daniel Phillips,37,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_A
+2026-09-27,Trinidad and Tobago,Dominican Republic,Dominican Republic,Heinz Mörschel,42,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_A
+2026-09-27,Trinidad and Tobago,Dominican Republic,Dominican Republic,Mariano Díaz,50,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_A
+2026-09-27,Vanuatu,New Caledonia,New Caledonia,Cédric Decoire,15,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_MSG_Prime_Minister%27s_Cup_%E2%80%93_Men%27s_football_tournament
+2026-09-27,Vanuatu,New Caledonia,Vanuatu,Tony Kaltak,24,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_MSG_Prime_Minister%27s_Cup_%E2%80%93_Men%27s_football_tournament
+2026-09-27,Vanuatu,New Caledonia,Vanuatu,Joe Moses,79,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_MSG_Prime_Minister%27s_Cup_%E2%80%93_Men%27s_football_tournament
+2026-09-27,Vanuatu,New Caledonia,Vanuatu,Edward Roqara,85,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_MSG_Prime_Minister%27s_Cup_%E2%80%93_Men%27s_football_tournament
+2026-09-27,Vanuatu,New Caledonia,Vanuatu,Azariah Soromon,90,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_MSG_Prime_Minister%27s_Cup_%E2%80%93_Men%27s_football_tournament
+2026-09-27,Yemen,Qatar,Qatar,Yusuf Abdurisag,64,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/27th_Arabian_Gulf_Cup
+2026-09-28,Armenia,Montenegro,Montenegro,Erik Piloyan,20,TRUE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_C
+2026-09-28,Armenia,Montenegro,Armenia,Artur Serobyan,34,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_C
+2026-09-28,Armenia,Montenegro,Montenegro,Nikola Krstović,38,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_C
+2026-09-28,Armenia,Montenegro,Armenia,Eduard Spertsyan,65,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_C
+2026-09-28,Armenia,Montenegro,Montenegro,Aleksa Latković,89,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_C
+2026-09-28,Belgium,France,France,Michael Olise,88,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_A
+2026-09-28,Central African Republic,Burkina Faso,Burkina Faso,Aboubacar Camara,60,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_F
+2026-09-28,Cuba,Bonaire,Cuba,Yasniel Matos,3,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_B
+2026-09-28,Cuba,Bonaire,Cuba,Diego Catasus,49,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_B
+2026-09-28,Equatorial Guinea,Sierra Leone,Equatorial Guinea,Loren Zúñiga,1,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_E
+2026-09-28,Guadeloupe,Barbados,Guadeloupe,Djamalee Boisné,49,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_B
+2026-09-28,Guadeloupe,Barbados,Barbados,Thierry Gale,76,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_B
+2026-09-28,Guadeloupe,Barbados,Barbados,Niall Reid-Stephen,78,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_B
+2026-09-28,Guadeloupe,Barbados,Guadeloupe,Djamalee Boisné,90,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_B
+2026-09-28,Guatemala,El Salvador,Guatemala,Darwin Lom,8,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_A
+2026-09-28,Guatemala,El Salvador,Guatemala,Rubio Rubin,28,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_A
+2026-09-28,Guatemala,El Salvador,Guatemala,William Fajardo,32,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_A
+2026-09-28,Guatemala,El Salvador,Guatemala,Jorge Aparicio,56,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_A
+2026-09-28,Guatemala,El Salvador,Guatemala,William Fajardo,89,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_A
+2026-09-28,Guatemala,El Salvador,Guatemala,William Fajardo,90,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_A
+2026-09-28,Jamaica,Honduras,Honduras,Keyrol Figueroa,14,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_A
+2026-09-28,Japan,Venezuela,Venezuela,Kevin Kelsy,46,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Japan_national_football_team
+2026-09-28,Japan,Venezuela,Japan,Ayase Ueda,49,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Japan_national_football_team
+2026-09-28,Japan,Venezuela,Japan,Ayase Ueda,90,FALSE,TRUE,NA,https://en.wikipedia.org/wiki/Japan_national_football_team
+2026-09-28,Kyrgyzstan,Maldives,Kyrgyzstan,Erbol Atabayev,11,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Maldives_national_football_team
+2026-09-28,Kyrgyzstan,Maldives,Kyrgyzstan,Sirozhiddin Astanakulov,20,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Maldives_national_football_team
+2026-09-28,Kyrgyzstan,Maldives,Kyrgyzstan,Erbol Atabayev,23,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Maldives_national_football_team
+2026-09-28,Kyrgyzstan,Maldives,Kyrgyzstan,Valeriy Murzakov,32,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Maldives_national_football_team
+2026-09-28,Kyrgyzstan,Maldives,Kyrgyzstan,Joel Kojo,42,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Maldives_national_football_team
+2026-09-28,Palestine,Tajikistan,Tajikistan,Sheriddin Boboev,4,FALSE,TRUE,NA,https://en.wikipedia.org/wiki/Tajikistan_national_football_team
+2026-09-28,Palestine,Tajikistan,Palestine,Assad Al Hamlawi,21,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Tajikistan_national_football_team
+2026-09-28,Palestine,Tajikistan,Tajikistan,Nozim Babadjanov,24,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Tajikistan_national_football_team
+2026-09-28,Palestine,Tajikistan,Palestine,Assad Al Hamlawi,45,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Tajikistan_national_football_team
+2026-09-28,Palestine,Tajikistan,Palestine,Alaa Aldeen Hassan,46,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Tajikistan_national_football_team
+2026-09-28,Palestine,Tajikistan,Palestine,Oday Dabbagh,74,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Tajikistan_national_football_team
+2026-09-28,Romania,Bosnia and Herzegovina,Bosnia and Herzegovina,Armin Gigović,12,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_B
+2026-09-28,Romania,Bosnia and Herzegovina,Bosnia and Herzegovina,Tarik Muharemović,19,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_B
+2026-09-28,Romania,Bosnia and Herzegovina,Romania,Daniel Bîrligea,28,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_B
+2026-09-28,Romania,Bosnia and Herzegovina,Bosnia and Herzegovina,Haris Tabaković,40,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_B
+2026-09-28,Romania,Bosnia and Herzegovina,Bosnia and Herzegovina,Ermin Mahmić,55,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_B
+2026-09-28,Romania,Bosnia and Herzegovina,Romania,Alexandru Cicâldău,62,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_B
+2026-09-28,Saint Kitts and Nevis,Grenada,Saint Kitts and Nevis,Tiquanny Williams,11,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_B
+2026-09-28,Saint Kitts and Nevis,Grenada,Saint Kitts and Nevis,Tiquanny Williams,17,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_B
+2026-09-28,Saint Kitts and Nevis,Grenada,Saint Kitts and Nevis,Tiquanny Williams,76,FALSE,TRUE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_B
+2026-09-28,Saint Lucia,Bermuda,Saint Lucia,Kegan Caull,15,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_B
+2026-09-28,Saint Lucia,Bermuda,Saint Lucia,Kegan Caull,18,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_B
+2026-09-28,Saint Lucia,Bermuda,Saint Lucia,Kegan Caull,35,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_B
+2026-09-28,Saint Lucia,Bermuda,Bermuda,Ajani Burchall,45,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_B
+2026-09-28,Saint Lucia,Bermuda,Saint Lucia,Shevon Byron,53,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_B
+2026-09-28,Saint Lucia,Bermuda,Saint Lucia,Kurt Frederick,68,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_B
+2026-09-28,Saint Lucia,Bermuda,Bermuda,Riley Robinson,70,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_B
+2026-09-28,Singapore,Bangladesh,Singapore,Harhys Stewart,35,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_FIFA_ASEAN_Cup
+2026-09-28,South Korea,Uruguay,Uruguay,Darwin Núñez,13,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Uruguay_national_football_team
+2026-09-28,South Korea,Uruguay,Uruguay,Giorgian de Arrascaeta,27,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Uruguay_national_football_team
+2026-09-28,South Korea,Uruguay,Uruguay,Kim Min-jae,43,TRUE,FALSE,NA,https://en.wikipedia.org/wiki/Uruguay_national_football_team
+2026-09-28,South Korea,Uruguay,Uruguay,Darwin Núñez,62,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Uruguay_national_football_team
+2026-09-28,South Korea,Uruguay,South Korea,Son Heung-min,80,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Uruguay_national_football_team
+2026-09-28,Suriname,Martinique,Suriname,Justin Lonwijk,54,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_A
+2026-09-28,Suriname,Martinique,Suriname,Gyrano Kerk,69,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_A
+2026-09-28,Suriname,Martinique,Martinique,Boris Moltenis,81,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_A
+2026-09-28,Sweden,Poland,Sweden,Benjamin Nygren,8,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_B
+2026-09-28,Sweden,Poland,Poland,Sebastian Szymański,43,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_B
+2026-09-28,Sweden,Poland,Sweden,Yasin Ayari,64,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_B
+2026-09-28,Sweden,Poland,Sweden,Viktor Gyökeres,72,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_B
+2026-09-28,Tunisia,Botswana,Botswana,Thatayaone Kgamanyane,37,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_H
+2026-09-28,Tunisia,Botswana,Tunisia,Hazem Mastouri,44,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_H
+2026-09-28,Tunisia,Botswana,Tunisia,Hazem Mastouri,49,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_H
+2026-09-28,Tunisia,Botswana,Botswana,Lebogang Ditsele,60,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_H
+2026-09-28,Turkey,Italy,Italy,Alessandro Bastoni,9,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_A
+2026-09-28,Turkey,Italy,Italy,Davide Frattesi,22,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_A
+2026-09-28,Turkey,Italy,Italy,Michael Kayode,27,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_A
+2026-09-28,Turkey,Italy,Turkey,Barış Alper Yılmaz,47,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_A
+2026-09-28,Turkey,Italy,Italy,Pio Esposito,50,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_A
+2026-09-28,Zimbabwe,DR Congo,DR Congo,Yoane Wissa,30,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_E
+2026-09-28,Zimbabwe,DR Congo,DR Congo,Samuel Moutoussamy,45,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_E
+2026-09-28,Zimbabwe,DR Congo,Zimbabwe,Marshall Munetsi,90,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_E
+2026-09-29,Anguilla,Aruba,Aruba,Rovien Ostiana,53,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_C
+2026-09-29,Anguilla,Aruba,Aruba,Justin Figaroa,88,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_C
+2026-09-29,Australia,Brazil,Brazil,Vanderson,3,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Australia_men's_national_soccer_team_results_(2020%E2%80%93present)
+2026-09-29,Australia,Brazil,Australia,Alessandro Circati,30,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Australia_men's_national_soccer_team_results_(2020%E2%80%93present)
+2026-09-29,Australia,Brazil,Australia,Connor Metcalfe,34,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Australia_men's_national_soccer_team_results_(2020%E2%80%93present)
+2026-09-29,Australia,Brazil,Brazil,Raphinha,45,FALSE,TRUE,NA,https://en.wikipedia.org/wiki/Australia_men's_national_soccer_team_results_(2020%E2%80%93present)
+2026-09-29,Australia,Brazil,Brazil,Bruno Guimarães,70,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Australia_men's_national_soccer_team_results_(2020%E2%80%93present)
+2026-09-29,Australia,Brazil,Brazil,Vinícius Júnior,80,FALSE,TRUE,NA,https://en.wikipedia.org/wiki/Australia_men's_national_soccer_team_results_(2020%E2%80%93present)
+2026-09-29,Belize,Saint Vincent and the Grenadines,Saint Vincent and the Grenadines,Andrew Johnson,10,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_B
+2026-09-29,Benin,Mauritania,Benin,Rodolfo Aloko,31,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_F
+2026-09-29,Benin,Mauritania,Benin,Rodolfo Aloko,46,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_F
+2026-09-29,Benin,Mauritania,Mauritania,Aboubakary Koïta,80,FALSE,TRUE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_F
+2026-09-29,Burundi,Algeria,Burundi,Farès Chaïbi,5,TRUE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_I
+2026-09-29,Burundi,Algeria,Burundi,Jean Claude Girumugisha,12,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_I
+2026-09-29,Burundi,Algeria,Algeria,Bachir Belloumi,30,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_I
+2026-09-29,Burundi,Algeria,Algeria,Adil Boulbina,63,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_I
+2026-09-29,Cape Verde,Rwanda,Cape Verde,Gilson Benchimol,40,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_K
+2026-09-29,Cape Verde,Rwanda,Rwanda,Claude Niyomugabo,45,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_K
+2026-09-29,Cape Verde,Rwanda,Rwanda,Elie Iradukunda,52,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_K
+2026-09-29,Comoros,Namibia,Comoros,Benjaloud Youssouf,53,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_G
+2026-09-29,Congo,Cameroon,Congo,Geltany Stalgout Bantsiele,24,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_G
+2026-09-29,Congo,Cameroon,Cameroon,Melvin Zinga,53,TRUE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_G
+2026-09-29,Czech Republic,England,England,Anthony Gordon,47,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_A
+2026-09-29,Czech Republic,England,England,Harry Kane,69,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_A
+2026-09-29,Ethiopia,Senegal,Senegal,Ibrahim Mbaye,11,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_J
+2026-09-29,French Guiana,Sint Maarten,French Guiana,Jules Haabo,90,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_B
+2026-09-29,Gabon,Niger,Gabon,Rody Junior Effaghe,53,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_A
+2026-09-29,Gabon,Niger,Gabon,Denis Bouanga,77,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_A
+2026-09-29,Ghana,Gambia,Ghana,Ernest Nuamah,27,FALSE,TRUE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_C
+2026-09-29,Ghana,Gambia,Ghana,Felix Afena-Gyan,33,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_C
+2026-09-29,Ghana,Gambia,Gambia,Muhammed Badamosi,37,FALSE,TRUE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_C
+2026-09-29,Ghana,Gambia,Gambia,Omar Colley,42,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_C
+2026-09-29,Ghana,Gambia,Gambia,Ebrima Colley,68,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_C
+2026-09-29,Ghana,Gambia,Gambia,Ebrima Colley,90,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_C
+2026-09-29,Guinea-Bissau,Nigeria,Guinea-Bissau,Franculino Djú,15,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_L
+2026-09-29,Guinea-Bissau,Nigeria,Guinea-Bissau,Mama Baldé,66,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_L
+2026-09-29,Guinea-Bissau,Nigeria,Guinea-Bissau,Álvaro Djaló,90,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_L
+2026-09-29,Lesotho,Morocco,Morocco,Brahim Díaz,45,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_A
+2026-09-29,Lesotho,Morocco,Morocco,Azzedine Ounahi,82,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_A
+2026-09-29,Liberia,Mali,Mali,Ange Martial Tia,79,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_K
+2026-09-29,Luxembourg,Iceland,Iceland,Andri Guðjohnsen,13,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_C
+2026-09-29,Luxembourg,Iceland,Iceland,Orri Óskarsson,39,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_C
+2026-09-29,Luxembourg,Iceland,Iceland,Victor Pálsson,73,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_C
+2026-09-29,Madagascar,Tanzania,Tanzania,Cyprian Kachwele,39,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_L
+2026-09-29,Madagascar,Tanzania,Madagascar,Nicolas Fontaine,50,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_L
+2026-09-29,Mexico,Peru,Peru,Jairo Vélez,26,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Peru_national_football_team_results_(2020%E2%80%93present)
+2026-09-29,Mexico,Peru,Mexico,Víctor Guzmán,49,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Peru_national_football_team_results_(2020%E2%80%93present)
+2026-09-29,Moldova,Faroe Islands,Faroe Islands,Viljormur Davidsen,26,FALSE,TRUE,NA,https://www.espn.com/soccer/match/_/gameId/401861090/faroe-islands-moldova
+2026-09-29,Moldova,Faroe Islands,Moldova,Sergiu Perciun,66,FALSE,FALSE,NA,https://www.espn.com/soccer/match/_/gameId/401861090/faroe-islands-moldova
+2026-09-29,Mozambique,Sudan,Mozambique,Witi,24,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_J
+2026-09-29,Mozambique,Sudan,Mozambique,Chamito,46,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_J
+2026-09-29,Mozambique,Sudan,Mozambique,Guima,58,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_J
+2026-09-29,Mozambique,Sudan,Mozambique,Chamito,62,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_J
+2026-09-29,Mozambique,Sudan,Sudan,Yasin Hamed,88,FALSE,TRUE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_J
+2026-09-29,Oman,Kuwait,Kuwait,Shabaib Al-Khaldi,6,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/27th_Arabian_Gulf_Cup
+2026-09-29,Oman,Kuwait,Oman,Nasser Al-Rawahi,65,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/27th_Arabian_Gulf_Cup
+2026-09-29,Oman,Kuwait,Oman,Nasser Al-Rawahi,81,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/27th_Arabian_Gulf_Cup
+2026-09-29,Oman,Kuwait,Oman,Musab Al-Shaqsy,84,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/27th_Arabian_Gulf_Cup
+2026-09-29,Philippines,Pakistan,Philippines,Sandro Reyes,24,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_FIFA_ASEAN_Cup
+2026-09-29,Philippines,Pakistan,Philippines,Bjørn Martin Kristensen,32,FALSE,TRUE,NA,https://en.wikipedia.org/wiki/2026_FIFA_ASEAN_Cup
+2026-09-29,Philippines,Pakistan,Pakistan,Ali Khan,47,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_FIFA_ASEAN_Cup
+2026-09-29,Philippines,Pakistan,Pakistan,Abdul Arshad,62,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_FIFA_ASEAN_Cup
+2026-09-29,Russia,Iran,Russia,Aleksandr Golovin,21,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Russia_national_football_team_results_(2020%E2%80%93present)
+2026-09-29,Russia,Iran,Russia,Aleksandr Golovin,36,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Russia_national_football_team_results_(2020%E2%80%93present)
+2026-09-29,San Marino,Albania,Albania,Anis Mehmeti,21,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_C
+2026-09-29,San Marino,Albania,Albania,Myrto Uzuni,27,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_C
+2026-09-29,San Marino,Albania,Albania,Rei Manaj,65,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_C
+2026-09-29,Saudi Arabia,Iraq,Saudi Arabia,Abdullah Al-Salem,55,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/27th_Arabian_Gulf_Cup
+2026-09-29,Saudi Arabia,Iraq,Saudi Arabia,Abdullah Al-Hamdan,69,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/27th_Arabian_Gulf_Cup
+2026-09-29,Scotland,Switzerland,Switzerland,Ricardo Rodriguez,12,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_B
+2026-09-29,Scotland,Switzerland,Switzerland,Nico Elvedi,55,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_B
+2026-09-29,Scotland,Switzerland,Switzerland,Zeki Amdouni,82,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_B
+2026-09-29,Slovakia,Kazakhstan,Slovakia,Leo Sauer,26,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_C
+2026-09-29,Slovakia,Kazakhstan,Kazakhstan,Ramazan Karimov,35,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_C
+2026-09-29,Slovakia,Kazakhstan,Slovakia,Dávid Hancko,82,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_C
+2026-09-29,Slovenia,North Macedonia,Slovenia,Sandi Lovrić,55,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_B
+2026-09-29,Slovenia,North Macedonia,Slovenia,Aljoša Matko,82,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_B
+2026-09-29,Somalia,Ivory Coast,Ivory Coast,Yann Gboho,89,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_C
+2026-09-29,Somalia,Ivory Coast,Ivory Coast,Bazoumana Touré,90,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_C
+2026-09-29,South Sudan,Egypt,Egypt,Mostafa Ziko,36,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_B
+2026-09-29,South Sudan,Egypt,Egypt,Omar Marmoush,49,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_B
+2026-09-29,South Sudan,Egypt,Egypt,Ibrahim Adel,75,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_B
+2026-09-29,South Sudan,Egypt,Egypt,Omar Marmoush,83,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_B
+2026-09-29,South Sudan,Egypt,Egypt,Hamza Abdelkarim,90,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_B
+2026-09-29,Spain,Croatia,Spain,Lamine Yamal,2,FALSE,FALSE,NA,https://www.croatiaweek.com/spain-beat-croatia-4-1-nations-league-seville/
+2026-09-29,Spain,Croatia,Croatia,Dion Beljo,28,FALSE,FALSE,NA,https://www.croatiaweek.com/spain-beat-croatia-4-1-nations-league-seville/
+2026-09-29,Spain,Croatia,Spain,Marc Pubill,31,FALSE,FALSE,NA,https://www.croatiaweek.com/spain-beat-croatia-4-1-nations-league-seville/
+2026-09-29,Spain,Croatia,Spain,Lamine Yamal,63,FALSE,FALSE,NA,https://www.croatiaweek.com/spain-beat-croatia-4-1-nations-league-seville/
+2026-09-29,Spain,Croatia,Spain,Nico Williams,89,FALSE,FALSE,NA,https://www.croatiaweek.com/spain-beat-croatia-4-1-nations-league-seville/
+2026-09-29,Thailand,Vietnam,Thailand,Sarach Yooyen,10,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_FIFA_ASEAN_Cup
+2026-09-29,Thailand,Vietnam,Thailand,Chaiyaphon Otton,90,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_FIFA_ASEAN_Cup
+2026-09-29,Turks and Caicos Islands,British Virgin Islands,Turks and Caicos Islands,Billy Forbes,9,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_C
+2026-09-29,Turks and Caicos Islands,British Virgin Islands,Turks and Caicos Islands,Junior Paul,52,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_C
+2026-09-29,Turks and Caicos Islands,British Virgin Islands,Turks and Caicos Islands,Billy Forbes,74,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_C
+2026-09-29,Uganda,Libya,Uganda,Arnold Vula,45,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_H
+2026-09-29,United States,Chile,United States,Sebastian Berhalter,37,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Chile_national_football_team
+2026-09-29,United States,Chile,Chile,Diego Ulloa,45,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Chile_national_football_team
+2026-09-29,United States,Chile,Chile,Maximiliano Gutiérrez,49,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Chile_national_football_team
+2026-09-29,United States,Chile,United States,Julian Hall,51,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Chile_national_football_team
+2026-09-29,United States,Chile,United States,Chris Richards,72,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Chile_national_football_team
+2026-09-29,United States,Chile,United States,Mathis Albert,90,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Chile_national_football_team
+2026-09-29,United States Virgin Islands,Bahamas,United States Virgin Islands,Jimson St. Louis,14,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_C
+2026-09-29,United States Virgin Islands,Bahamas,United States Virgin Islands,Rakeem Joseph,45,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_C
+2026-09-29,United States Virgin Islands,Bahamas,United States Virgin Islands,Noah Armour,62,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_C
+2026-09-29,United States Virgin Islands,Bahamas,Bahamas,Christopher Rahming,68,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026–27_CONCACAF_Nations_League_C
+2026-09-29,Zambia,Togo,Zambia,Albert Kangwanda,2,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_I
+2026-09-29,Zambia,Togo,Zambia,Eliya Mandanji,90,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_I
+2026-09-30,Argentina,Bolivia,Argentina,Lautaro Martínez,19,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Bolivia_national_football_team
+2026-09-30,Argentina,Bolivia,Argentina,Nico Paz,29,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Bolivia_national_football_team
+2026-09-30,Argentina,Bolivia,Argentina,Cristian Romero,54,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Bolivia_national_football_team
+2026-09-30,Argentina,Bolivia,Argentina,José Manuel López,86,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Bolivia_national_football_team
+2026-09-30,Bahrain,Yemen,Bahrain,Ali Al-Doseri,7,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/27th_Arabian_Gulf_Cup
+2026-09-30,Bahrain,Yemen,Yemen,Nasser Al-Gahwashi,18,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/27th_Arabian_Gulf_Cup
+2026-09-30,Bahrain,Yemen,Yemen,Abdulwasea Al-Matari,31,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/27th_Arabian_Gulf_Cup
+2026-09-30,Bahrain,Yemen,Yemen,Rami Al-Wasmani,40,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/27th_Arabian_Gulf_Cup
+2026-09-30,Bahrain,Yemen,Yemen,Adel Abbas Qasem,44,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/27th_Arabian_Gulf_Cup
+2026-09-30,Bahrain,Yemen,Bahrain,Ali Madan,67,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/27th_Arabian_Gulf_Cup
+2026-09-30,Bahrain,Yemen,Yemen,Rami Al-Wasmani,90,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/27th_Arabian_Gulf_Cup
+2026-09-30,Eritrea,South Africa,South Africa,Relebohile Mofokeng,19,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_D
+2026-09-30,Eritrea,South Africa,South Africa,Relebohile Mofokeng,45,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_D
+2026-09-30,Eritrea,South Africa,South Africa,Sphephelo Sithole,52,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_D
+2026-09-30,Eritrea,South Africa,South Africa,Iqraam Rayners,63,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_D
+2026-09-30,Eritrea,South Africa,South Africa,Luther Singh,90,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_D
+2026-09-30,Fiji,New Caledonia,New Caledonia,Willy Read,39,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_MSG_Prime_Minister%27s_Cup_%E2%80%93_Men%27s_football_tournament
+2026-09-30,Fiji,New Caledonia,Fiji,Scott Wara,50,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_MSG_Prime_Minister%27s_Cup_%E2%80%93_Men%27s_football_tournament
+2026-09-30,Fiji,New Caledonia,Fiji,Maikah Dau,66,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_MSG_Prime_Minister%27s_Cup_%E2%80%93_Men%27s_football_tournament
+2026-09-30,Hong Kong,Brunei,Hong Kong,Chan Siu Kwan,60,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_FIFA_ASEAN_Cup
+2026-09-30,Hong Kong,Brunei,Hong Kong,Matt Orr,90,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_FIFA_ASEAN_Cup
+2026-09-30,Lithuania,Andorra,Lithuania,Manfredas Ruzgis,21,FALSE,TRUE,NA,https://en.wikipedia.org/wiki/Andorra_national_football_team_results_(2020%E2%80%93present)
+2026-09-30,Lithuania,Andorra,Lithuania,Faustas Steponavičius,27,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Andorra_national_football_team_results_(2020%E2%80%93present)
+2026-09-30,Lithuania,Andorra,Lithuania,Armandas Kučys,46,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Andorra_national_football_team_results_(2020%E2%80%93present)
+2026-09-30,Papua New Guinea,Solomon Islands,Solomon Islands,Raphael Lea'i,3,FALSE,TRUE,NA,https://en.wikipedia.org/wiki/2026_MSG_Prime_Minister%27s_Cup_%E2%80%93_Men%27s_football_tournament
+2026-09-30,Papua New Guinea,Solomon Islands,Papua New Guinea,Ati Kepo,60,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_MSG_Prime_Minister%27s_Cup_%E2%80%93_Men%27s_football_tournament
+2026-09-30,Seychelles,Sri Lanka,Sri Lanka,Dillon De Silva,32,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Seychelles_national_football_team
+2026-09-30,Seychelles,Sri Lanka,Sri Lanka,Ahmed Waseem Razeek,84,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Seychelles_national_football_team
+2026-09-30,Timor-Leste,Cambodia,Timor-Leste,João Pedro,17,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_FIFA_ASEAN_Cup
+2026-09-30,Timor-Leste,Cambodia,Cambodia,Andrés Nieto,28,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_FIFA_ASEAN_Cup
+2026-09-30,Timor-Leste,Cambodia,Cambodia,Andrés Nieto,38,FALSE,TRUE,NA,https://en.wikipedia.org/wiki/2026_FIFA_ASEAN_Cup
+2026-09-30,Timor-Leste,Cambodia,Timor-Leste,Alexandro Bakhito,58,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_FIFA_ASEAN_Cup
+2026-09-30,United Arab Emirates,Qatar,Qatar,Almoez Ali,33,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/27th_Arabian_Gulf_Cup
+2026-09-30,United Arab Emirates,Qatar,United Arab Emirates,Ali Saleh,45,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/27th_Arabian_Gulf_Cup
+2026-10-01,Antigua and Barbuda,Anguilla,Antigua and Barbuda,D'Andre Bishop,35,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_C
+2026-10-01,Antigua and Barbuda,Anguilla,Antigua and Barbuda,D'Andre Bishop,64,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_C
+2026-10-01,Antigua and Barbuda,Anguilla,Antigua and Barbuda,Sean Tomlinson,74,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_C
+2026-10-01,British Virgin Islands,Montserrat,Montserrat,Brandon Barzey,11,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_C
+2026-10-01,British Virgin Islands,Montserrat,Montserrat,Joel Mars,43,TRUE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_C
+2026-10-01,Cook Islands,Tahiti,Cook Islands,Benjamin Mata,3,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Cook_Islands_national_football_team
+2026-10-01,Cook Islands,Tahiti,Cook Islands,Tremaine Rimene-Albrett,9,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Cook_Islands_national_football_team
+2026-10-01,Cook Islands,Tahiti,Tahiti,Kalamani Bennett,16,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Cook_Islands_national_football_team
+2026-10-01,Cook Islands,Tahiti,Tahiti,Kalamani Bennett,23,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Cook_Islands_national_football_team
+2026-10-01,Cook Islands,Tahiti,Cook Islands,Benjamin Mata,49,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Cook_Islands_national_football_team
+2026-10-01,Curaçao,Trinidad and Tobago,Curaçao,Juninho Bacuna,58,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_A
+2026-10-01,Denmark,Portugal,Portugal,João Cancelo,13,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_A
+2026-10-01,Denmark,Portugal,Denmark,Mikkel Damsgaard,23,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_A
+2026-10-01,Denmark,Portugal,Portugal,Gonçalo Ramos,25,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_A
+2026-10-01,Denmark,Portugal,Denmark,Rasmus Højlund,53,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_A
+2026-10-01,Denmark,Portugal,Portugal,Vitinha,67,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_A
+2026-10-01,Denmark,Portugal,Portugal,João Félix,87,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_A
+2026-10-01,Dominica,Guyana,Guyana,Osaze De Rosario,27,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_B
+2026-10-01,Dominica,Guyana,Guyana,Omari Glasgow,41,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_B
+2026-10-01,Dominica,Guyana,Guyana,Deon Moore,50,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_B
+2026-10-01,Dominica,Guyana,Dominica,Troy Jules,75,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_B
+2026-10-01,Dominica,Guyana,Guyana,Kelsey Benjamin,79,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_B
+2026-10-01,Dominica,Guyana,Guyana,Enoch George,90,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_B
+2026-10-01,Dominican Republic,Haiti,Haiti,Louicius Deedson,9,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_A
+2026-10-01,Dominican Republic,Haiti,Haiti,Wilson Isidor,51,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_A
+2026-10-01,Dominican Republic,Haiti,Dominican Republic,Dorny Romero,55,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_A
+2026-10-01,Dominican Republic,Haiti,Haiti,Wilson Isidor,67,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_A
+2026-10-01,Dominican Republic,Haiti,Haiti,Yassin Fortuné,76,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_A
+2026-10-01,Germany,Serbia,Germany,Tom Bischof,39,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_A
+2026-10-01,Germany,Serbia,Germany,Florian Wirtz,61,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_A
+2026-10-01,Greece,Netherlands,Greece,Fotis Ioannidis,23,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_A
+2026-10-01,Greece,Netherlands,Greece,Giorgos Masouras,45,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_A
+2026-10-01,Greece,Netherlands,Netherlands,Virgil van Dijk,59,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_A
+2026-10-01,Greece,Netherlands,Netherlands,Tijjani Reijnders,89,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_A
+2026-10-01,Guinea,Kenya,Guinea,Serhou Guirassy,32,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_D
+2026-10-01,Indonesia,Bangladesh,Indonesia,Mitchell Baker,11,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_FIFA_ASEAN_Cup
+2026-10-01,Indonesia,Bangladesh,Indonesia,Mitchell Baker,20,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_FIFA_ASEAN_Cup
+2026-10-01,Indonesia,Bangladesh,Indonesia,Rizky Ridho,32,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_FIFA_ASEAN_Cup
+2026-10-01,Indonesia,Bangladesh,Bangladesh,Shahriar Emon,36,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_FIFA_ASEAN_Cup
+2026-10-01,Indonesia,Bangladesh,Indonesia,Mitchell Baker,37,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_FIFA_ASEAN_Cup
+2026-10-01,Indonesia,Bangladesh,Indonesia,Mitchell Baker,42,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_FIFA_ASEAN_Cup
+2026-10-01,Indonesia,Bangladesh,Indonesia,Justin Hubner,45,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_FIFA_ASEAN_Cup
+2026-10-01,Indonesia,Bangladesh,Indonesia,Luke Vickery,90,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_FIFA_ASEAN_Cup
+2026-10-01,Indonesia,Bangladesh,Bangladesh,Farhaan Ali Wahid,90,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_FIFA_ASEAN_Cup
+2026-10-01,Indonesia,Bangladesh,Indonesia,Kevin Diks,90,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_FIFA_ASEAN_Cup
+2026-10-01,Indonesia,Bangladesh,Indonesia,Mitchell Baker,90,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_FIFA_ASEAN_Cup
+2026-10-01,Lebanon,Maldives,Lebanon,Husseyn Chakroun,3,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Lebanon_national_football_team_results_(2020%E2%80%93present)
+2026-10-01,Lebanon,Maldives,Lebanon,Husseyn Chakroun,36,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Lebanon_national_football_team_results_(2020%E2%80%93present)
+2026-10-01,Lebanon,Maldives,Lebanon,Husseyn Chakroun,42,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Lebanon_national_football_team_results_(2020%E2%80%93present)
+2026-10-01,Lebanon,Maldives,Lebanon,Ahmed Maish Rasheed,52,TRUE,FALSE,NA,https://en.wikipedia.org/wiki/Lebanon_national_football_team_results_(2020%E2%80%93present)
+2026-10-01,Lebanon,Maldives,Lebanon,Ali Kassas,83,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Lebanon_national_football_team_results_(2020%E2%80%93present)
+2026-10-01,Lebanon,Maldives,Lebanon,Ali Kassas,90,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Lebanon_national_football_team_results_(2020%E2%80%93present)
+2026-10-01,Malaysia,Singapore,Malaysia,Bérgson,8,FALSE,TRUE,NA,https://en.wikipedia.org/wiki/2026_FIFA_ASEAN_Cup
+2026-10-01,Malaysia,Singapore,Malaysia,Stuart Wilkin,26,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_FIFA_ASEAN_Cup
+2026-10-01,Malaysia,Singapore,Malaysia,Bérgson,62,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_FIFA_ASEAN_Cup
+2026-10-01,Malaysia,Singapore,Malaysia,Paulo Josué,76,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_FIFA_ASEAN_Cup
+2026-10-01,Malaysia,Singapore,Malaysia,Syahir Bashah,87,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_FIFA_ASEAN_Cup
+2026-10-01,Malaysia,Singapore,Malaysia,Bérgson,90,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_FIFA_ASEAN_Cup
+2026-10-01,Malta,Gibraltar,Malta,Joseph Mbong,53,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_D
+2026-10-01,Malta,Gibraltar,Gibraltar,James Scanlon,61,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_D
+2026-10-01,Nicaragua,Costa Rica,Costa Rica,Orlando Sinclair,57,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_A
+2026-10-01,Nicaragua,Costa Rica,Costa Rica,Carlos Mora,60,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_A
+2026-10-01,Nicaragua,Costa Rica,Costa Rica,Kenyel Michel,90,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_A
+2026-10-01,Panama,New Zealand,New Zealand,Marko Stamenić,13,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/New_Zealand_men's_national_football_team
+2026-10-01,Panama,New Zealand,Panama,Giovany Herbert,45,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/New_Zealand_men's_national_football_team
+2026-10-01,Puerto Rico,Cayman Islands,Puerto Rico,Ricardo Rivera,26,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_B
+2026-10-01,Puerto Rico,Cayman Islands,Puerto Rico,Wilfredo Rivera,45,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_B
+2026-10-01,Puerto Rico,Cayman Islands,Puerto Rico,Leandro Antonetti,90,FALSE,TRUE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_B
+2026-10-01,Republic of Ireland,Austria,Republic of Ireland,Troy Parrott,12,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_B
+2026-10-01,Republic of Ireland,Austria,Republic of Ireland,Troy Parrott,45,FALSE,TRUE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_B
+2026-10-01,Republic of Ireland,Austria,Austria,Alexander Prass,71,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_B
+2026-10-01,Republic of Ireland,Austria,Austria,Michael Gregoritsch,77,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_B
+2026-10-01,United States Virgin Islands,Saint Martin,Saint Martin,Axel Raga,44,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_C
+2026-10-01,United States Virgin Islands,Saint Martin,Saint Martin,Rahim Denis,49,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_C
+2026-10-01,United States Virgin Islands,Saint Martin,Saint Martin,Pierre-Bertrand Arné,83,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_C
+2026-10-01,United States Virgin Islands,Saint Martin,Saint Martin,Pierre-Bertrand Arné,86,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_C
+2026-10-01,United States Virgin Islands,Saint Martin,Saint Martin,Pierre-Bertrand Arné,89,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_C
+2026-10-01,Uzbekistan,Syria,Uzbekistan,Sherzod Esanov,27,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Uzbekistan_national_football_team_results_(2020%E2%80%93present)
+2026-10-01,Uzbekistan,Syria,Uzbekistan,Akmal Mozgovoy,45,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Uzbekistan_national_football_team_results_(2020%E2%80%93present)
+2026-10-01,Uzbekistan,Syria,Uzbekistan,Khusain Norchaev,48,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Uzbekistan_national_football_team_results_(2020%E2%80%93present)
+2026-10-01,Uzbekistan,Syria,Uzbekistan,Khusain Norchaev,90,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Uzbekistan_national_football_team_results_(2020%E2%80%93present)
+2026-10-01,Uzbekistan,Syria,Syria,Mukhammad Khakimov,90,TRUE,FALSE,NA,https://en.wikipedia.org/wiki/Uzbekistan_national_football_team_results_(2020%E2%80%93present)
+2026-10-01,Wales,Norway,Norway,Oscar Bobb,11,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_A
+2026-10-01,Wales,Norway,Wales,Daniel James,38,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_A
+2026-10-01,Wales,Norway,Wales,Neco Williams,48,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_A
+2026-10-02,Barbados,Bermuda,Bermuda,Djair Parfitt-Williams,8,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_B
+2026-10-02,Barbados,Bermuda,Barbados,Thierry Gale,26,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_B
+2026-10-02,Barbados,Bermuda,Barbados,Andre Applewhaite,29,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_B
+2026-10-02,Barbados,Bermuda,Barbados,Thierry Gale,41,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_B
+2026-10-02,Barbados,Bermuda,Barbados,Niall Reid-Stephen,86,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_B
+2026-10-02,Belgium,Turkey,Belgium,Kevin De Bruyne,10,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_A
+2026-10-02,Belgium,Turkey,Belgium,Kevin De Bruyne,60,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_A
+2026-10-02,Belgium,Turkey,Belgium,Romelu Lukaku,76,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_A
+2026-10-02,Bonaire,Grenada,Bonaire,Ayrton Cicilia,7,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_B
+2026-10-02,Bonaire,Grenada,Bonaire,Myron Bostdorp,33,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_B
+2026-10-02,Bonaire,Grenada,Grenada,Myles Hippolyte,50,FALSE,TRUE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_B
+2026-10-02,Bonaire,Grenada,Grenada,Benjamin Ettienne,55,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_B
+2026-10-02,Bonaire,Grenada,Grenada,Caleb Redhead,69,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_B
+2026-10-02,Bosnia and Herzegovina,Sweden,Sweden,Viktor Gyökeres,61,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_B
+2026-10-02,Bosnia and Herzegovina,Sweden,Bosnia and Herzegovina,Kerim Alajbegović,80,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_B
+2026-10-02,China,Palestine,Palestine,Assad Al Hamlawi,16,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Palestine_national_football_team_results_(2020%E2%80%93present)
+2026-10-02,China,Palestine,Palestine,Assad Al Hamlawi,22,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Palestine_national_football_team_results_(2020%E2%80%93present)
+2026-10-02,China,Palestine,Palestine,Oday Dabbagh,45,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Palestine_national_football_team_results_(2020%E2%80%93present)
+2026-10-02,China,Palestine,Palestine,Oday Dabbagh,54,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Palestine_national_football_team_results_(2020%E2%80%93present)
+2026-10-02,China,Palestine,Palestine,Ahmad Al-Qaq,90,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Palestine_national_football_team_results_(2020%E2%80%93present)
+2026-10-02,Colombia,Paraguay,Paraguay,Hugo Benítez,56,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Paraguay_national_football_team
+2026-10-02,Cyprus,Armenia,Cyprus,Leonidas Konomis,19,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_C
+2026-10-02,Cyprus,Armenia,Cyprus,Andronikos Kakoullis,31,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_C
+2026-10-02,DR Congo,Uganda,Uganda,James Bogere,7,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/DR_Congo_national_football_team
+2026-10-02,DR Congo,Uganda,Uganda,Kelvin Boateng,49,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/DR_Congo_national_football_team
+2026-10-02,El Salvador,Jamaica,Jamaica,Javon East,39,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_A
+2026-10-02,El Salvador,Jamaica,Jamaica,Javon East,64,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_A
+2026-10-02,Faroe Islands,Slovakia,Slovakia,Sølvi Vatnhamar,38,TRUE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_C
+2026-10-02,Faroe Islands,Slovakia,Faroe Islands,Adrian Justinussen,66,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_C
+2026-10-02,France,Italy,France,Michael Olise,55,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_A
+2026-10-02,France,Italy,Italy,Alessandro Bastoni,68,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_A
+2026-10-02,Hungary,Georgia,Hungary,Milos Kerkez,35,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_B
+2026-10-02,Kazakhstan,Moldova,Moldova,Nicky Cleșcenco,45,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_C
+2026-10-02,Kazakhstan,Moldova,Moldova,Petru Popescu,50,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_C
+2026-10-02,Kazakhstan,Moldova,Kazakhstan,Nuraly Alip,64,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_C
+2026-10-02,Latvia,Montenegro,Montenegro,Vasilije Adžić,3,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_C
+2026-10-02,Latvia,Montenegro,Montenegro,Vasilije Adžić,56,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_C
+2026-10-02,Latvia,Montenegro,Latvia,Markuss Strods,82,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_C
+2026-10-02,Martinique,Honduras,Honduras,Erick Puerto,8,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_A
+2026-10-02,Martinique,Honduras,Martinique,Jonathan Varane,40,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_A
+2026-10-02,Martinique,Honduras,Martinique,Jonathan Mexique,88,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_A
+2026-10-02,Mauritius,Sri Lanka,Mauritius,Stephan De Robillard,28,FALSE,TRUE,NA,https://en.wikipedia.org/wiki/Mauritius_national_football_team
+2026-10-02,Mauritius,Sri Lanka,Mauritius,William François,33,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Mauritius_national_football_team
+2026-10-02,Mauritius,Sri Lanka,Mauritius,Adrien François,59,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Mauritius_national_football_team
+2026-10-02,Poland,Romania,Poland,Robert Lewandowski,24,FALSE,TRUE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_B
+2026-10-02,Poland,Romania,Poland,Robert Lewandowski,47,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_B
+2026-10-02,Poland,Romania,Poland,Virgil Ghiță,49,TRUE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_B
+2026-10-02,Poland,Romania,Poland,Piotr Zieliński,62,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_B
+2026-10-02,Poland,Romania,Poland,Jan Bednarek,66,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_B
+2026-10-02,Poland,Romania,Poland,Robert Lewandowski,86,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_B
+2026-10-02,Saint Kitts and Nevis,Cuba,Saint Kitts and Nevis,Kyle Kelly,26,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_B
+2026-10-02,Saint Kitts and Nevis,Cuba,Cuba,Yunior Pérez,29,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_B
+2026-10-02,Saint Kitts and Nevis,Cuba,Cuba,Diego Catasus,38,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_B
+2026-10-02,Saint Kitts and Nevis,Cuba,Cuba,Yunior Pérez,51,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_B
+2026-10-02,Saint Kitts and Nevis,Cuba,Saint Kitts and Nevis,Tyreece Simpson,82,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_B
+2026-10-02,Saint Kitts and Nevis,Cuba,Saint Kitts and Nevis,Tiquanny Williams,88,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_B
+2026-10-02,Saint Lucia,Guadeloupe,Saint Lucia,Caniggia Elva,18,FALSE,TRUE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_B
+2026-10-02,Saint Lucia,Guadeloupe,Saint Lucia,Arkell Jude-Boyd,35,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_B
+2026-10-02,Saint Lucia,Guadeloupe,Saint Lucia,Donavan Phillip,57,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_B
+2026-10-02,Thailand,Philippines,Philippines,Bjørn Martin Kristensen,3,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_FIFA_ASEAN_Cup
+2026-10-02,Thailand,Philippines,Thailand,Iklas Sanron,55,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_FIFA_ASEAN_Cup
+2026-10-02,Thailand,Philippines,Philippines,Bjørn Martin Kristensen,68,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_FIFA_ASEAN_Cup
+2026-10-02,Ukraine,Northern Ireland,Northern Ireland,Ciaron Brown,9,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_B
+2026-10-02,Ukraine,Northern Ireland,Northern Ireland,Isaac Price,22,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_B
+2026-10-02,Ukraine,Northern Ireland,Northern Ireland,Ciaron Brown,61,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_B
+2026-10-02,Vietnam,Pakistan,Pakistan,Mohib Ullah,31,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_FIFA_ASEAN_Cup
+2026-10-02,Vietnam,Pakistan,Vietnam,Nguyễn Hai Long,51,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_FIFA_ASEAN_Cup
+2026-10-02,Vietnam,Pakistan,Vietnam,Nguyễn Hoàng Đức,57,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_FIFA_ASEAN_Cup
+2026-10-02,Vietnam,Pakistan,Vietnam,Nguyễn Đình Bắc,80,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_FIFA_ASEAN_Cup
+2026-10-02,Vietnam,Pakistan,Pakistan,Kaleemullah Khan,88,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_FIFA_ASEAN_Cup
+2026-10-02,Vietnam,Pakistan,Vietnam,Williams Minh Hoàng,90,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_FIFA_ASEAN_Cup
+2026-10-03,Argentina,Burkina Faso,Argentina,Lautaro Martínez,4,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Burkina_Faso_national_football_team
+2026-10-03,Argentina,Burkina Faso,Argentina,Moumouni Diallo,8,TRUE,FALSE,NA,https://en.wikipedia.org/wiki/Burkina_Faso_national_football_team
+2026-10-03,Argentina,Burkina Faso,Argentina,Gianluca Prestianni,12,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Burkina_Faso_national_football_team
+2026-10-03,Argentina,Burkina Faso,Argentina,Nico Paz,35,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Burkina_Faso_national_football_team
+2026-10-03,Argentina,Burkina Faso,Argentina,Julián Alvarez,36,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Burkina_Faso_national_football_team
+2026-10-03,Argentina,Burkina Faso,Argentina,Franco Mastantuono,57,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Burkina_Faso_national_football_team
+2026-10-03,Argentina,Burkina Faso,Argentina,Giuliano Simeone,90,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Burkina_Faso_national_football_team
+2026-10-03,Belarus,San Marino,Belarus,Artem Kontsevoy,46,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_C
+2026-10-03,Belarus,San Marino,Belarus,Artyom Shumansky,65,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_C
+2026-10-03,Belarus,San Marino,Belarus,Max Ebong,68,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_C
+2026-10-03,Belarus,San Marino,Belarus,Artem Kontsevoy,88,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_C
+2026-10-03,Belize,French Guiana,French Guiana,Guy Anakaba,78,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_B
+2026-10-03,Belize,French Guiana,French Guiana,Jules Haabo,84,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_B
+2026-10-03,Canada,Peru,Canada,Jacob Shaffelburg,19,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Peru_national_football_team_results_(2020%E2%80%93present)
+2026-10-03,Canada,Peru,Canada,Jacob Shaffelburg,35,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Peru_national_football_team_results_(2020%E2%80%93present)
+2026-10-03,Croatia,England,England,Harry Kane,8,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_A
+2026-10-03,Croatia,England,England,Jude Bellingham,21,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_A
+2026-10-03,Croatia,England,England,Anthony Gordon,39,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_A
+2026-10-03,Croatia,England,England,Bukayo Saka,45,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_A
+2026-10-03,Croatia,England,England,Harry Kane,53,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_A
+2026-10-03,Croatia,England,England,Bukayo Saka,68,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_A
+2026-10-03,Croatia,England,England,Morgan Rogers,87,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_A
+2026-10-03,Estonia,Luxembourg,Estonia,Rasmus Peetson,5,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_C
+2026-10-03,Fiji,Vanuatu,Fiji,Thomas Dunn,10,FALSE,FALSE,Roy Krishna,https://oceaniafootballcenter.org/2026/10/03/thomas-dunn-fires-fiji-past-vanuatu-as-bula-boys-end-26-year-wait-for-melanesian-crown/
+2026-10-03,Finland,Albania,Albania,Rei Manaj,4,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_C
+2026-10-03,Finland,Albania,Finland,Leo Walta,26,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_C
+2026-10-03,Finland,Albania,Finland,Leo Walta,71,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_C
+2026-10-03,Hong Kong,Cambodia,Hong Kong,Matt Orr,41,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_FIFA_ASEAN_Cup
+2026-10-03,Hong Kong,Cambodia,Hong Kong,Everton Camargo,58,FALSE,TRUE,NA,https://en.wikipedia.org/wiki/2026_FIFA_ASEAN_Cup
+2026-10-03,Iceland,Bulgaria,Iceland,Orri Óskarsson,37,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_C
+2026-10-03,Iceland,Bulgaria,Iceland,Orri Óskarsson,60,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_C
+2026-10-03,Iceland,Bulgaria,Iceland,Mikael Egill Ellertsson,90,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_C
+2026-10-03,India,Brazil,Brazil,Estêvão Willian,28,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/India_national_football_team_results_(2020%E2%80%93present)
+2026-10-03,India,Brazil,Brazil,Pedro,42,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/India_national_football_team_results_(2020%E2%80%93present)
+2026-10-03,India,Brazil,Brazil,Samuel Lino,58,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/India_national_football_team_results_(2020%E2%80%93present)
+2026-10-03,India,Brazil,Brazil,Samuel Lino,90,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/India_national_football_team_results_(2020%E2%80%93present)
+2026-10-03,Ivory Coast,Cameroon,Cameroon,Bil Nsongo,46,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Cameroon_national_football_team
+2026-10-03,North Macedonia,Scotland,Scotland,Kieron Bowie,7,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_B
+2026-10-03,North Macedonia,Scotland,Scotland,John McGinn,70,FALSE,TRUE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_B
+2026-10-03,Russia,Namibia,Russia,Lechi Sadulayev,37,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Russia_national_football_team_results_(2020%E2%80%93present)
+2026-10-03,Russia,Namibia,Russia,Danil Prutsev,54,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Russia_national_football_team_results_(2020%E2%80%93present)
+2026-10-03,Russia,Namibia,Russia,Konstantin Tyukavin,65,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Russia_national_football_team_results_(2020%E2%80%93present)
+2026-10-03,Russia,Namibia,Russia,Maksim Glushenkov,85,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Russia_national_football_team_results_(2020%E2%80%93present)
+2026-10-03,Russia,Namibia,Russia,Maksim Petrov,87,FALSE,TRUE,NA,https://en.wikipedia.org/wiki/Russia_national_football_team_results_(2020%E2%80%93present)
+2026-10-03,Russia,Namibia,Russia,Kamaijanda Ndisiro,90,TRUE,FALSE,NA,https://en.wikipedia.org/wiki/Russia_national_football_team_results_(2020%E2%80%93present)
+2026-10-03,Sint Maarten,Saint Vincent and the Grenadines,Saint Vincent and the Grenadines,Oalex Anderson,11,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_B
+2026-10-03,Sint Maarten,Saint Vincent and the Grenadines,Saint Vincent and the Grenadines,Oalex Anderson,24,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_B
+2026-10-03,Sint Maarten,Saint Vincent and the Grenadines,Saint Vincent and the Grenadines,Sergio Hughes,34,TRUE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_B
+2026-10-03,Sint Maarten,Saint Vincent and the Grenadines,Saint Vincent and the Grenadines,Oalex Anderson,57,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_B
+2026-10-03,Sint Maarten,Saint Vincent and the Grenadines,Sint Maarten,Mitchell de Nooijer,74,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_B
+2026-10-03,Sint Maarten,Saint Vincent and the Grenadines,Sint Maarten,Quintón Christina,82,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_B
+2026-10-03,Spain,Czech Republic,Spain,Lamine Yamal,6,FALSE,FALSE,NA,https://www.espn.com/soccer/report/_/gameId/401861118
+2026-10-03,Spain,Czech Republic,Spain,Rodri,35,FALSE,FALSE,NA,https://www.espn.com/soccer/report/_/gameId/401861118
+2026-10-03,Spain,Czech Republic,Czech Republic,Jiří Sláma,69,FALSE,FALSE,NA,https://www.espn.com/soccer/report/_/gameId/401861118
+2026-10-03,Spain,Czech Republic,Spain,Mikel Merino,89,FALSE,FALSE,NA,https://www.vavel.com/en-us/soccer/2026/10/03/1273758-spain-vs-czech-republic-live-score-uefa-nations-league.html
+2026-10-03,Switzerland,Slovenia,Slovenia,Žan Vipotnik,2,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_B
+2026-10-03,Switzerland,Slovenia,Switzerland,Erik Janža,10,TRUE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_B
+2026-10-03,Switzerland,Slovenia,Switzerland,Dan Ndoye,38,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_B
+2026-10-03,United Arab Emirates,Oman,United Arab Emirates,Ousmane Camara,22,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/27th_Arabian_Gulf_Cup
+2026-10-03,United States,Mexico,United States,Julian Hall,28,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Mexico_national_football_team_results_(2020%E2%80%93present)
+2026-10-03,United States,Mexico,United States,Cavan Sullivan,62,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Mexico_national_football_team_results_(2020%E2%80%93present)
+2026-10-03,United States,Mexico,United States,Malik Tillman,84,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Mexico_national_football_team_results_(2020%E2%80%93present)
+2026-10-04,Aruba,Anguilla,Aruba,Carlito Fermina,7,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_C
+2026-10-04,Aruba,Anguilla,Anguilla,Nathaniel Owen,39,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_C
+2026-10-04,Aruba,Anguilla,Anguilla,Antoine Fleming,77,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_C
+2026-10-04,Aruba,Anguilla,Aruba,Alljereau Mercera,90,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_C
+2026-10-04,Aruba,Anguilla,Aruba,Justin Peterson,90,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_C
+2026-10-04,Azerbaijan,Lithuania,Azerbaijan,Abdulakh Khaybulayev,25,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_D
+2026-10-04,Costa Rica,Haiti,Costa Rica,Carlos Mora,6,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_A
+2026-10-04,Costa Rica,Haiti,Costa Rica,Andrey Soto,21,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_A
+2026-10-04,Egypt,South Africa,South Africa,Puso Dithejane,51,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Egypt_national_football_team
+2026-10-04,Guyana,Dominica,Guyana,Omari Glasgow,5,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_B
+2026-10-04,Guyana,Dominica,Guyana,Deon Moore,18,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_B
+2026-10-04,Guyana,Dominica,Guyana,Elliot Bonds,24,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_B
+2026-10-04,Guyana,Dominica,Guyana,Omari Glasgow,33,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_B
+2026-10-04,Guyana,Dominica,Guyana,Curtez Kellman,53,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_B
+2026-10-04,Guyana,Dominica,Guyana,Deon Moore,57,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_B
+2026-10-04,Guyana,Dominica,Dominica,Reon Cuffy,67,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_B
+2026-10-04,Guyana,Dominica,Guyana,Enoch George,69,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_B
+2026-10-04,Guyana,Dominica,Guyana,Elliot Bonds,75,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_B
+2026-10-04,Kosovo,Austria,Kosovo,Fisnik Asllani,70,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_B
+2026-10-04,Kosovo,Austria,Austria,Christoph Lang,85,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_B
+2026-10-04,Kyrgyzstan,Lebanon,Kyrgyzstan,Odilzhon Abdurakhmanov,19,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Lebanon_national_football_team_results_(2020%E2%80%93present)
+2026-10-04,Kyrgyzstan,Lebanon,Kyrgyzstan,Alimardon Shukurov,31,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Lebanon_national_football_team_results_(2020%E2%80%93present)
+2026-10-04,Kyrgyzstan,Lebanon,Lebanon,Pedro Budib,62,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Lebanon_national_football_team_results_(2020%E2%80%93present)
+2026-10-04,Kyrgyzstan,Lebanon,Kyrgyzstan,Khalil Khamis,64,TRUE,FALSE,NA,https://en.wikipedia.org/wiki/Lebanon_national_football_team_results_(2020%E2%80%93present)
+2026-10-04,Malta,Andorra,Malta,Teddy Teuma,49,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_D
+2026-10-04,Morocco,Mali,Morocco,Abde Ezzalzouli,35,FALSE,TRUE,NA,https://en.wikipedia.org/wiki/Morocco_national_football_team
+2026-10-04,Morocco,Mali,Mali,Gaoussou Diarra,77,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Morocco_national_football_team
+2026-10-04,Netherlands,Serbia,Netherlands,Teun Koopmeiners,31,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_A
+2026-10-04,Netherlands,Serbia,Serbia,Mihajlo Cvetković,35,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_A
+2026-10-04,Netherlands,Serbia,Netherlands,Joshua Zirkzee,71,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_A
+2026-10-04,Nicaragua,Dominican Republic,Nicaragua,Jaime Moreno,53,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_A
+2026-10-04,Nicaragua,Dominican Republic,Dominican Republic,Heinz Mörschel,58,FALSE,TRUE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_A
+2026-10-04,Nicaragua,Dominican Republic,Dominican Republic,Lucas Bretón,66,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_A
+2026-10-04,Portugal,Norway,Norway,Kristoffer Ajer,36,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_A
+2026-10-04,Portugal,Norway,Portugal,João Cancelo,38,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_A
+2026-10-04,Portugal,Norway,Portugal,Gonçalo Ramos,79,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_A
+2026-10-04,Puerto Rico,Cayman Islands,Puerto Rico,Jeremy de León,64,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_B
+2026-10-04,Republic of Ireland,Israel,Republic of Ireland,Troy Parrott,39,FALSE,TRUE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_B
+2026-10-04,Republic of Ireland,Israel,Israel,Dor Peretz,47,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_B
+2026-10-04,Senegal,Comoros,Senegal,Iliman Ndiaye,5,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Senegal_national_football_team
+2026-10-04,Trinidad and Tobago,Curaçao,Trinidad and Tobago,Luke Phillip,39,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_A
+2026-10-04,Trinidad and Tobago,Curaçao,Curaçao,Jordi Paulina,61,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_A
+2026-10-04,Turks and Caicos Islands,British Virgin Islands,Turks and Caicos Islands,Dominic Hutchinson,37,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_C
+2026-10-04,Turks and Caicos Islands,British Virgin Islands,Turks and Caicos Islands,John Robertson,90,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_C
+2026-10-04,Turks and Caicos Islands,British Virgin Islands,Turks and Caicos Islands,Sean Clare,90,FALSE,TRUE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_C
+2026-10-04,Wales,Denmark,Denmark,Rasmus Højlund,75,FALSE,TRUE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_A
+2026-10-05,Barbados,Bermuda,Bermuda,Djair Parfitt-Williams,75,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_B
+2026-10-05,Barbados,Bermuda,Barbados,Thierry Gale,79,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_B
+2026-10-05,Barbados,Bermuda,Barbados,Thierry Gale,82,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_B
+2026-10-05,Bosnia and Herzegovina,Poland,Bosnia and Herzegovina,Ivan Bašić,84,FALSE,TRUE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_B
+2026-10-05,Cuba,Saint Kitts and Nevis,Saint Kitts and Nevis,Tiquanny Williams,16,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_B
+2026-10-05,Cuba,Saint Kitts and Nevis,Cuba,Yunior Pérez,25,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_B
+2026-10-05,Cuba,Saint Kitts and Nevis,Saint Kitts and Nevis,Tiquanny Williams,63,FALSE,TRUE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_B
+2026-10-05,Cuba,Saint Kitts and Nevis,Cuba,Daniel Díaz,90,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_B
+2026-10-05,Cyprus,Latvia,Latvia,Eduards Dašķevičs,57,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_C
+2026-10-05,Cyprus,Latvia,Cyprus,Ioannis Kosti,70,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_C
+2026-10-05,Cyprus,Latvia,Cyprus,Marcus Edwards,90,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_C
+2026-10-05,Ecuador,Panama,Panama,Josué Vergara,38,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Ecuador_national_football_team
+2026-10-05,Ecuador,Panama,Ecuador,Juan Riquelme Angulo,58,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Ecuador_national_football_team
+2026-10-05,France,Belgium,Belgium,Dodi Lukébakio,35,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_A
+2026-10-05,France,Belgium,France,Désiré Doué,77,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_A
+2026-10-05,France,Belgium,France,Rayan Cherki,81,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_A
+2026-10-05,France,Belgium,France,Michael Olise,88,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_A
+2026-10-05,France,Belgium,France,Michael Olise,90,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_A
+2026-10-05,Grenada,Bonaire,Grenada,Benjamin Ettienne,11,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_B
+2026-10-05,Grenada,Bonaire,Bonaire,Rowendley Martijn,13,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_B
+2026-10-05,Grenada,Bonaire,Bonaire,Berry Sonnenschein,59,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_B
+2026-10-05,Grenada,Bonaire,Bonaire,Myron Bostdorp,67,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_B
+2026-10-05,Grenada,Bonaire,Bonaire,Ayrton Cicilia,83,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_B
+2026-10-05,Guadeloupe,Saint Lucia,Saint Lucia,Kegan Caull,5,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_B
+2026-10-05,Guatemala,Suriname,Guatemala,Matt Evans,90,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_A
+2026-10-05,Honduras,Jamaica,Jamaica,Tyreece Campbell,27,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_A
+2026-10-05,Honduras,Jamaica,Honduras,Luis Palma,51,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_A
+2026-10-05,Indonesia,Thailand,Indonesia,Dean James,84,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_FIFA_ASEAN_Cup_final
+2026-10-05,Indonesia,Thailand,Thailand,Iklas Sanron,87,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_FIFA_ASEAN_Cup_final
+2026-10-05,Indonesia,Thailand,Thailand,Peeradol Chamrasamee,111,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_FIFA_ASEAN_Cup_final
+2026-10-05,Indonesia,Thailand,Indonesia,Elkan Baggott,116,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_FIFA_ASEAN_Cup_final
+2026-10-05,Italy,Turkey,Italy,Gianluca Scamacca,26,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_A
+2026-10-05,Italy,Turkey,Turkey,Aral Şimşir,61,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_A
+2026-10-05,Italy,Turkey,Italy,Riccardo Calafiori,64,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_A
+2026-10-05,Italy,Turkey,Italy,Pio Esposito,87,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_A
+2026-10-05,Japan,New Zealand,Japan,Ayase Ueda,28,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/New_Zealand_men's_national_football_team
+2026-10-05,Japan,New Zealand,New Zealand,Ben Old,32,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/New_Zealand_men's_national_football_team
+2026-10-05,Japan,New Zealand,Japan,Ritsu Dōan,71,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/New_Zealand_men's_national_football_team
+2026-10-05,Liechtenstein,Gibraltar,Gibraltar,Bernardo Lopes,20,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Liechtenstein_national_football_team_results_(2020%E2%80%93present)
+2026-10-05,Liechtenstein,Gibraltar,Gibraltar,Dylan Borge,57,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Liechtenstein_national_football_team_results_(2020%E2%80%93present)
+2026-10-05,Malaysia,Vietnam,Malaysia,Fergus Tierney,62,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026_FIFA_ASEAN_Cup
+2026-10-05,Martinique,El Salvador,El Salvador,Jefferson Valladares,3,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_A
+2026-10-05,Martinique,El Salvador,Martinique,Janis Antiste,56,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_A
+2026-10-05,Romania,Sweden,Sweden,Viktor Gyökeres,13,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_B
+2026-10-05,Uganda,DR Congo,DR Congo,Nathanaël Mbuku,64,FALSE,FALSE,NA,https://acp.cd/anglais/football-drc-and-uganda-draw-1-1-in-international-friendly-in-johannesburg/
+2026-10-05,Uganda,DR Congo,Uganda,James Bogere,90,FALSE,FALSE,NA,https://acp.cd/anglais/football-drc-and-uganda-draw-1-1-in-international-friendly-in-johannesburg/
+2026-10-05,Ukraine,Hungary,Hungary,Milán Tóth,52,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_B
+2026-10-05,Ukraine,Hungary,Ukraine,Roman Yaremchuk,83,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_B
+2026-10-05,Ukraine,Hungary,Hungary,Márk Csinger,85,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_B
+2026-10-06,Albania,San Marino,Albania,Kristjan Asllani,11,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_C
+2026-10-06,Albania,San Marino,San Marino,Lorenzo Lazzari,66,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_C
+2026-10-06,Albania,San Marino,Albania,Kristjan Asllani,90,FALSE,TRUE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_C
+2026-10-06,Algeria,Niger,Niger,Konan N'Dri,12,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Algeria_national_football_team
+2026-10-06,Algeria,Niger,Algeria,Mohamed Belloumi,53,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Algeria_national_football_team
+2026-10-06,Algeria,Niger,Algeria,Ramy Bensebaini,72,FALSE,TRUE,NA,https://en.wikipedia.org/wiki/Algeria_national_football_team
+2026-10-06,Angola,Malawi,Angola,Felício Milson,3,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_B
+2026-10-06,Angola,Malawi,Angola,Mabululu,38,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_B
+2026-10-06,Angola,Malawi,Malawi,Kialonda Gaspar,45,TRUE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_B
+2026-10-06,Angola,Malawi,Angola,Miro,70,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2027_Africa_Cup_of_Nations_qualification_Group_B
+2026-10-06,Antigua and Barbuda,Aruba,Antigua and Barbuda,Sean Tomlinson,5,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_C
+2026-10-06,Antigua and Barbuda,Aruba,Antigua and Barbuda,TJ Bramble,11,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_C
+2026-10-06,Antigua and Barbuda,Aruba,Aruba,Walter Bennett,14,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_C
+2026-10-06,Antigua and Barbuda,Aruba,Aruba,Carlito Fermina,50,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_C
+2026-10-06,Antigua and Barbuda,Aruba,Antigua and Barbuda,Brandon Satchell,86,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_C
+2026-10-06,Argentina,Benin,Argentina,Nicolás Otamendi,48,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Argentina_v_Benin
+2026-10-06,Argentina,Benin,Argentina,Nico Paz,61,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Argentina_v_Benin
+2026-10-06,Argentina,Benin,Argentina,Lionel Messi,71,FALSE,TRUE,NA,https://en.wikipedia.org/wiki/Argentina_v_Benin
+2026-10-06,Belarus,Finland,Belarus,Artyom Shumansky,1,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_C
+2026-10-06,Belize,French Guiana,French Guiana,Yvelin Nozile,84,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_B
+2026-10-06,China,Tajikistan,Tajikistan,Vahdat Hanonov,53,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Tajikistan_national_football_team_results
+2026-10-06,Colombia,Peru,Colombia,Samuel Velásquez,57,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Peru_national_football_team_results_(2020%E2%80%93present)
+2026-10-06,Colombia,Peru,Colombia,Daniel Arcila,90,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Peru_national_football_team_results_(2020%E2%80%93present)
+2026-10-06,Croatia,Spain,Croatia,Ivan Perišić,17,FALSE,FALSE,NA,https://www.espn.com/soccer/match/_/gameId/401861137/spain-croatia
+2026-10-06,Croatia,Spain,Spain,Mikel Merino,61,FALSE,FALSE,NA,https://www.espn.com/soccer/match/_/gameId/401861137/spain-croatia
+2026-10-06,Croatia,Spain,Spain,Mikel Merino,88,FALSE,FALSE,Martín Zubimendi,https://m.dongqiudi.com/en/match/54419509
+2026-10-06,England,Czech Republic,England,Vladimír Coufal,27,TRUE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_A
+2026-10-06,England,Czech Republic,England,Harry Kane,40,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_A
+2026-10-06,England,Czech Republic,England,Harry Kane,57,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_A
+2026-10-06,India,Uruguay,Uruguay,Darwin Núñez,12,FALSE,TRUE,NA,https://en.wikipedia.org/wiki/India_national_football_team_results_(2020%E2%80%93present)
+2026-10-06,India,Uruguay,India,Anirudh Thapa,22,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/India_national_football_team_results_(2020%E2%80%93present)
+2026-10-06,India,Uruguay,Uruguay,Maximiliano Araújo,28,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/India_national_football_team_results_(2020%E2%80%93present)
+2026-10-06,India,Uruguay,Uruguay,Rodrigo Zalazar,53,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/India_national_football_team_results_(2020%E2%80%93present)
+2026-10-06,India,Uruguay,Uruguay,Maximiliano Araújo,59,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/India_national_football_team_results_(2020%E2%80%93present)
+2026-10-06,India,Uruguay,Uruguay,Juan Manuel Sanabria,71,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/India_national_football_team_results_(2020%E2%80%93present)
+2026-10-06,India,Uruguay,Uruguay,Rodrigo Aguirre,86,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/India_national_football_team_results_(2020%E2%80%93present)
+2026-10-06,Kazakhstan,Faroe Islands,Faroe Islands,Petur Knudsen,22,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_C
+2026-10-06,Kazakhstan,Faroe Islands,Faroe Islands,Géza Dávid Turi,63,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_C
+2026-10-06,Kazakhstan,Faroe Islands,Kazakhstan,Serhiy Malyi,68,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_C
+2026-10-06,Kazakhstan,Faroe Islands,Kazakhstan,Nuraly Alip,76,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_C
+2026-10-06,Luxembourg,Bulgaria,Bulgaria,Kristiyan Balov,19,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_C
+2026-10-06,Luxembourg,Bulgaria,Bulgaria,Atanas Iliev,34,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_C
+2026-10-06,Mexico,Chile,Chile,Maximiliano Gutiérrez,54,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Mexico_national_football_team_results_(2020%E2%80%93present)
+2026-10-06,Mexico,Chile,Chile,Vicente Pizarro,65,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Mexico_national_football_team_results_(2020%E2%80%93present)
+2026-10-06,Moldova,Slovakia,Slovakia,David Strelec,8,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_C
+2026-10-06,Moldova,Slovakia,Slovakia,Tomáš Suslov,44,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_C
+2026-10-06,Moldova,Slovakia,Slovakia,Dávid Hancko,60,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_C
+2026-10-06,Moldova,Slovakia,Slovakia,Lukáš Haraslín,75,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_C
+2026-10-06,Russia,Nigeria,Nigeria,Kelechi Iheanacho,10,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Nigeria_national_football_team
+2026-10-06,Russia,Nigeria,Russia,Lechi Sadulayev,30,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Nigeria_national_football_team
+2026-10-06,Russia,Nigeria,Russia,Matvey Kislyak,45,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Nigeria_national_football_team
+2026-10-06,Russia,Nigeria,Russia,Aleksei Miranchuk,54,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Nigeria_national_football_team
+2026-10-06,Russia,Nigeria,Nigeria,Osayande Edokpolor,78,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Nigeria_national_football_team
+2026-10-06,Russia,Nigeria,Nigeria,Akor Adams,90,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Nigeria_national_football_team
+2026-10-06,Saint Martin,Bahamas,Saint Martin,Axel Raga,15,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_C
+2026-10-06,Saint Martin,Bahamas,Saint Martin,Pierre-Bertrand Arné,24,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_C
+2026-10-06,Saint Martin,Bahamas,Saint Martin,Mattéo Makhabe,38,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_C
+2026-10-06,Saint Martin,Bahamas,Saint Martin,Jordan Alexandre,50,FALSE,TRUE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_C
+2026-10-06,Saint Martin,Bahamas,Saint Martin,Axel Raga,77,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_C
+2026-10-06,Saint Martin,Bahamas,Saint Martin,Axel Raga,90,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_C
+2026-10-06,Saint Vincent and the Grenadines,Sint Maarten,Saint Vincent and the Grenadines,Oalex Anderson,21,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_B
+2026-10-06,Saint Vincent and the Grenadines,Sint Maarten,Saint Vincent and the Grenadines,Diel Spring,40,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_B
+2026-10-06,Saint Vincent and the Grenadines,Sint Maarten,Saint Vincent and the Grenadines,Azinho Solomon,44,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_B
+2026-10-06,Saint Vincent and the Grenadines,Sint Maarten,Saint Vincent and the Grenadines,Malcolm Stewart,73,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_B
+2026-10-06,Saudi Arabia,United Arab Emirates,Saudi Arabia,Hammam Al-Hammami,11,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/27th_Arabian_Gulf_Cup
+2026-10-06,Saudi Arabia,United Arab Emirates,Saudi Arabia,Firas Al-Buraikan,13,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/27th_Arabian_Gulf_Cup
+2026-10-06,Scotland,Slovenia,Scotland,Ryan Christie,31,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_B
+2026-10-06,Scotland,Slovenia,Slovenia,Aljoša Matko,56,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_B
+2026-10-06,Scotland,Slovenia,Slovenia,Danijel Šturm,71,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_B
+2026-10-06,South Korea,Uzbekistan,South Korea,Son Heung-min,6,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/South_Korea_national_football_team_results_(2020%E2%80%93present)
+2026-10-06,South Korea,Uzbekistan,South Korea,Oh Se-hun,60,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/South_Korea_national_football_team_results_(2020%E2%80%93present)
+2026-10-06,Switzerland,North Macedonia,Switzerland,Fabian Rieder,43,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_B
+2026-10-06,Switzerland,North Macedonia,Switzerland,Johan Manzambi,73,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_B
+2026-10-06,Switzerland,North Macedonia,Switzerland,Dan Ndoye,81,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_UEFA_Nations_League_B
+2026-10-06,Turks and Caicos Islands,Montserrat,Montserrat,Lyle Taylor,3,FALSE,TRUE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_C
+2026-10-06,Turks and Caicos Islands,Montserrat,Montserrat,Lyle Taylor,45,FALSE,TRUE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_C
+2026-10-06,Turks and Caicos Islands,Montserrat,Turks and Caicos Islands,Billy Forbes,81,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_C
+2026-10-06,Turks and Caicos Islands,Montserrat,Montserrat,Tyrone Baker,82,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_C
+2026-10-06,Turks and Caicos Islands,Montserrat,Montserrat,Ashley Boatswain,90,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/2026%E2%80%9327_CONCACAF_Nations_League_C
+2026-10-06,United States,Canada,United States,Justin Ellis,29,FALSE,FALSE,NA,https://en.wikipedia.org/wiki/Canada_men's_national_soccer_team

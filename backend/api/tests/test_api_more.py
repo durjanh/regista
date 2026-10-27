@@ -212,6 +212,40 @@ def test_replay_models_goals_the_dataset_does_not_record_and_names_nobody(client
     assert "doesn't record this match's goalscorers" in match["source"]["disclosure"]
 
 
+def test_replay_uses_cited_match_reports_when_the_dataset_has_no_scorers_yet(client):
+    rows = client.get("/api/forge/real", params={"team": "spain", "opponent": "england", "year": 2026}).json()
+    game = next(r for r in rows if r["date"] == "2026-09-26")
+    assert game["replayable"] and not game["goals_modelled"]
+    client.post("/api/forge/real", json={"match_id": game["match_id"]})
+    match = client.get(f"/api/matches/{game['match_id']}").json()
+    assert match["source"]["goals_modelled"] is False
+    assert all(u.startswith("https://") for u in match["source"]["scorers_sources"])
+    goals = [(g["minute"], g["scorer"]) for g in match["source"]["real"]["goals"]]
+    assert goals == [(2, "Lamine Yamal"), (36, "Anthony Gordon"), (40, "Harry Kane"), (60, "Álex Baena"), (74, "Mikel Oyarzabal")]
+    assert "published match reports" in match["source"]["disclosure"]
+
+
+def test_supplement_never_overrides_the_dataset_or_contradicts_the_score(tmp_path):
+    from collections import defaultdict
+    from app.forge.reference import ReferenceData
+    ref = object.__new__(ReferenceData)
+    ref.former, ref.goal_rows, ref.scorer_sources = {}, [], {}
+    ref.results = [{"date": "2026-10-01", "home_team": "A", "away_team": "B", "home_score": 1, "away_score": 0},
+                   {"date": "2026-10-02", "home_team": "A", "away_team": "C", "home_score": 2, "away_score": 0},
+                   {"date": "2026-10-03", "home_team": "B", "away_team": "C", "home_score": 1, "away_score": 1}]
+    ref.goals = defaultdict(list, {("2026-10-03", "B", "C"): [{"scorer": "In CC0"}, {"scorer": "In CC0"}]})
+    f = tmp_path / "goalscorers_supplement.csv"
+    f.write_text("date,home_team,away_team,team,scorer,minute,own_goal,penalty,assist,source\n"
+                 "2026-10-01,A,B,A,Right,10,FALSE,FALSE,NA,https://a\n"            # adds up: kept
+                 "2026-10-02,A,C,A,Short,10,FALSE,FALSE,NA,https://b\n"            # one of two goals: skipped
+                 "2026-10-03,B,C,B,Other,10,FALSE,FALSE,NA,https://c\n"            # CC0 already has it: skipped
+                 "2026-10-03,B,C,C,Other,20,FALSE,FALSE,NA,https://c\n", encoding="utf-8")
+    ref._load_supplement(f)
+    assert ref.scorer_sources == {("2026-10-01", "A", "B"): ["https://a"]}
+    assert [g["scorer"] for g in ref.goals[("2026-10-03", "B", "C")]] == ["In CC0", "In CC0"]
+    assert ("2026-10-02", "A", "C") not in ref.goals
+
+
 def test_extra_time_and_shootouts_replay_with_the_real_winner(client):
     rows = client.get("/api/forge/real", params={"team": "argentina", "opponent": "france", "year": 2022}).json()
     final = next(r for r in rows if r["date"] == "2022-12-18")

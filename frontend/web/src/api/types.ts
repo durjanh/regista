@@ -41,6 +41,8 @@ export type MatchSource = {
   kind: "real_result" | "what_if";
   /** The dataset doesn't record this real result's scorers: goal minutes and scorers are modelled, nobody is named. */
   goals_modelled?: boolean;
+  /** Match reports the scorers come from, when the CC0 dataset doesn't record them yet. */
+  scorers_sources?: string[];
   disclosure: string;
   real?: {
     date: string;

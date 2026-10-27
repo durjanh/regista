@@ -182,6 +182,8 @@ class ReferenceData:
                  "assist": r.get("assist") if r.get("assist") not in (None, "", "NA") else None}
             self.goals[(g["date"], g["home_team"], g["away_team"])].append(g)
             self.goal_rows.append(g)
+        self.scorer_sources: dict[tuple, list[str]] = {}
+        self._load_supplement(self.dir.parent / "goalscorers_supplement.csv")
         self.shootouts: dict[tuple, str] = {}
         so = self.dir / "shootouts.csv"
         if so.exists():
@@ -199,6 +201,31 @@ class ReferenceData:
         self._compute_elo()
         self._fit_goal_model()
         self._index_players()
+
+    def _load_supplement(self, path: Path) -> None:
+        """Scorers for recent results the CC0 file doesn't record yet, taken from published match reports (each row
+        cites its URL). A match is used only when the CC0 file has no scorers for it and the rows add up to the real
+        score for both teams; anything else is skipped, so the real score always wins."""
+        if not path.exists():
+            return
+        by_match: dict[tuple, list[dict]] = defaultdict(list)
+        for r in csv.DictReader(open(path, encoding="utf-8")):
+            key = (r["date"], self.current(r["home_team"]), self.current(r["away_team"]))
+            by_match[key].append({
+                "date": r["date"], "home_team": key[1], "away_team": key[2], "team": self.current(r["team"]),
+                "scorer": r["scorer"], "minute": int(r["minute"]), "own_goal": r["own_goal"].upper() == "TRUE",
+                "penalty": r["penalty"].upper() == "TRUE",
+                "assist": r.get("assist") if r.get("assist") not in (None, "", "NA") else None, "source": r["source"]})
+        results = {(r["date"], r["home_team"], r["away_team"]): r for r in self.results}
+        for key, goals in by_match.items():
+            result = results.get(key)
+            if not result or self.goals.get(key):
+                continue
+            if [sum(g["team"] == t for g in goals) for t in key[1:]] != [result["home_score"], result["away_score"]]:
+                continue
+            self.goals[key] = goals
+            self.goal_rows.extend(goals)
+            self.scorer_sources[key] = list(dict.fromkeys(g["source"] for g in goals))
 
     # ------------------------------------------------------------------ basics
 
@@ -249,6 +276,10 @@ class ReferenceData:
     def goals_recorded(self, result: dict) -> bool:
         """True when the dataset records every goal (scorer and minute) of this result."""
         return len(self.goals.get((result["date"], result["home_team"], result["away_team"]), [])) == result["home_score"] + result["away_score"]
+
+    def scorers_sources(self, result: dict) -> list[str]:
+        """The match-report URLs this result's scorers come from, or [] when they come from the CC0 dataset."""
+        return self.scorer_sources.get((result["date"], result["home_team"], result["away_team"]), [])
 
     def result_by_match_id(self, match_id: str) -> dict | None:
         """The real result a rebuilt match id ('2026-07-15-england-argentina') names, or None."""
@@ -581,6 +612,7 @@ class ReferenceData:
         teams = {t for r in self.results for t in (r["home_team"], r["away_team"])}
         return {"matches": len(self.results), "first_date": self.results[0]["date"], "last_date": self.results[-1]["date"],
                 "teams": len(teams), "goals_recorded": len(self.goal_rows), "shootouts": len(self.shootouts),
+                "matches_scorers_from_reports": len(self.scorer_sources),
                 "source": DATASET["source"], "licence": DATASET["licence"], "name": DATASET["name"]}
 
     # ------------------------------------------------------------------ calibration reference (real distributions)

@@ -33,6 +33,17 @@ export function SourceBadge({ source, compact }: { source: MatchSource | undefin
       <div className="source-pop" role="note">
         <strong>{label}</strong>
         <p>{source.disclosure}</p>
+        {source.scorers_sources?.length ? (
+          <div className="xs faint mb-6">
+            Scorers:{" "}
+            {source.scorers_sources.map((u, i) => (
+              <span key={u}>
+                {i ? " · " : null}
+                <a href={u} target="_blank" rel="noreferrer" className="team-link">{new URL(u).hostname.replace(/^www\./, "")}</a>
+              </span>
+            ))}
+          </div>
+        ) : null}
         <div className="xs faint">
           Dataset: {source.dataset.name} · {source.dataset.licence} ·{" "}
           <a href={sourceUrl(source.dataset.source)} target="_blank" rel="noreferrer" className="team-link">
