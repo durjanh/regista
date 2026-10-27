@@ -241,10 +241,9 @@ class ReferenceData:
     def replay_blocker(self, result: dict) -> str | None:
         """Why a real result can't be rebuilt for replay, or None when it can: the engine doesn't play extra time or
         shoot-outs yet. (Goals the dataset doesn't record are modelled; see goals_recorded.)"""
-        key = (result["date"], result["home_team"], result["away_team"])
-        goals = self.goals.get(key, [])
-        if key in self.shootouts or any((g["minute"] or 0) > 100 for g in goals):
-            return "Extra-time matches are not supported yet"
+        goals = self.goals.get((result["date"], result["home_team"], result["away_team"]), [])
+        if any((g["minute"] or 0) > 125 for g in goals):
+            return "Goal minutes beyond extra time can't be placed"
         return None
 
     def goals_recorded(self, result: dict) -> bool:

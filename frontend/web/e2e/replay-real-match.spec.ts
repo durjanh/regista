@@ -18,3 +18,21 @@ test.describe("Replay a real match", () => {
     await expect.poll(() => scoreBugLabel(page), { timeout: 45_000 }).toMatch(/^Argentina 2, England 1/);
   });
 });
+
+test.describe("Replay a match decided on penalties", () => {
+  test("plays extra time with the real goals and ends with a shoot-out won by the real winner", async ({ page }) => {
+    test.setTimeout(90_000);
+    await page.goto("/?replay=argentina");
+    const finder = page.locator("#replay");
+    await finder.getByRole("combobox", { name: "Opponent" }).selectOption("france");
+    await finder.getByRole("textbox", { name: "Year" }).fill("2022");
+    const row = finder.getByRole("row").filter({ hasText: "2022-12-18" });
+    await expect(row).toContainText("Argentina won on penalties");
+    await row.getByRole("button", { name: /Play/ }).click();
+    await expect(page).toHaveURL(/\/match\/2022-12-18-argentina-france/);
+    await page.getByRole("button", { name: /Skip to full time/ }).click();
+    await expect.poll(() => scoreBugLabel(page), { timeout: 60_000 }).toMatch(/^Argentina 3, France 3/);
+    await expect(page.getByText("After extra time")).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByText(/Argentina win \d–\d on penalties/)).toBeVisible();
+  });
+});

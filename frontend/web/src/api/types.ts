@@ -87,8 +87,15 @@ export type MatchMeta = {
   elo: { home: number; away: number };
   h2h: H2H;
   venue_info?: VenueInfo;
+  /** Played to 120 minutes. */
+  extra_time?: boolean;
+  /** Decided on penalties: the winner is real; the kicks are modelled (the dataset records only the winner). */
+  shootout?: Shootout;
   featured?: boolean;
 };
+
+export type ShootoutKick = { side: "home" | "away"; player_id: string; shirt: number; outcome: "scored" | "saved" | "missed"; placement: string };
+export type Shootout = { winner: "home" | "away"; home: number; away: number; first: "home" | "away"; kicks: ShootoutKick[]; modelled: boolean };
 
 export type VenueInfo = { city: string; altitude_m?: number; note?: string };
 

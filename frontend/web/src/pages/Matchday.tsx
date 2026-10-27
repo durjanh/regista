@@ -30,6 +30,7 @@ import { usePoll, useTruthMode } from "../lib/truth";
 import { IconBack } from "../components/icons";
 import { quietly } from "../lib/activity";
 import { Lineups } from "../components/Lineups";
+import { ShootoutPanel } from "../components/Shootout";
 import { ModelTag } from "../components/SourceBadge";
 import { webglAvailable } from "../lib/webgl";
 import { venueStyle } from "../lib/venue";
@@ -239,6 +240,7 @@ export function Matchday() {
         live={state.status === "live"}
         statusLabel={state.status === "live" ? undefined : statusLabel(state, t)}
       />
+      {state.status === "ended" ? <ShootoutPanel match={match} /> : null}
 
       <div className="card p-12">
         {onAir?.live ? (

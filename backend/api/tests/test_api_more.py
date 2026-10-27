@@ -173,11 +173,9 @@ def test_search_real_results_and_replay_one(client):
     assert client.post("/api/forge/real", json={"match_id": mid}).json()["match_id"] == mid   # already built: returned
 
 
-def test_replay_explains_what_cannot_be_rebuilt(client):
+def test_every_real_result_can_be_replayed_and_bad_ids_are_refused(client):
     rows = client.get("/api/forge/real", params={"team": "argentina", "year": 2026}).json()
-    blocked = next(r for r in rows if not r["replayable"])
-    assert blocked["reason"] in ("Goal records are incomplete for this match", "Extra-time matches are not supported yet")
-    assert client.post("/api/forge/real", json={"match_id": blocked["match_id"]}).status_code == 422
+    assert rows and all(r["replayable"] and r["reason"] is None for r in rows)      # extra time and shoot-outs included
     assert client.post("/api/forge/real", json={"match_id": "1900-01-01-nowhere-nobody"}).status_code == 404
     assert client.post("/api/forge/real", json={"match_id": "../etc"}).status_code == 422
     assert client.get("/api/forge/real", params={"team": "atlantis"}).status_code == 404
@@ -212,3 +210,20 @@ def test_replay_models_goals_the_dataset_does_not_record_and_names_nobody(client
     names = [p["name"] for side in ("home", "away") for p in match[side]["players"]]
     assert all(" No. " in n for n in names)                                              # nobody is named
     assert "doesn't record this match's goalscorers" in match["source"]["disclosure"]
+
+
+def test_extra_time_and_shootouts_replay_with_the_real_winner(client):
+    rows = client.get("/api/forge/real", params={"team": "argentina", "opponent": "france", "year": 2022}).json()
+    final = next(r for r in rows if r["date"] == "2022-12-18")
+    assert final["replayable"] and final["shootout_winner"] == "Argentina"
+    summary = client.post("/api/forge/real", json={"match_id": final["match_id"]}).json()
+    assert summary["final_score"] == {"home": 3, "away": 3} and summary["extra_time"] is True
+    match = client.get(f"/api/matches/{final['match_id']}").json()
+    assert len(match["period_starts"]) == 4                                              # two halves and two of extra time
+    so = match["shootout"]
+    assert so["winner"] == "home" and so["home"] > so["away"] and so["modelled"] is True   # the real winner
+    assert "shoot-out is modelled" in match["source"]["disclosure"]
+    events = client.get(f"/api/matches/{final['match_id']}/events").json()
+    assert events[-1]["type"] == "full_time" and events[-1]["minute"] >= 120
+    late = [e for e in events if e["type"] == "shot" and e["outcome"] == "success" and e["minute"] > 105]
+    assert [e["player_name"] for e in late] == ["Lionel Messi", "Kylian Mbappé"]           # the real extra-time goals

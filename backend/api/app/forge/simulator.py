@@ -45,6 +45,7 @@ SCENARIO_LABELS = {
 }
 
 FIRST_HALF = 45 * 60
+EXTRA_HALF = 15 * 60
 # How often each family receives passes relative to its position on the pitch (strikers get far fewer touches).
 # Who wins the ball back: defensive actions follow role, not just proximity (strikers rarely intercept).
 DEFEND_WEIGHT = {"FWD": 0.3, "WIDE": 0.55, "AM": 0.65, "MID": 1.0, "WB": 1.1, "DEF": 1.5, "GK": 1.0}
@@ -110,13 +111,15 @@ class MatchSimulator:
     def __init__(self, home: TeamProfile, away: TeamProfile, seed: int = 7, scenario: str = "balanced",
                  intensity: float = 0.5, neutral: bool = False, goal_schedule: list[dict] | None = None,
                  scoring_bias: dict[str, float] | None = None, altitude_m: int | None = None,
-                 acclimatised: tuple[str, ...] = (), plants: list[dict] | None = None):
+                 acclimatised: tuple[str, ...] = (), plants: list[dict] | None = None, extra_time: bool = False):
         """`goal_schedule` switches the engine into conditioned mode: only the scheduled (real) goals are scored,
-        at their real minutes, by their real scorers, and cards are not invented for real players."""
+        at their real minutes, by their real scorers, and cards are not invented for real players. `extra_time` plays
+        two more 15-minute periods (91'-120'); goals scheduled after the 90th minute then fall in them."""
         if home.team_id == away.team_id:
             raise ValueError("home and away must be different teams")
         self.rng = random.Random(seed)
         self.seed = seed
+        self.extra_time = extra_time
         self.scenario = scenario if scenario in SCENARIOS else "balanced"
         self.intensity = clamp(intensity if self.scenario != "derby" else max(intensity, 0.85), 0.0, 1.0)
         bonus = 0.0 if neutral else 0.03
@@ -144,7 +147,7 @@ class MatchSimulator:
         self.possession_id = 0
         self.counter_left = 0
         self.last_pass: dict | None = None
-        self.added = (self.rng.randint(1, 4), self.rng.randint(3, 7))
+        self.added = (self.rng.randint(1, 4), self.rng.randint(3, 7), self.rng.randint(0, 2), self.rng.randint(1, 3))
         self._plan_schedule()
         self.forced_red_minute = self.rng.randint(30, 65) if (self.scenario == "red_card" and not self.conditioned) else None
         self.forced_red_team = self.rng.choice([self.home, self.away]) if self.forced_red_minute else None
@@ -167,6 +170,9 @@ class MatchSimulator:
                     extra_p1 = max(extra_p1, 2)
             elif m < 90:
                 period, elapsed = 2, (m - 46) * 60 + self.rng.uniform(25, 45)
+            elif self.extra_time and m > 90:
+                period = 3 if m <= 105 else 4
+                elapsed = (min(m, 120) - (91 if period == 3 else 106)) * 60 + self.rng.uniform(15, 40)
             else:
                 period = 2
                 if m == 90 and nineties == 0:
@@ -182,13 +188,20 @@ class MatchSimulator:
             a, b = self.schedule[i - 1], self.schedule[i]
             if a["period"] == b["period"] and b["elapsed"] - a["elapsed"] < 75:
                 b["elapsed"] = a["elapsed"] + 75
-        self.added = (max(self.added[0], extra_p1), max(self.added[1], extra_p2))
+        self.added = (max(self.added[0], extra_p1), max(self.added[1], extra_p2), self.added[2], self.added[3])
+
+    def period_length(self, period: int) -> float:
+        return (FIRST_HALF if period <= 2 else EXTRA_HALF) + self.added[period - 1] * 60
+
+    def period_start_of(self, period: int) -> float:
+        """Stream clock at which a period kicks off: each follows the last with no break in the clock."""
+        return sum(self.period_length(p) for p in range(1, period))
 
     def scripted_goal_due(self) -> dict | None:
         if not self.schedule:
             return None
         g = self.schedule[0]
-        target = (0.0 if g["period"] == 1 else FIRST_HALF + self.added[0] * 60) + g["elapsed"]
+        target = self.period_start_of(g["period"]) + g["elapsed"]
         if self.period == g["period"] and self.t >= target - (70 if g.get("penalty") else 34):
             g["t_target"] = target
             return g
@@ -319,14 +332,15 @@ class MatchSimulator:
             if elapsed >= FIRST_HALF:
                 return 45, int((elapsed - FIRST_HALF) // 60) + 1, int(elapsed % 60)
             return int(elapsed // 60) + 1, None, int(elapsed % 60)
-        minute = 45 + int(elapsed // 60) + 1
-        if minute > 90:
-            return 90, minute - 90, int(elapsed % 60)
+        base, cap = {2: (45, 90), 3: (90, 105), 4: (105, 120)}[self.period]
+        minute = base + int(elapsed // 60) + 1
+        if minute > cap:
+            return cap, minute - cap, int(elapsed % 60)
         return minute, None, int(elapsed % 60)
 
     def match_minute(self) -> float:
         elapsed = self.t - self.period_start
-        return (elapsed / 60.0) + (45 if self.period == 2 else 0)
+        return (elapsed / 60.0) + {1: 0, 2: 45, 3: 90, 4: 105}[self.period]
 
     def emit(self, etype: str, team: TeamState, player_id: str | None, x: float, y: float, **kw) -> dict:
         minute, added, second = self.clock()
@@ -631,7 +645,7 @@ class MatchSimulator:
 
     def maybe_substitutions(self) -> None:
         m = self.match_minute()
-        for window in (58, 67, 76, 84):
+        for window in (58, 67, 76, 84, 96, 106):                  # the last two only come in extra time
             if m < window:
                 continue
             for team in (self.home, self.away):
@@ -753,17 +767,18 @@ class MatchSimulator:
     def run(self) -> dict:
         att = self.home
         restart = ("kick_off", 52.5, 34.0)
-        for period in (1, 2):
+        periods = (1, 2, 3, 4) if self.extra_time else (1, 2)
+        for period in periods:
             self.period = period
-            self.period_start = 0.0 if period == 1 else FIRST_HALF + self.added[0] * 60
+            self.period_start = self.period_start_of(period)
             self.t = self.period_start
-            end = self.period_start + FIRST_HALF + self.added[period - 1] * 60
-            att = self.home if period == 1 else self.away
+            end = self.period_start + self.period_length(period)
+            att = self.home if period % 2 else self.away
             restart = ("kick_off", 52.5, 34.0)
             while self.t < end:
                 self.update_game_state()
                 self.apply_plants()
-                if period == 2:
+                if period >= 2:
                     self.maybe_substitutions()
                 if self.forced_red_minute and self.match_minute() >= self.forced_red_minute and self.forced_red_team and not self.forced_red_team.sent_off:
                     team = self.forced_red_team
@@ -775,7 +790,7 @@ class MatchSimulator:
                     att = self.other(team)
                     restart = ("free_kick", 50.0, 34.0)
                 att, restart = self.play_possession(att, restart, end)
-            self.emit("half_end" if period == 1 else "full_time", att, None, 52.5, 34.0)
+            self.emit("full_time" if period == periods[-1] else "half_end", att, None, 52.5, 34.0)
         return {"events": self.events, "score": dict(self.score)}
 
     def new_possession(self) -> None:
@@ -1240,7 +1255,7 @@ class MatchSimulator:
             celebrate = self.rng.uniform(55, 85)
             if self.schedule:
                 nxt = self.schedule[0]
-                nxt_t = (0.0 if nxt["period"] == 1 else FIRST_HALF + self.added[0] * 60) + nxt["elapsed"]
+                nxt_t = self.period_start_of(nxt["period"]) + nxt["elapsed"]
                 if nxt["period"] == self.period:
                     celebrate = max(20.0, min(celebrate, nxt_t - self.t - 30))
             self.tick(celebrate)
@@ -1276,7 +1291,7 @@ class MatchSimulator:
             tags.append("red_card")
         if self.score["home"] + self.score["away"] >= 5:
             tags.append("goals")
-        p2_start = FIRST_HALF + self.added[0] * 60
+        p2_start = self.period_start_of(2)
         last_goal = max((e["t"] for e in self.events if e.get("shot_outcome") == "goal"), default=0)
         if last_goal and last_goal - p2_start >= 40 * 60:
             tags.append("late_goal")
@@ -1289,7 +1304,8 @@ class MatchSimulator:
             "duration_s": round(self.events[-1]["t"], 1),
             "scenario_tags": sorted(set(tags)),
             "seed": self.seed,
-            "period_starts": [0, p2_start],
+            "period_starts": [round(self.period_start_of(p), 1) for p in ((1, 2, 3, 4) if self.extra_time else (1, 2))],
+            **({"extra_time": True} if self.extra_time else {}),
             "truth": {"scenario": self.scenario, "conditioned": self.conditioned, "labels": self.truth, "plants": self.plant_labels},
         }
         return {"meta": doc_meta, "events": self.events}
